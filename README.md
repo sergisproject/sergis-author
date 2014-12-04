@@ -2,6 +2,8 @@
 
 The SerGIS Prompt Author is a web-based program to create [SerGIS JSON Game Data files](http://sergisproject.github.io/docs/json.html) for [the SerGIS Project](http://sergisproject.github.io/).
 
+Current version: 0.9
+
 ## Using SerGIS Prompt Author
 
 The SerGIS Prompt Author is hosted at this URL: http://sergisproject.github.io/sergis-author/
