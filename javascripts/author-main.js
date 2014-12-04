@@ -21,6 +21,28 @@ var json = {
 };
 
 /**
+ * Shortcut to show/hide a big overlay.
+ *
+ * @param {string} [overlayID] - The ID of the overlay to show. If not
+ *        provided, hides all overlays.
+ */
+function overlay(overlayID) {
+    // Hide all overlays, but show the one we want (if applicable)
+    var overlayShown = false;
+    var overlays = document.getElementsByClassName("overlay_inner");
+    for (var i = 0; i < overlays.length; i++) {
+        if (overlayID && overlays[i].getAttribute("id") == overlayID) {
+            overlays[i].style.display = "block";
+            overlayShown = true;
+        } else {
+            overlays[i].style.display = "none";
+        }
+    }
+    // Show/hide overlay container
+    document.getElementById("overlay").style.display = overlayShown ? "block" : "none";
+}
+
+/**
  * Shortcut to create an element.
  */
 function c(elem, attributes, onclick_or_change /*, [onclick parameter, [onclick parameter, [...]]] */) {
@@ -359,6 +381,9 @@ function init() {
     
     // Make our JSON defaults and generate the default table
     generate(true);
+    
+    // Get rid of loading sign
+    overlay();
 }
 
 window.addEventListener("load", init, false);
