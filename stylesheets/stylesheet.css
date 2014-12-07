@@ -41,7 +41,7 @@ a.icon_up {
   /* http://www.iconarchive.com/show/flatastic-1-icons-by-custom-icon-design/up-icon.html */
   background-image: url(../images/up-icon.png);
   float: left;
-  bottom: 12px;
+  bottom: 10px;
   position: relative;
 }
 
@@ -51,7 +51,7 @@ a.icon_up {
 }
 
 .row_choice a.icon_up {
-  left: -12px;
+  left: -10px;
 }
 
 a.icon_down {
@@ -69,8 +69,20 @@ a.icon_down {
 }
 
 .row_choice a.icon_down {
-  left: -36px;
-  top: 7px;
+  left: -34px;
+  top: 12px;
+}
+
+.row_content_text {
+  text-indent: -36px;
+}
+
+.row_choice > div.row {
+  text-indent: -30px;
+}
+
+.row_content_text code, .row_choice > div.row code {
+  text-indent: 0;
 }
 
 .row_title {

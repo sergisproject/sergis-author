@@ -66,7 +66,7 @@ var AUTHOR_EDITOR = {
         document.getElementById("overlay_editor_choiceContaner").style.display = "none";
         editorTitle(isAdding ? "addcontent" : "editcontent");
         
-        editor_state.content_json = json.promptList[promptIndex].prompt.contents[contentIndex];
+        editor_state.content_json = json.promptList[promptIndex].prompt.contents[contentIndex] || {};
         editor_state.promptIndex = promptIndex;
         editor_state.contentIndex = contentIndex;
         editor_state.choiceIndex = null;
@@ -89,7 +89,7 @@ var AUTHOR_EDITOR = {
         document.getElementById("overlay_editor_choiceContaner").style.display = "block";
         editorTitle(isAdding ? "addchoice" : "editchoice");
         
-        editor_state.content_json = json.promptList[promptIndex].prompt.choices[choiceIndex];
+        editor_state.content_json = json.promptList[promptIndex].prompt.choices[choiceIndex] || {};
         editor_state.promptIndex = promptIndex;
         editor_state.contentIndex = null;
         editor_state.choiceIndex = choiceIndex;

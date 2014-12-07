@@ -120,7 +120,7 @@ var AUTHOR_TABLE = {
          */
         addContent: function (event, promptIndex) {
             event.preventDefault();
-            AUTHOR_EDITOR.editContent(promptIndex, json.promptList[promptIndex].prompt.contents.push({}) - 1, true);
+            AUTHOR_EDITOR.editContent(promptIndex, json.promptList[promptIndex].prompt.contents.length, true);
         },
         
         /**
@@ -175,16 +175,14 @@ var AUTHOR_TABLE = {
          */
         addChoice: function (event, promptIndex) {
             event.preventDefault();
-            var choiceIndex = json.promptList[promptIndex].prompt.choices.push({}) - 1;
-            checkJSON();
-            AUTHOR_EDITOR.editChoice(promptIndex, choiceIndex, true);
+            AUTHOR_EDITOR.editChoice(promptIndex, json.promptList[promptIndex].prompt.choices.length, true);
         },
         
         /**
          * Handler for the "Randomize Choices" input checkbox.
          */
         updateRandomizeChoices: function (event, promptIndex) {
-            json.promptList[promptIndex].prompt.randomizeChoices = this.value;
+            json.promptList[promptIndex].prompt.randomizeChoices = this.checked;
             // Update the save button
             generate();
         },
@@ -433,14 +431,14 @@ var AUTHOR_TABLE = {
                 text: " ",
                 title: _("Move Content Up"),
                 tabindex: ++tabindex
-            }, tableEvents.moveChoiceUp, promptIndex, i));
+            }, tableEvents.moveContentUp, promptIndex, i));
             div.appendChild(c("a", {
                 className: "row_content_down icon icon_down" + (i == prompt.contents.length - 1 ? " invisible" : ""),
                 href: "#",
                 text: " ",
                 title: _("Move Content Down"),
                 tabindex: ++tabindex
-            }, tableEvents.moveChoiceDown, promptIndex, i));
+            }, tableEvents.moveContentDown, promptIndex, i));
             
             // Make "Edit Content" and "Delete Content" buttons
             div.appendChild(c("a", {

@@ -129,7 +129,9 @@ function checkJSON() {
     var i, item, j, k;
     
     // Check "name"
-    if (!json.name) json.name = _("SerGIS Data");
+    if (!json.name) {
+        document.getElementById("general_name").value = json.name = _("SerGIS Data");
+    }
     
     // Check "generator"
     json.generator = "SerGIS Prompt Author v" + SERGIS_PROMPT_AUTHOR_VERSION;
@@ -352,29 +354,22 @@ function readJSONFile(file) {
                 result = JSON.parse(reader.result);
             } catch (err) {}
             if (result) {
-                // Create new file metadata
-                json_metadata = {
-                    filename: file.name
-                };
-                // Check filename
-                if (!json_metadata.filename) {
-                    json_metadata.filename = _("SerGIS Data");
+                // Create filename
+                var filename = file.name || "";
+                if (filename.substring(filename.length - 5) == ".json") {
+                    filename = filename.substring(0, filename.length - 5);
                 }
-                // Check extension
-                if (json_metadata.filename.substring(json_metadata.filename.length - 5).toLowerCase() != ".json") {
-                    json_metadata.filename += ".json";
-                }
-                // Add basename (filename without extension)
-                json_metadata.basename = json_metadata.filename.substring(0, json_metadata.filename.lastIndexOf("."));
-                
                 // Hide instructions; show "Loaded from filename.json"
                 document.getElementById("instructions").style.display = "none";
-                document.getElementById("loadedFrom_filename").textContent = json_metadata.filename;
-                document.getElementById("loadedFrom").style.display = "block";
+                if (filename) {
+                    document.getElementById("loadedFrom_filename").textContent = filename + ".json";
+                    document.getElementById("loadedFrom").style.display = "block";
+                }
                 
                 // Store the new JSON
                 json = result;
-                
+                // Make sure it has a name
+                if (!json.name && filename) json.name = filename;
                 // Check the new JSON
                 checkJSON();
                 
