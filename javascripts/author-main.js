@@ -91,8 +91,8 @@ function c(elem, attributes, event /*, [parameter, [parameter, [...]]] */) {
     if (event) {
         var args = Array.prototype.slice.call(arguments, 3),
             event = NEEDS_ONCHANGE.indexOf(elem.nodeName.toLowerCase()) == -1 ? "click" : "change";
-        elem.addEventListener(event, function (event) {
-            event.apply(this, [event].concat(args));
+        elem.addEventListener(event, function (_event) {
+            event.apply(this, [_event].concat(args));
         }, false);
     }
     
