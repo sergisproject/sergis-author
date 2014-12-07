@@ -90,8 +90,8 @@ function c(elem, attributes, event /*, [parameter, [parameter, [...]]] */) {
     // Apply event handler
     if (event) {
         var args = Array.prototype.slice.call(arguments, 3),
-            event = NEEDS_ONCHANGE.indexOf(elem.nodeName.toLowerCase()) == -1 ? "click" : "change";
-        elem.addEventListener(event, function (_event) {
+            eventName = NEEDS_ONCHANGE.indexOf(elem.nodeName.toLowerCase()) == -1 ? "click" : "change";
+        elem.addEventListener(eventName, function (_event) {
             event.apply(this, [_event].concat(args));
         }, false);
     }
