@@ -89,13 +89,14 @@ var AUTHOR_TABLE = {
          */
         updateMapStuff: function (event, stuff, promptIndex) {
             this.style.border = "";
-            if (typeof this.value.trim == "function") {
-                this.value = this.value.trim();
+            var value = this.value;
+            if (typeof value.trim == "function") {
+                value = value.trim();
             }
-            if (!this.value) {
+            if (!value) {
                 delete json.promptList[promptIndex].prompt.map[stuff];
             } else {
-                var num = Number(this.value);
+                var num = Number(value);
                 if (isNaN(num)) {
                     this.style.border = "1px solid red";
                 } else {
@@ -391,6 +392,7 @@ var AUTHOR_TABLE = {
                 className: "row_map_" + mapstuff[i][0],
                 id: id,
                 size: "4",
+                type: "number",
                 tabindex: ++tabindex,
                 value: prompt.map[mapstuff[i][0]] || ""
             }, tableEvents.updateMapStuff, mapstuff[i][0], promptIndex));
