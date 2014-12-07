@@ -20,8 +20,12 @@
     <h1 id="project_title">SerGIS Prompt Author</h1>
     <section id="downloads">
       <!-- Icons made by <a href="http://www.freepik.com">Freepik</a> from <a href="http://www.flaticon.com">www.flaticon.com</a> are licensed under <a href="http://creativecommons.org/licenses/by/3.0/">Creative Commons BY 3.0</a>. -->
-      <a id="downloads_save" href="#" title="Save JSON Game Data File" tabindex="3">Save File</a>
-      <a id="downloads_open" href="#" title="Open JSON Game Data File" tabindex="2">Open File</a>
+      <a id="downloads_save" href="#" title="Save JSON Game Data File" tabindex="4" style="display: none;">Save File</a>
+      <a id="downloads_open" href="#" title="Open JSON Game Data File" tabindex="3" style="display: none;">Open File</a>
+      <div id="downloads_recent" style="display: none;">
+        <label for="downloads_recent_select">Recent Files: </label>
+        <select id="downloads_recent_select" tabindex="2"></select>
+      </div>
     </section>
   </header>
 </div>
@@ -30,10 +34,15 @@
   <section id="main_content" class="inner">
     <div id="instructions">
       <p>To make a new SerGIS JSON Game Data file, just start adding data below!</p>
-      <p>To load an existing SerGIS JSON Game Data, click the "Open File" button to the right.</p>
-      <p>Once you are finished, be sure to click the "Save File" button to the right to download your SerGIS JSON Game Data file.</p>
+      <p id="instructions_open" style="display: none;">To load an existing SerGIS JSON Game Data, click the "Open File" button to the right.</p>
+      <p id="instructions_recent" style="display: none;">Files that you have edited before using the SerGIS Prompt Author are above in the <label for="downloads_recent_select" style="cursor: pointer;">"Recent Files" dropdown</label>.</p>
+      <p>To view the JSON data, click "View JSON Data" at the bottom of the page.</p>
+      <p id="instructions_save" style="display: none;">Once you are finished, be sure to click the "Save File" button to the right to download your SerGIS JSON Game Data file. (If you forget, no worries; it will appear next time in the "Recent Files" dropdown.)</p>
     </div>
-    <div id="loadedFrom" style="display: none;"><p>Loaded from <b id="loadedFrom_filename"></b></p></div>
+    <div id="loadedFrom" style="display: none;">
+      <h3 id="loadedFrom_filename" style="text-align: center;"></h3>
+      <hr>
+    </div>
 
     <h2>General Properties</h2>
     <table class="noborder">
@@ -77,6 +86,7 @@
 
 <div id="footer_wrap" class="outer">
   <footer class="inner">
+    <p><a href="#" id="viewjson_link">View JSON Data</a></p>
     <p><a href="http://sergisproject.github.io/">The SerGIS Project</a> &mdash; SerGIS Prompt Author<span id="version_outer" style="display: none;"> version <span id="version_inner"></span></span></p>
   </footer>
 </div>
@@ -85,8 +95,19 @@
   <table><tbody><tr><td>
     <!-- Loading overlay -->
     <div id="overlay_loading" class="overlay_inner" style="text-align: center;">
+      <!--[if lt IE 9]><p>Please upgrade to a <a href="http://whatbrowser.org/">modern browser</a>.</p><![endif]-->
+      <!--[if gte IE 9]>-->
       <p>Loading...</p>
       <noscript><p>Please enable JavaScript.</p></noscript>
+      <!--<![endif]-->
+    </div>
+
+    <!-- View JSON overlay -->
+    <div id="overlay_viewjson" class="overlay_inner" style="display: none;">
+      <h2>View JSON</h2>
+      <p id="overlay_viewjson_selectall" style="display: none;"><a id="overlay_viewjson_selectall_link" href="#">Select All</a></p>
+      <pre id="overlay_viewjson_content"></pre>
+      <p style="text-align: center;"><button id="overlay_viewjson_close">Close</button></p>
     </div>
 
     <!-- Edit Frontend Info overlay -->

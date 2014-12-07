@@ -6,15 +6,21 @@
     in the LICENSE.txt file.
  */
 
-// Globals: json, overlay, c, checkJSON, swapGotos, decrementGotos, generate, readJSONFile
+// Globals: json, overlay, c, selectAll, checkJSON, swapGotos, decrementGotos, generate, readJSONFile
 
 /**
  * The current state of the SerGIS JSON Game Data that we're working on.
  */
 var json = {
+    // Metadata:
     name: "",
     author: "",
     generator: "",
+    // "created" and "modified" are stored as Date objects, which are converted to ISO strings by JSON.stringify
+    created: null,
+    modified: null,
+    
+    // Game Data:
     jumpingBackAllowed: false,
     onJumpBack: "",
     jumpingForwardAllowed: false,
@@ -95,14 +101,46 @@ function c(elem, attributes, event /*, [parameter, [parameter, [...]]] */) {
 }
 
 /**
+ * Select all the text in an element.
+ * Adapted from http://stackoverflow.com/a/987376
+ *
+ * @param {Element} element - The DOM element to select all the text of.
+ */
+function selectAll(elem) {
+    var range, selection;
+    if (typeof document.body.createTextRange == "function") {
+        range = document.body.createTextRange();
+        range.moveToElementText(elem);
+        range.select();
+    } else if (typeof window.getSelection == "function") {
+        selection = window.getSelection();
+        range = document.createRange();
+        range.selectNodeContents(elem);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+}
+
+/**
  * Checks properties in the SerGIS JSON Game Data, possibly filling in default
  * values to make sure it doesn't lead to errors later.
  */
 function checkJSON() {
     var i, item, j, k;
     
+    // Check "name"
+    if (!json.name) json.name = _("SerGIS Data");
+    
     // Check "generator"
     json.generator = "SerGIS Prompt Author v" + SERGIS_PROMPT_AUTHOR_VERSION;
+    
+    // Check "created"
+    if (!json.created) {
+        json.created = new Date();
+    }
+    
+    // Check "modified"
+    json.modified = new Date();
     
     // Check "onJumpBack"
     var onJumpBackValues = [],
@@ -271,10 +309,33 @@ function generate(updateTable) {
     checkJSON();
     // And our save button
     var a = document.getElementById("downloads_save");
-    a.setAttribute("download", _("SerGIS Data") + " " + icu.getDateFormat("SHORT").format(new Date()) + ".json");
+    a.setAttribute("download", json.name + " " + icu.getDateFormat("SHORT").format(json.modified) + ".json");
     a.setAttribute("href", "data:application/json;base64," + btoa(JSON.stringify(json, null, 2)));
     // And, update the table (if needed)
     if (updateTable) AUTHOR_TABLE.initTable();
+}
+
+/**
+ * Update the "Recent Files" dropdown.
+ *
+ * @return {boolean} True if there are recent files, false otherwise.
+ */
+function updateRecentFiles() {
+    var recent = window.localStorage && window.localStorage.getItem("recent_files");
+    if (recent) {
+        try {
+            recent = JSON.parse(recent);
+        } catch (err) {
+            recent = null;
+        }
+    }
+    if (recent) {
+        // TODO...
+        //return true;
+        return false;
+    } else {
+        return false;
+    }
 }
 
 /**
@@ -291,14 +352,32 @@ function readJSONFile(file) {
                 result = JSON.parse(reader.result);
             } catch (err) {}
             if (result) {
+                // Create new file metadata
+                json_metadata = {
+                    filename: file.name
+                };
+                // Check filename
+                if (!json_metadata.filename) {
+                    json_metadata.filename = _("SerGIS Data");
+                }
+                // Check extension
+                if (json_metadata.filename.substring(json_metadata.filename.length - 5).toLowerCase() != ".json") {
+                    json_metadata.filename += ".json";
+                }
+                // Add basename (filename without extension)
+                json_metadata.basename = json_metadata.filename.substring(0, json_metadata.filename.lastIndexOf("."));
+                
                 // Hide instructions; show "Loaded from filename.json"
                 document.getElementById("instructions").style.display = "none";
-                document.getElementById("loadedFrom_filename").textContent = file.name;
+                document.getElementById("loadedFrom_filename").textContent = json_metadata.filename;
                 document.getElementById("loadedFrom").style.display = "block";
+                
                 // Store the new JSON
                 json = result;
+                
                 // Check the new JSON
                 checkJSON();
+                
                 // Set the values for the General Properties
                 document.getElementById("general_name").value = json.name || "";
                 document.getElementById("general_author").value = json.author || "";
@@ -306,8 +385,10 @@ function readJSONFile(file) {
                 document.getElementById("general_onJumpBack").value = json.onJumpBack;
                 document.getElementById("general_jumpingForwardAllowed").checked = !!json.jumpingForwardAllowed;
                 document.getElementById("general_showActionsInUserOrder").checked = !!json.showActionsInUserOrder;
+                
                 // Regenerate the table and update the save button
                 generate(true);
+                
                 // Scroll up to the top of the page
                 window.scrollTo(0, 0);
             } else {
@@ -333,9 +414,9 @@ function readJSONFile(file) {
         document.getElementById("version_outer").style.display = "inline";
         
         // "Open" button (if FileReader is supported)
-        if (typeof FileReader != "function") {
-            document.getElementById("downloads_open").style.visibility = "hidden";
-        } else {
+        if (typeof FileReader == "function") {
+            document.getElementById("instructions_open").style.display = "block";
+            document.getElementById("downloads_open").style.display = "block";
             document.getElementById("downloads_open").addEventListener("click", function (event) {
                 event.preventDefault();
                 document.getElementById("fileinput").click();
@@ -353,12 +434,26 @@ function readJSONFile(file) {
             }, false);
         }
         
-        // "Save" button (if <a download="..."> isn't supported)
-        if (typeof document.createElement("a").download == "undefined") {
-            document.getElementById("downloads_save").addEventListener("click", function (event) {
-                alert(_("Right-click this button, select \"Save Link As\" or \"Save Target As\", and name the file something like \"name.json\""));
-                event.preventDefault();
-            }, false);
+        // "Save" button (if base64 and data URIs are supported)
+        /* Yes, you can shoot me later for the use of browser detection, but IE
+         * is the only major browser that *still* doesn't fully support "data:"
+         * URIs.
+         */
+        if (typeof btoa == "function" && navigator.userAgent.indexOf("Trident/") == -1) {
+            document.getElementById("instructions_save").style.display = "block";
+            document.getElementById("downloads_save").style.display = "block";
+            // Message if <a download="..."> isn't supported
+            if (typeof document.createElement("a").download == "undefined") {
+                document.getElementById("downloads_save").addEventListener("click", function (event) {
+                    alert(_("Right-click this button, select \"Save Link As\" or \"Save Target As\", and name the file something like \"name.json\""));
+                    event.preventDefault();
+                }, false);
+            }
+        }
+        
+        // "Recent Files" button (if supported and available)
+        if (updateRecentFiles()) {
+            document.getElementById("instructions_recent").style.display = "block";
         }
         
         // "Add Prompt" button
@@ -409,6 +504,27 @@ function readJSONFile(file) {
             json.showActionsInUserOrder = this.checked;
             // Update the save button
             generate();
+        }, false);
+        
+        // "View JSON" button/overlay
+        document.getElementById("viewjson_link").addEventListener("click", function (event) {
+            event.preventDefault();
+            document.getElementById("overlay_viewjson_content").innerHTML = "";
+            document.getElementById("overlay_viewjson_content").appendChild(document.createTextNode(JSON.stringify(json, null, 2)));
+            overlay("overlay_viewjson");
+        }, false);
+        // "Select All" button
+        if (typeof document.body.createTextRange == "function" || typeof window.getSelection == "function") {
+            document.getElementById("overlay_viewjson_selectall").style.display = "block";
+            document.getElementById("overlay_viewjson_selectall_link").addEventListener("click", function (event) {
+                event.preventDefault();
+                selectAll(document.getElementById("overlay_viewjson_content"));
+            }, false);
+        }
+        // "Close" button
+        document.getElementById("overlay_viewjson_close").addEventListener("click", function (event) {
+            event.preventDefault();
+            overlay();
         }, false);
         
         // Make our JSON defaults and generate the default table
