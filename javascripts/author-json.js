@@ -378,7 +378,8 @@ var AUTHOR_JSON = {
      */
     AUTHOR_JSON.actions = {
         explain: [
-            new SERGIS_JSON_Content(_("Explanation"))
+            new SERGIS_JSON_Content(_("Explanation")),
+            "repeat"
         ],
         "goto": [
             new SERGIS_JSON_Number(_("Prompt Index"))

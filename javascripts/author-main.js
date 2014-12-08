@@ -36,18 +36,19 @@ var json = {
  */
 function overlay(overlayID) {
     // Hide all overlays, but show the one we want (if applicable)
-    var overlayShown = false;
+    var overlayShown = -1;
     var overlays = document.getElementsByClassName("overlay_inner");
     for (var i = 0; i < overlays.length; i++) {
         if (overlayID && overlays[i].getAttribute("id") == overlayID) {
             overlays[i].style.display = "block";
-            overlayShown = true;
+            overlayShown = i;
         } else {
             overlays[i].style.display = "none";
         }
     }
     // Show/hide overlay container
-    document.getElementById("overlay").style.display = overlayShown ? "block" : "none";
+    document.getElementById("overlay").style.display = overlayShown > -1 ? "block" : "none";
+    if (overlayShown > -1) overlays[overlayShown].scrollTop = 0;
 }
 
 /**
