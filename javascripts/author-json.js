@@ -4,60 +4,10 @@
     Copyright (c) 2014, SerGIS Project Contributors. All rights reserved.
     Use of this source code is governed by the MIT License, which can be found
     in the LICENSE.txt file.
- */
+*/
 
-// Globals: AUTHOR_JSON
-
-var AUTHOR_JSON = {
-    /**
-     * Reference for the SerGIS JSON Content Object types used by "Edit
-     * Content" and "Edit Choices".
-     * Each property is an array of the options that that content type takes.
-     * Each array item is another array:
-     *     [JSON property, display name, type, default value]
-     */
-    contentTypes: {
-        "text": {
-            name: _("Text"),
-            fields: [
-                ["value", _("Text Content:"), "string_multiline"],
-                ["centered", _("Center Text"), "boolean", false],
-                ["style", _("CSS style:"), "string"]
-            ]
-        },
-        "html": {
-            name: _("HTML"),
-            fields: [
-                ["value", _("HTML Content:"), "string_multiline"],
-                ["style", _("CSS style:"), "string"]
-            ]
-        },
-        "image": {
-            name: _("Image"),
-            fields: [
-                ["value", _("URL of Image:"), "string"],
-                ["centered", _("Center Image"), "boolean", true],
-                ["style", _("CSS style:"), "string"]
-            ]
-        },
-        "youtube": {
-            name: _("YouTube Video"),
-            fields: [
-                ["value", _("YouTube Video ID:"), "string"],
-                ["width", _("Video Width:"), "number", 400],
-                ["height", _("Video Height:"), "number", 300],
-                ["centered", _("Center Video"), "boolean", true],
-                ["style", _("CSS style:"), "string"]
-                // NOT SUPPORTED: playerVars
-            ]
-        }
-    },
-    
-    defaultContentType: "text"
-    
-    /* actions */
-    /* actionsByFrontend */
-};
+var AUTHOR = AUTHOR || {};
+AUTHOR.JSON = AUTHOR.JSON || {};
 
 (function () {
     /**
@@ -318,19 +268,19 @@ var AUTHOR_JSON = {
         });
         // Make sure default content type is first
         var defaultContentType;
-        if (AUTHOR_JSON.defaultContentType && AUTHOR_JSON.contentTypes.hasOwnProperty(defaultContentType)) {
-            defaultContentType = AUTHOR_JSON.defaultContentType;
+        if (AUTHOR.JSON.defaultContentType && AUTHOR.JSON.contentTypes.hasOwnProperty(defaultContentType)) {
+            defaultContentType = AUTHOR.JSON.defaultContentType;
             select.appendChild(c("option", {
                 value: defaultContentType,
-                text: AUTHOR_JSON.contentTypes[defaultContentType].name
+                text: AUTHOR.JSON.contentTypes[defaultContentType].name
             }));
         }
         // Make the rest of the content types
-        for (var type in AUTHOR_JSON.contentTypes) {
-            if (AUTHOR_JSON.contentTypes.hasOwnProperty(type) && type != defaultContentType) {
+        for (var type in AUTHOR.JSON.contentTypes) {
+            if (AUTHOR.JSON.contentTypes.hasOwnProperty(type) && type != defaultContentType) {
                 select.appendChild(c("option", {
                     value: type,
-                    text: AUTHOR_JSON.contentTypes[type].name
+                    text: AUTHOR.JSON.contentTypes[type].name
                 }));
             }
         }
@@ -367,7 +317,8 @@ var AUTHOR_JSON = {
     };
     
     
-    // Initialize the rest of AUTHOR_JSON
+    ///////////////////////////////////////////////////////////////////////////
+    // Initialize AUTHOR.JSON
     
     /**
      * The Gameplay Actions in SerGIS (not frontend-specific).
@@ -376,7 +327,7 @@ var AUTHOR_JSON = {
      * be a string whose value is "repeat", which indicates that the last
      * parameter (before "repeat") can be repeated multiple times.
      */
-    AUTHOR_JSON.actions = {
+    AUTHOR.JSON.actions = {
         explain: [
             new SERGIS_JSON_Content(_("Explanation")),
             "repeat"
@@ -386,49 +337,96 @@ var AUTHOR_JSON = {
         ],
         logout: []
     };
-    
-    /**
-     * The Map Actions in SerGIS (frontend-specific).
-     * Each property is an object that represents a frontend. The object
-     * follows the same format as AUTHOR_JSON.actions.
-     */
-    AUTHOR_JSON.actionsByFrontend = {
-        arcgis: {
-            clearGraphics: [],
-            showLayers: [
-                new SERGIS_JSON_Layer(_("Layer")),
-                "repeat"
-            ],
-            hideLayers: [
-                new SERGIS_JSON_String(_("Layer Group")),
-                "repeat"
-            ],
-            draw: [
-                new SERGIS_JSON_String(_("Object Name")),
-                new SERGIS_JSON_Dropdown(_("Type"), [
-                    {
-                        label: _("Point"),
-                        value: "point"
-                    },
-                    {
-                        label: _("Line"),
-                        value: "line"
-                    },
-                    {
-                        label: _("Polygon"),
-                        value: "polygon"
-                    }
-                ]),
-                //new SERGIS_JSON_DrawStyle(_("Style")),
-                new SERGIS_JSON_PointsArray(_("Points")),
-                "repeat"
-            ],
-            buffer: [
-                new SERGIS_JSON_Number(_("Distance")),
-                new SERGIS_JSON_String(_("Distance Unit")),
-                new SERGIS_JSON_String(_("Object Name"))
-                //new SERGIS_JSON_DrawStyle(_("Style"))
-            ]
-        }
+        
+        /**
+         * The Map Actions in SerGIS (frontend-specific).
+         * Each property is an object that represents a frontend. The object
+         * follows the same format as AUTHOR.JSON.actions.
+         */
+        actionsByFrontend: {
+            arcgis: {
+                clearGraphics: [],
+                showLayers: [
+                    new SERGIS_JSON_Layer(_("Layer")),
+                    "repeat"
+                ],
+                hideLayers: [
+                    new SERGIS_JSON_String(_("Layer Group")),
+                    "repeat"
+                ],
+                draw: [
+                    new SERGIS_JSON_String(_("Object Name")),
+                    new SERGIS_JSON_Dropdown(_("Type"), [
+                        {
+                            label: _("Point"),
+                            value: "point"
+                        },
+                        {
+                            label: _("Line"),
+                            value: "line"
+                        },
+                        {
+                            label: _("Polygon"),
+                            value: "polygon"
+                        }
+                    ]),
+                    //new SERGIS_JSON_DrawStyle(_("Style")),
+                    new SERGIS_JSON_PointsArray(_("Points")),
+                    "repeat"
+                ],
+                buffer: [
+                    new SERGIS_JSON_Number(_("Distance")),
+                    new SERGIS_JSON_String(_("Distance Unit")),
+                    new SERGIS_JSON_String(_("Object Name"))
+                    //new SERGIS_JSON_DrawStyle(_("Style"))
+                ]
+            }
+        },
+        
+        /**
+         * Reference for the SerGIS JSON Content Object types used by "Edit
+         * Content" and "Edit Choices".
+         * Each property is an array of the options that that content type takes.
+         * Each array item is another array:
+         *     [JSON property, display name, type, default value]
+         */
+        contentTypes: {
+            "text": {
+                name: _("Text"),
+                fields: [
+                    ["value", _("Text Content:"), "string_multiline"],
+                    ["centered", _("Center Text"), "boolean", false],
+                    ["style", _("CSS style:"), "string"]
+                ]
+            },
+            "html": {
+                name: _("HTML"),
+                fields: [
+                    ["value", _("HTML Content:"), "string_multiline"],
+                    ["style", _("CSS style:"), "string"]
+                ]
+            },
+            "image": {
+                name: _("Image"),
+                fields: [
+                    ["value", _("URL of Image:"), "string"],
+                    ["centered", _("Center Image"), "boolean", true],
+                    ["style", _("CSS style:"), "string"]
+                ]
+            },
+            "youtube": {
+                name: _("YouTube Video"),
+                fields: [
+                    ["value", _("YouTube Video ID:"), "string"],
+                    ["width", _("Video Width:"), "number", 400],
+                    ["height", _("Video Height:"), "number", 300],
+                    ["centered", _("Center Video"), "boolean", true],
+                    ["style", _("CSS style:"), "string"]
+                    // NOT SUPPORTED: playerVars
+                ]
+            }
+        },
+        
+        defaultContentType: "text"
     };
 })();

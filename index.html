@@ -1,151 +1,131 @@
 <!DOCTYPE html>
-<!-- Slate template by Jason Costello, @jsncostello
-     Modified by Jake Hartz for use with the SerGIS Project. -->
-<html>
+<!--
+    Copyright (c) 2014, SerGIS Project Contributors. All rights reserved.
+    Use of this source code is governed by the MIT License, which can be found
+    in the LICENSE.txt file.
+-->
+<html lang="en">
 <head>
-<meta charset='utf-8'>
+<meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
-<meta name="description" content="Slate is a responsive theme for GitHub Pages">
-<link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-<!-- VERSION NUMBER -->
-<script>var SERGIS_PROMPT_AUTHOR_VERSION = "0.9";</script>
+<link rel="stylesheet" type="text/css" media="screen" href="css/style.css">
 <title>SerGIS Prompt Author</title>
+<!-- VERSION NUMBER -->
+<script>var SERGIS_PROMPT_AUTHOR_VERSION = "0.9.1";</script>
 </head>
 
 <body>
 
-<div id="header_wrap" class="outer">
+<div class="outer header-wrap">
   <header class="inner">
-    <h1 id="project_title">SerGIS Prompt Author</h1>
-    <section id="downloads">
-      <!-- Icons made by <a href="http://www.freepik.com">Freepik</a> from <a href="http://www.flaticon.com">www.flaticon.com</a> are licensed under <a href="http://creativecommons.org/licenses/by/3.0/">Creative Commons BY 3.0</a>. -->
-      <a id="downloads_save" href="#" title="Save JSON Game Data File" tabindex="4" style="display: none;">Save File</a>
-      <a id="downloads_open" href="#" title="Open JSON Game Data File" tabindex="3" style="display: none;">Open File</a>
+    <h1>SerGIS Prompt Author</h1>
+    <div class="toolbar">
+      <a class="toolbar-save" href="#" title="Save JSON Game Data File" tabindex="5">Save</a>
+      <a class="toolbar-view" href="#" title="View JSON Game Data File" tabindex="4">View</a>
+      <a class="toolbar-open" href="#" title="Open JSON Game Data File" tabindex="3">Open</a>
       <div id="downloads_recent" style="display: none;">
         <label for="downloads_recent_select">Recent Files: </label>
         <select id="downloads_recent_select" tabindex="2"></select>
       </div>
-    </section>
+    </div>
   </header>
 </div>
 
-<div id="main_content_wrap" class="outer">
-  <section id="main_content" class="inner">
-    <div id="instructions">
-      <p>To make a new SerGIS JSON Game Data file, just start adding data below!</p>
-      <p id="instructions_open" style="display: none;">To load an existing SerGIS JSON Game Data, click the "Open File" button to the right.</p>
-      <p id="instructions_recent" style="display: none;">Files that you have edited before using the SerGIS Prompt Author are above in the <label for="downloads_recent_select" style="cursor: pointer;">"Recent Files" dropdown</label>.</p>
-      <p>To view the JSON data, click "View JSON Data" at the bottom of the page.</p>
-      <p id="instructions_save" style="display: none;">Once you are finished, be sure to click the "Save File" button to the right to download your SerGIS JSON Game Data file. (If you forget, no worries; it will appear next time in the "Recent Files" dropdown.)</p>
+<div class="outer content-wrap">
+  <div id="section-wrap" class="inner container">
+    <div class="nav-wrap">
+      <nav id="nav" class="noselect">
+        <ul>
+          <li data-section="instructions"><a href="#">Home</a></li>
+          <li data-section="viewjson"><a href="#">View JSON</a></li>
+          <li data-section="properties"><a href="#">Prompt Set Properties</a></li>
+        </ul>
+        <div>
+          <h3>Prompts</h3>
+          <ul id="nav-wrap-prompts">
+            <li><a href="#">Prompt 1</a></li>
+            <li><a href="#">Prompt 2</a></li>
+            <li><a href="#">Prompt 3</a></li>
+            <li><a href="#">Prompt 4</a></li>
+            <li id="nav-wrap-addprompt"><a href="#">Add Prompt</a></li>
+          </ul>
+        </div>
+        <footer>
+          <p><a href="http://sergisproject.github.io/">The SerGIS Project</a> &mdash; <a href="https://github.com/sergisproject/sergis-author/" title="View on GitHub">SerGIS Prompt Author</a><span id="version_outer" style="display: none;"> version <span id="version_inner"></span></span></p>
+        </footer>
+      </nav>
     </div>
-    <div id="loadedFrom" style="display: none;">
-      <h3 id="loadedFrom_filename" style="text-align: center;"></h3>
-      <hr>
-    </div>
-
-    <h2>General Properties</h2>
-    <table class="noborder">
-      <tbody>
-        <tr>
-          <td><label for="general_name">Prompt Set Name:</label></td>
-          <td><input id="general_name" tabindex="10"></td>
-        </tr>
-        <tr>
-          <td><label for="general_author">Prompt Set Author:</label></td>
-          <td><input id="general_author" tabindex="11"></td>
-        </tr>
-      </tbody>
-    </table>
-    <table class="noborder">
-      <tbody>
-        <tr>
-          <td><input type="checkbox" id="general_jumpingBackAllowed" tabindex="12"></td>
-          <td><label for="general_jumpingBackAllowed">Jumping Back Allowed</label></td>
-        </tr>
-        <tr>
-          <td>&nbsp;</td>
-          <td><label for="general_onJumpBack">On Jump Back: </label><select id="general_onJumpBack" tabindex="13"><option value="">Default</option><option value="reset">Reset</option><option value="hide">Hide</option></select></td>
-        </tr>
-        <tr>
-          <td><input type="checkbox" id="general_jumpingForwardAllowed" tabindex="14"></td>
-          <td><label for="general_jumpingForwardAllowed">Jumping Forward Allowed</label></td>
-        </tr>
-        <tr>
-          <td><input type="checkbox" id="general_showActionsInUserOrder" tabindex="15"></td>
-          <td><label for="general_showActionsInUserOrder">Show Actions In User Order</label></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h2>Prompts</h2>
-    <div id="promptContainer"></div>
-    <p><button id="addPrompt">Add Prompt</button></p>
-  </section>
-</div>
-
-<div id="footer_wrap" class="outer">
-  <footer class="inner">
-    <p><a href="#" id="viewjson_link">View JSON Data</a></p>
-    <p><a href="http://sergisproject.github.io/">The SerGIS Project</a> &mdash; SerGIS Prompt Author<span id="version_outer" style="display: none;"> version <span id="version_inner"></span></span></p>
-    <p><a href="https://github.com/sergisproject/sergis-author/">View SerGIS Author on GitHub</a></p>
-  </footer>
-</div>
-
-<div id="overlay" class="overlay_outer">
-  <table><tbody><tr><td>
-    <!-- Loading overlay -->
-    <div id="overlay_loading" class="overlay_inner" style="text-align: center;">
-      <!--[if lt IE 9]><p>Please upgrade to a <a href="http://whatbrowser.org/">modern browser</a>.</p><![endif]-->
-      <!--[if gte IE 9]>-->
-      <p>Loading...</p>
+    
+    <section data-section="loading">
+      <h2>Loading...</h2>
       <noscript><p>Please enable JavaScript.</p></noscript>
-      <!--<![endif]-->
-    </div>
-
-    <!-- View JSON overlay -->
-    <div id="overlay_viewjson" class="overlay_inner" style="display: none;">
-      <h2>View JSON</h2>
-      <p id="overlay_viewjson_selectall" style="display: none;"><a id="overlay_viewjson_selectall_link" href="#">Select All</a></p>
-      <pre id="overlay_viewjson_content"></pre>
-      <p style="text-align: center;"><button id="overlay_viewjson_close">Close</button></p>
-    </div>
-
-    <!-- Edit Frontend Info overlay -->
-    <div id="overlay_editFrontendInfo" class="overlay_inner" style="display: none;">
-      <h2>Frontend Info</h2>
-    </div>
-
-    <!-- Edit Content/Choice overlay -->
-    <div id="overlay_editor" class="overlay_inner" style="display: none;">
-      <h2 class="overlay_editor_title" id="overlay_editor_title_addcontent">Add Content</h2>
-      <h2 class="overlay_editor_title" id="overlay_editor_title_editcontent">Edit Content</h2>
-      <h2 class="overlay_editor_title" id="overlay_editor_title_addchoice">Add Choice</h2>
-      <h2 class="overlay_editor_title" id="overlay_editor_title_editchoice">Edit Choice</h2>
-
-      <p style="text-align: center;"><label for="overlay_editor_contentType">Content Type: </label><select id="overlay_editor_contentType"></select></p>
-      <div id="overlay_editor_contentContainer"></div>
-      <hr>
-
-      <div id="overlay_editor_choiceContaner">
-        <h3>Actions</h3>
-        <div id="overlay_editor_choice_actionsContainer"></div>
-        <p><button id="overlay_editor_choice_addAction">Add Action</button></p>
-        <hr>
-      </div>
-
-      <p style="text-align: center;"><button id="overlay_editor_cancel" class="cancel-button">Cancel</button><button id="overlay_editor_save" class="save-button">Save</button></p>
-    </div>
-  </td></tr></tbody></table>
+    </section>
+    
+    <section data-section="instructions" style="display: none;">
+      <h2>Welcome to SerGIS Prompt Author!</h2>
+      <p>To make a new SerGIS JSON Game Data file, just start adding data by clicking "Prompt Set Properties" or "Add Prompt".</p>
+      <p id="instructions_open" style="display: none;">To load an existing SerGIS JSON Game Data, click the "Open File" button at the top.</p>
+      <p id="instructions_recent" style="display: none;">Files that you have edited before using the SerGIS Prompt Author are above in the <label for="downloads_recent_select" style="cursor: pointer;">"Recent Files" dropdown</label>.</p>
+      <p>To view the JSON data, click "View JSON".</p>
+      <p id="instructions_save" style="display: none;">Once you are finished, be sure to click the "Save File" button at the top to download your SerGIS JSON Game Data file. (If you forget, no worries; it will appear next time in the "Recent Files" dropdown.)</p>
+    </section>
+    
+    <section data-section="viewjson" style="display: none;">
+      <h2>View SerGIS JSON Game Data</h2>
+      <p>Yup</p>
+    </section>
+    
+    <section data-section="properties" style="display: none;">
+      <h2>Prompt Set Properties</h2>
+      <table class="noborder">
+        <tbody>
+          <tr>
+            <td><label for="general_name">Prompt Set Name:</label></td>
+            <td><input id="general_name"></td>
+          </tr>
+          <tr>
+            <td><label for="general_author">Prompt Set Author:</label></td>
+            <td><input id="general_author"></td>
+          </tr>
+        </tbody>
+      </table>
+      <table class="noborder">
+        <tbody>
+          <tr>
+            <td><input type="checkbox" id="general_jumpingBackAllowed"></td>
+            <td><label for="general_jumpingBackAllowed">Jumping Back Allowed</label></td>
+          </tr>
+          <tr>
+            <td>&nbsp;</td>
+            <td><label for="general_onJumpBack">On Jump Back: </label><select id="general_onJumpBack"><option value="">Default</option><option value="reset">Reset</option><option value="hide">Hide</option></select></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" id="general_jumpingForwardAllowed"></td>
+            <td><label for="general_jumpingForwardAllowed">Jumping Forward Allowed</label></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" id="general_showActionsInUserOrder"></td>
+            <td><label for="general_showActionsInUserOrder">Show Actions In User Order</label></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
 </div>
 
-<div style="display: none;"><input id="fileinput" type="file"></div>
+<!-- Localization Tools -->
+<script type="text/javascript" src="http://www.localeplanet.com/api/auto/icu.js"></script>
+<script type="text/javascript" src="http://www.localeplanet.com/api/translate.js"></script>
 
-<script src="http://www.localeplanet.com/api/auto/icu.js"></script>
-<script src="http://www.localeplanet.com/api/translate.js"></script>
+<!-- Third-party Scripts -->
+<!-- slip.js: https://github.com/pornel/slip -->
+<script type="text/javascript" src="javascripts/slip.js"></script>
+
+<!-- SerGIS Prompt Author scripts -->
 <script type="text/javascript" src="javascripts/author-main.js"></script>
+<script type="text/javascript" src="javascripts/author-dom.js"></script>
 <script type="text/javascript" src="javascripts/author-json.js"></script>
-<script type="text/javascript" src="javascripts/author-table.js"></script>
-<script type="text/javascript" src="javascripts/author-editor.js"></script>
+<script type="text/javascript" src="javascripts/author-prompts.js"></script>
 
 </body>
 </html>

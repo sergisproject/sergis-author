@@ -1,0 +1,494 @@
+/* Based loosely on Slate Theme by Jason Costello */
+/* Modified by Jake Hartz for use with the SerGIS Project */
+
+@import url(normalize.css);
+
+.noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: default;
+}
+
+/* .inputcontainer is used to make a text input take up the rest of the width:
+ * <div class="inputcontainer"><label></label><span><input></span></div>
+ */
+
+.inputcontainer {
+  display: table;
+  width: 100%;
+}
+
+.inputcontainer label {
+  display: table-cell;
+  width: 1px;
+  white-space: nowrap;
+}
+
+.inputcontainer span {
+  display: table-cell;
+  padding: 0 0 0 5px
+}
+
+.inputcontainer input {
+  width: 100%
+}
+
+/* THEME STYLES */
+
+*, *:before, *:after {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+body {
+  color: #373737;
+  background: #212121;
+  font-size: 18px;
+  font-family: 'Myriad Pro', Calibri, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 10px 0;
+  font-weight: 700;
+  color: #222222;
+  font-family: 'Lucida Grande', 'Calibri', Helvetica, Arial, sans-serif;
+  letter-spacing: -1px;
+}
+
+h1 {
+  font-size: 36px;
+  font-weight: 700;
+}
+
+h2 {
+  padding-bottom: 10px;
+  font-size: 32px;
+  background: url('../images/bg_hr.png') repeat-x bottom;
+}
+
+h3 {
+  font-size: 24px;
+}
+
+h4 {
+  font-size: 21px;
+}
+
+h5 {
+  font-size: 18px;
+}
+
+h6 {
+  font-size: 16px;
+}
+
+p {
+  font-size: 18px;
+  margin: 10px 0 15px 0;
+}
+
+nav p {
+  color: #f2f2f2;
+  margin: 5px 0 7px 0;
+}
+
+a {
+  text-decoration: none;
+  color: #007edf;
+  text-shadow: none;
+}
+
+a:hover, a:focus {
+  text-decoration: underline;
+}
+
+nav a {
+  color: #F2F2F2;
+  text-decoration: underline;
+}
+
+em {
+  font-style: italic;
+}
+
+strong {
+  font-weight: bold;
+}
+
+img {
+  position: relative;
+  margin: 0 auto;
+  max-width: 739px;
+  padding: 5px;
+  margin: 10px 0 10px 0;
+  border: 1px solid #ebebeb;
+
+  box-shadow: 0 0 5px #ebebeb;
+  -webkit-box-shadow: 0 0 5px #ebebeb;
+  -moz-box-shadow: 0 0 5px #ebebeb;
+  -o-box-shadow: 0 0 5px #ebebeb;
+  -ms-box-shadow: 0 0 5px #ebebeb;
+}
+
+p img {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  vertical-align: middle;
+  text-align: center;
+  border: none;
+}
+
+pre, code {
+  width: 100%;
+  color: #222;
+  background-color: #fff;
+
+  font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
+  font-size: 14px;
+
+  border-radius: 2px;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+
+  box-shadow: 0 0 10px rgba(0,0,0,.1);
+}
+
+pre {
+  padding: 10px;
+  overflow: auto;
+}
+
+code {
+  padding: 3px;
+  margin: 0 3px;
+}
+
+pre code {
+  display: block;
+  box-shadow: none;
+}
+
+blockquote {
+  color: #666;
+  margin: 0 0 20px 2px;
+  padding-left: 20px;
+  border-left: 3px solid #bbb;
+  font-style: italic;
+}
+
+ul, ol, dl {
+  margin: 0 0 15px 0;
+  padding-left: 20px;
+}
+
+dl dt {
+  font-weight: bold;
+}
+
+dl dd {
+  margin-left: 0;
+  padding-left: 0;
+  font-style: italic;
+}
+
+dl p {
+  padding-left: 20px;
+  font-style: italic;
+}
+
+hr {
+  height: 1px;
+  margin-bottom: 5px;
+  border: none;
+  background: url('../images/bg_hr.png') repeat-x center;
+}
+
+table {
+  border: 1px solid #373737;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+th {
+  font-family: 'Lucida Grande', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  padding: 10px;
+  background: #373737;
+  color: #fff;
+  border: 1px solid black;
+}
+
+td {
+  padding: 10px;
+  border: 1px solid #373737;
+  vertical-align: top;
+}
+
+tr.toprow td {
+  border-top: 4px solid #373737;
+}
+
+table.noborder {
+  border-style: none;
+}
+
+table.noborder th, table.noborder td {
+  border-style: none;
+  padding: 2px;
+}
+
+table.scrollFixed thead {
+  position: fixed;
+  top: 0;
+  z-index: 1;
+}
+
+form {
+  background: #f2f2f2;
+  padding: 20px;
+}
+
+input[type=number] {
+  width: 60px;
+}
+
+
+header {
+  padding: 10px;
+  max-width: 1200px;
+}
+
+header h1 {
+  margin: 0;
+  color: #fff;
+  font-size: 42px;
+  font-weight: 700;
+  text-shadow: #111 0px 0px 10px;
+}
+
+
+.toolbar > a {
+  display: block;
+  float: right;
+  width: 45px;
+  height: 35px;
+  padding-top: 33px;
+  text-align: center;
+  color: #fff;
+  background-image: url(../images/sprite.png);
+  background-repeat: no-repeat;
+  background-size: 300%;
+}
+
+.toolbar > div {
+  float: right;
+  margin-top: 33px;
+}
+
+.toolbar-open {
+  background-position: 0 0;
+}
+
+.toolbar-open:hover {
+  background-position: 0 100%;
+}
+
+.toolbar-view {
+  background-position: 100% 0;
+  margin-left: 10px;
+}
+
+.toolbar-view:hover {
+  background-position: 100% 100%;
+}
+
+.toolbar-save {
+  background-position: 50% 0;
+  margin-left: 10px;
+}
+
+.toolbar-save:hover {
+  background-position: 50% 100%;
+}
+
+nav h3 {
+  color: #fff;
+}
+
+nav ul {
+  color: #f2f2f2;
+  list-style: none;
+  padding: 0 5px;
+}
+
+nav li {
+  padding: 5px;
+  border: 1px solid #f2f2f2;
+  border-radius: 6px;
+  margin: 4px 0;
+  cursor: pointer;
+  background: linear-gradient(#595959, #212121);
+}
+
+nav li a {
+  text-decoration: none;
+}
+
+nav li:hover:not(:active) {
+  position: relative;
+  left: -1px;
+  top: -1px;
+}
+
+table button, table label, table input, table select, table .minirow, table .row, table li {
+  font-size: 80%;
+}
+
+
+/* FULL-WIDTH STYLES */
+
+html, body {
+  height: 100%;
+}
+
+.outer {
+  width: 100%;
+}
+
+.inner {
+  position: relative;
+  margin: 0 auto;
+}
+
+.header-wrap {
+  position: absolute;
+  /* background: #212121; */
+  background: linear-gradient(#464646, #212121);
+  z-index: 9;
+  height: 85px;
+}
+
+.toolbar {
+  position: absolute;
+  /* width: 210px; */
+  z-index: 10;
+  bottom: -10px;
+  right: 0;
+  height: 70px;
+}
+
+.content-wrap {
+  background: #f2f2f2;
+  border-top: 1px solid #111;
+  height: 100%;
+}
+
+.container {
+  padding-top: 84px;
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.nav-wrap {
+  display: inline-block;
+  width: 480px;
+  padding: 10px;
+  color: #fff;
+  background: #212121;
+  box-shadow: inset 0 0 2px rgba(242,242,242,0.6);
+  height: 100%;
+  overflow: auto;
+}
+
+nav {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 100%;
+}
+
+section {
+  width: 100%;
+  padding: 10px;
+  height: 100%;
+  overflow: auto;
+  border-left: 1px solid #212121;
+}
+
+/* SMALL DEVICE STYLES */
+
+@media screen and (max-width: 480px) {
+  table button, table label, table input, table select, table .minirow, table .row, table li {
+    font-size: 100%;
+  }
+  
+  html, body {
+    height: auto;
+  }
+
+  body {
+    font-size:14px;
+  }
+
+  .toolbar {
+    /*display: none;*/
+    bottom: -54px;
+  }
+
+  .container {
+    flex-direction: column;
+  }
+  
+  nav {
+    width: auto;
+    height: auto;
+    overflow: visible;
+  }
+  
+  section {
+    height: auto;
+    overflow: visible;
+  }
+
+  header h1 {
+    font-size: 32px;
+  }
+
+  h1 {
+    font-size: 28px;
+  }
+
+  h2 {
+    font-size: 24px;
+  }
+
+  h3 {
+    font-size: 21px;
+  }
+
+  h4 {
+    font-size: 18px;
+  }
+
+  h5 {
+    font-size: 14px;
+  }
+
+  h6 {
+    font-size: 12px;
+  }
+
+  code, pre {
+    min-width: 320px;
+    max-width: 480px;
+    font-size: 11px;
+  }
+}
