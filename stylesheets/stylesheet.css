@@ -95,7 +95,7 @@ a.icon_down {
 
 code {
   display: inline-block;
-  max-width: 150px;
+  max-width: 200px;
   max-height: 10ex;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -382,7 +382,7 @@ Full-Width Styles
 
 .inner {
   position: relative;
-  max-width:900px;
+  max-width: 1200px;
   padding: 20px 10px;
   margin: 0 auto;
 }
@@ -472,7 +472,7 @@ Full-Width Styles
 }
 
 .overlay_inner {
-  max-width: 900px;
+  max-width: 1200px;
   background-color: #f2f2f2;
   margin: 0 auto;
   padding: 10px;
