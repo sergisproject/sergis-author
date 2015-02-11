@@ -16,7 +16,7 @@ var AUTHOR_EDITOR = {
 (function () {
     /**
      * The current state of the editor.
-     
+     *
      * @property {object} content_json - The current state of the "content"
      *           json (or "choice content" json) that we're editing.
      * @property {number} promptIndex - The promptIndex of the prompt
