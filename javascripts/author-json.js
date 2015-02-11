@@ -343,6 +343,7 @@ AUTHOR.JSON = AUTHOR.JSON || {};
          * Each property is an object that represents a frontend. The object
          * follows the same format as AUTHOR.JSON.actions.
          */
+/*
         actionsByFrontend: {
             arcgis: {
                 clearGraphics: [],
@@ -382,7 +383,8 @@ AUTHOR.JSON = AUTHOR.JSON || {};
                 ]
             }
         },
-        
+*/
+
         /**
          * Reference for the SerGIS JSON Content Object types used by "Edit
          * Content" and "Edit Choices".
@@ -390,6 +392,7 @@ AUTHOR.JSON = AUTHOR.JSON || {};
          * Each array item is another array:
          *     [JSON property, display name, type, default value]
          */
+/*
         contentTypes: {
             "text": {
                 name: _("Text"),
@@ -429,4 +432,5 @@ AUTHOR.JSON = AUTHOR.JSON || {};
         
         defaultContentType: "text"
     };
+*/
 })();
