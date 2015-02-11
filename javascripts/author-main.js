@@ -531,5 +531,5 @@ function readJSONFile(file) {
     }
 
     window.addEventListener("load", init, false);
-    // NOTE: author-table.js and author-editor.js also have "window load" event listeners.
+    // NOTE: author-table.js, author-editor.js, and author-editor-action.js also have "window load" event listeners.
 })();

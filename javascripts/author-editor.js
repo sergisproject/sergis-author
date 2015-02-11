@@ -63,7 +63,6 @@ var AUTHOR_EDITOR = {
      *        added (affects the title of the editor).
      */
     AUTHOR_EDITOR.editContent = function (promptIndex, contentIndex, isAdding) {
-        document.getElementById("overlay_editor_choiceContaner").style.display = "none";
         editorTitle(isAdding ? "addcontent" : "editcontent");
         
         editor_state.content_json = json.promptList[promptIndex].prompt.contents[contentIndex] || {};
@@ -86,7 +85,6 @@ var AUTHOR_EDITOR = {
      *        (affects the title of the editor).
      */
     AUTHOR_EDITOR.editChoice = function (promptIndex, choiceIndex, isAdding) {
-        document.getElementById("overlay_editor_choiceContaner").style.display = "block";
         editorTitle(isAdding ? "addchoice" : "editchoice");
         
         editor_state.content_json = json.promptList[promptIndex].prompt.choices[choiceIndex] || {};

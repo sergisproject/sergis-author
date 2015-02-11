@@ -258,6 +258,14 @@ var AUTHOR_TABLE = {
             }
             // Update the save button
             generate();
+        },
+        
+        /**
+         * Handler for the "Add Action" button.
+         */
+        addAction: function (event, promptIndex, choiceIndex) {
+            event.preventDefault();
+            AUTHOR_EDITOR_ACTION.addAction(promptIndex, choiceIndex);
         }
     };
     
@@ -643,6 +651,15 @@ var AUTHOR_TABLE = {
                 text: _("No actions.")
             }));
         }
+        
+        // Make "Add Action" button
+        var p = c("p");
+        p.appendChild(c("button", {
+            text: _("Add Action"),
+            tabindex: ++tabindex
+        }, tableEvents.addAction, promptIndex, choiceIndex));
+        td.appendChild(p);
+        
         tr.appendChild(td);
         
         tbody.appendChild(tr);

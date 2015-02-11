@@ -126,14 +126,14 @@
       <div id="overlay_editor_contentContainer"></div>
       <hr>
 
-      <div id="overlay_editor_choiceContaner">
-        <h3>Actions</h3>
-        <div id="overlay_editor_choice_actionsContainer"></div>
-        <p><button id="overlay_editor_choice_addAction">Add Action</button></p>
-        <hr>
-      </div>
-
       <p style="text-align: center;"><button id="overlay_editor_cancel" class="cancel-button">Cancel</button><button id="overlay_editor_save" class="save-button">Save</button></p>
+    </div>
+
+    <!-- Add Action overlay -->
+    <div id="overlay_addAction" class="overlay_inner" style="display: none;">
+        <h2>Add Action</h2>
+        
+        <p style="text-align: center;"><button id="overlay_addAction_cancel" class="cancel-button">Cancel</button><button id="overlay_addAction_save" class="save-button">Add</button></p>
     </div>
   </td></tr></tbody></table>
 </div>
@@ -146,6 +146,7 @@
 <script type="text/javascript" src="javascripts/author-json.js"></script>
 <script type="text/javascript" src="javascripts/author-table.js"></script>
 <script type="text/javascript" src="javascripts/author-editor.js"></script>
+<script type="text/javascript" src="javascripts/author-editor-action.js"></script>
 
 </body>
 </html>
