@@ -462,16 +462,40 @@ Full-Width Styles
 }
 
 .overlay_outer {
+/*
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+*/
   background-color: rgba(33,33,33,0.9);
   z-index: 10;
+
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -moz-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    -moz-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
 }
 
 .overlay_inner {
+  width: 90%;
   max-width: 1200px;
   background-color: #f2f2f2;
   margin: 0 auto;
@@ -490,6 +514,7 @@ Full-Width Styles
   width: 100%;
 }
 
+/*
 .overlay_outer > table {
   width: 100%;
   height: 100%;
@@ -504,6 +529,7 @@ Full-Width Styles
   padding: 0;
   border-style: none;
 }
+*/
 
 /*******************************************************************************
 Small Device Styles

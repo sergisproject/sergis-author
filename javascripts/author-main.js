@@ -47,7 +47,7 @@ function overlay(overlayID) {
         }
     }
     // Show/hide overlay container
-    document.getElementById("overlay").style.display = overlayShown > -1 ? "block" : "none";
+    document.getElementById("overlay").style.display = overlayShown > -1 ? "flex" : "none";
     if (overlayShown > -1) overlays[overlayShown].scrollTop = 0;
 }
 
