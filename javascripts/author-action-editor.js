@@ -27,7 +27,9 @@ var AUTHOR_ACTION_EDITOR = {
      *           editing.
      */
     var editor_state = {
-        action_json: {},
+        action_json: {
+            data: []
+        },
         promptIndex: null,
         choiceIndex: null,
         actionIndex: null
@@ -53,7 +55,7 @@ var AUTHOR_ACTION_EDITOR = {
     }
     
     /**
-     * Open the editor to edit a content.
+     * Open the editor to edit an action.
      * @memberof AUTHOR_ACTION_EDITOR
      *
      * @param {number} promptIndex - The prompt index of the prompt containing
@@ -67,6 +69,14 @@ var AUTHOR_ACTION_EDITOR = {
      */
     AUTHOR_ACTION_EDITOR.editAction = function (promptIndex, choiceIndex, actionIndex, isAdding) {
         editorTitle(isAdding ? "addaction" : "editaction");
+        
+        editor_state.action_json = json.promptList[promptIndex].actionList[choiceIndex].actions[actionIndex] || {};
+        if (!editor_state.action_json.data) editor_state.action_json.data = [];
+        
+        editor_state.promptIndex = promptIndex;
+        editor_state.choiceIndex = choiceIndex;
+        editor_state.actionIndex = actionIndex;
+        updateActionEditor();
         overlay("overlay_actionEditor");
     };
 
@@ -74,8 +84,7 @@ var AUTHOR_ACTION_EDITOR = {
      * Save whatever we were editing and close the editor.
      */
     function saveEditor() {
-        // TODO: save stuff
-        
+        json.promptList[editor_state.promptIndex].actionList[editor_state.choiceIndex].actions[editor_state.actionIndex] = editor_state.action_json;
         // Close the editor
         closeEditor();
     }
@@ -109,75 +118,43 @@ var AUTHOR_ACTION_EDITOR = {
             var data = JSON.parse(select.value);
             editor_state.action_json.name = data.name;
             editor_state.action_json.frontend = data.frontend;
+            editor_state.action_json.data = [];
         }
         
         // Remove the old fields
         var container = document.getElementById("overlay_actionEditor_contentContainer");
         container.innerHTML = "";
         
-        /*
-        // Make the fields for this content type (based on AUTHOR_JSON.contentTypes)
-        var fields = AUTHOR_JSON.contentTypes[select.value].fields;
-        var property, name, type, value;
-        var p, id, inner_container;
+        // Make the fields for this action name (and possibly frontend)
+        var data = JSON.parse(select.value),
+            actionsDataList;
+        if (data.frontend) {
+            actionsDataList = AUTHOR_JSON.actionsByFrontend[data.frontend];
+        } else {
+            actionsDataList = AUTHOR_JSON.actions;
+        }
+        var fields = actionsDataList[data.name](editor_state.action_json.data);
+        
         for (var i = 0; i < fields.length; i++) {
-            // Shortcuts for the 4 elements in the array
-            property = fields[i][0];
-            name = fields[i][1];
-            type = fields[i][2];
-            value = typeof editor_state.content_json[property] != "undefined" ? editor_state.content_json[property] : fields[i][3];
-            
-            p = c("p");
-            id = "id_contenteditor_" + Math.random();
-            // Create the field editor based on its type
-            if (type == "boolean") {
-                // Boolean type (checkbox)
-                p.appendChild(c("input", {
-                    id: id,
-                    type: "checkbox",
-                    checked: value ? "checked" : undefined
-                }, function (event, property) {
-                    editor_state.content_json[property] = this.checked;
-                }, property));
-                p.appendChild(c("label", {
-                    "for": id,
-                    text: " " + name
+            if (fields[i] == "repeat") continue;
+            (function (i) {
+                container.appendChild(fields[i].getElement(function () {
+                    editor_state.action_json.data[i] = fields[i].getJSONValue();
                 }));
-            } else {
-                // Not a boolean type (checkbox), so label comes first
-                p.appendChild(c("label", {
-                    "for": id,
-                    text: name + " "
-                }));
-                if (type == "string_multiline") {
-                    // Multiline string type (textarea)
-                    p.appendChild(c("textarea", {
-                        id: id,
-                        rows: 3,
-                        text: value || ""
-                    }, function (event, property) {
-                        editor_state.content_json[property] = this.value;
-                    }, property));
-                } else {
-                    if (type == "number") {
-                        inner_container = p;
-                    } else {
-                        p.className += " inputcontainer";
-                        p.appendChild(inner_container = c("span"));
-                    }
-                    // String or number (input)
-                    inner_container.appendChild(c("input", {
-                        id: id,
-                        type: type == "number" ? "number" : "",
-                        value: value || ""
-                    }, function (event, property, type) {
-                        editor_state.content_json[property] = type == "number" ? Number(this.value) : this.value;
-                    }, property, type));
-                }
-            }
+            })(i);
+        }
+        
+        // If we ended in a repeatable field, take care of that
+        if (fields.length && fields[fields.length - 1] == "repeat") {
+            var p = c("p");
+            p.appendChild(c("button", {
+                text: "Add More..."
+            }, function (event) {
+                editor_state.action_json.data.push(null);
+                updateActionEditor();
+            }));
             container.appendChild(p);
         }
-        */
     }
 
     /**
@@ -214,6 +191,7 @@ var AUTHOR_ACTION_EDITOR = {
             var data = JSON.parse(this.value);
             editor_state.action_json.name = data.name;
             editor_state.action_json.frontend = data.frontend;
+            editor_state.action_json.data = [];
             updateActionEditor();
         }, false);
         

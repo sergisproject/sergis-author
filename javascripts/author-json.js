@@ -60,26 +60,23 @@ var AUTHOR_JSON = {
     /* actionsByFrontend */
 };
 
+////////////////////////////////////////////////////////////////////////////////
+// And, the rest is all for defining actions and their data.
 (function () {
     /**
      * A string for some action's data.
      * @constructor
      */
-    function SERGIS_JSON_String(label, defaultValue) {
+    function SERGIS_JSON_String(label, json) {
         this.label = label;
-        this.defaultValue = defaultValue || "";
-        this.reset();
+        this.string = typeof json == "string" ? json : "";
     }
-    
-    SERGIS_JSON_String.prototype.reset = function () {
-        this.string = this.defaultValue;
-    };
     
     SERGIS_JSON_String.prototype.getJSONValue = function () {
         return this.string;
     };
     
-    SERGIS_JSON_String.prototype.getElement = function () {
+    SERGIS_JSON_String.prototype.getElement = function (onchange) {
         var that = this,
             div = c("div", {className: "inputcontainer"}),
             id = "id_" + Math.random() + Math.random();
@@ -94,6 +91,7 @@ var AUTHOR_JSON = {
             value: this.string
         }, function (event) {
             that.string = this.value;
+            onchange();
         }));
         div.appendChild(span);
         return div;
@@ -104,24 +102,21 @@ var AUTHOR_JSON = {
      * A number for some action's data.
      * @constructor
      */
-    function SERGIS_JSON_Number(label, defaultValue, min, max, step) {
+    function SERGIS_JSON_Number(label, json, min, max, step) {
         this.label = label;
-        this.defaultValue = defaultValue || 0;
+        this.number = Number(json);
+        if (isNaN(this.number)) this.number = 0;
+        
         this.min = min;
         this.max = max;
         this.step = step;
-        this.reset();
     }
-    
-    SERGIS_JSON_Number.prototype.reset = function () {
-        this.number = this.defaultValue;
-    };
     
     SERGIS_JSON_Number.prototype.getJSONValue = function () {
         return this.number;
     };
     
-    SERGIS_JSON_Number.prototype.getElement = function () {
+    SERGIS_JSON_Number.prototype.getElement = function (onchange) {
         var that = this,
             div = c("div"),
             id = "id_" + Math.random() + Math.random();
@@ -143,6 +138,7 @@ var AUTHOR_JSON = {
             } else {
                 this.style.border = "";
                 that.number = num;
+                onchange();
             }
         }));
         return div;
@@ -154,21 +150,23 @@ var AUTHOR_JSON = {
      * objects with these properties: label (string), value (any valid JSON).
      * @constructor
      */
-    function SERGIS_JSON_Dropdown(label, items, defaultIndex) {
+    function SERGIS_JSON_Dropdown(label, json, items) {
         this.label = label;
         this.items = items;
-        this.defaultIndex = defaultIndex;
+        this.index = 0;
+        for (var i = 0; i < this.items.length; i++) {
+            if (this.items[i].value == json) {
+                this.index = i;
+                break;
+            }
+        }
     }
     
-    SERGIS_JSON_Dropdown.prototype.reset = function () {
-        this.index = this.defaultIndex;
-    };
-    
     SERGIS_JSON_Dropdown.prototype.getJSONValue = function () {
-        return this.items[this.index].json;
+        return this.items[this.index].value;
     };
     
-    SERGIS_JSON_Dropdown.prototype.getElement = function () {
+    SERGIS_JSON_Dropdown.prototype.getElement = function (onchange) {
         var that = this,
             div = c("div"),
             id = "id_" + Math.random() + Math.random();
@@ -181,6 +179,7 @@ var AUTHOR_JSON = {
             id: id
         }, function (event) {
             that.index = this.selectedIndex;
+            onchange();
         });
         for (var i = 0; i < this.items.length; i++) {
             select.appendChild(c("option", {
@@ -198,29 +197,20 @@ var AUTHOR_JSON = {
      * A SerGIS_ArcGIS~Layer object for some action's data.
      * @constructor
      */
-    function SERGIS_JSON_Layer(label, defaultName, defaultGroup, defaultURLs, defaultOpacity) {
+    function SERGIS_JSON_Layer(label, json) {
         this.label = label;
-        this.defaultName = defaultName || "";
-        this.defaultGroup = defaultGroup || "";
-        this.defaultURLs = defaultURLs || [];
-        this.defaultOpacity = typeof defaultOpacity == "number" ? defaultOpacity : 1;
-        this.reset();
+        this.json = (typeof json == "object" && json) ? json : {};
+        if (typeof this.json.name != "string") this.json.name = "";
+        if (typeof this.json.group != "string") this.json.group = "";
+        if (!this.json.urls || !this.json.urls.length) this.json.urls = [];
+        if (typeof this.json.opacity != "number") this.json.opacity = 1;
     }
-    
-    SERGIS_JSON_Layer.prototype.reset = function () {
-        this.json = {
-            name: this.defaultName,
-            group: this.defaultGroup,
-            urls: this.defaultURLs,
-            opacity: this.defaultOpacity
-        };
-    };
     
     SERGIS_JSON_Layer.prototype.getJSONValue = function () {
         return this.json;
     };
     
-    SERGIS_JSON_Layer.prototype.getElement = function () {
+    SERGIS_JSON_Layer.prototype.getElement = function (onchange) {
         var that = this,
             div = c("div"),
             id, inner_div, inner_span;
@@ -235,12 +225,15 @@ var AUTHOR_JSON = {
         var textfields = [
             [_("Name: "), this.json.name || "", function (event) {
                 that.json.name = this.value;
+                onchange();
             }],
             [_("Group: "), this.json.group || "", function (event) {
                 that.json.group = this.value;
+                onchange();
             }],
             [_("URL: "), this.json.urls[0] || "", function (event) {
                 that.json.urls[0] = this.value;
+                onchange();
             }]
         ];
         for (var i = 0; i < textfields.length; i++) {
@@ -279,6 +272,7 @@ var AUTHOR_JSON = {
             } else {
                 this.style.border = "";
                 that.json.opacity = num;
+                onchange();
             }
         }));
         
@@ -290,22 +284,17 @@ var AUTHOR_JSON = {
      * A SerGIS JSON Content object for some action's data.
      * @constructor
      */
-    function SERGIS_JSON_Content(label) {
+    function SERGIS_JSON_Content(label, json) {
         this.label = label;
-        this.reset();
+        this.json = (typeof json == "object" && json) ? json : {};
+        if (!this.json.type) this.json.type = "text";
     }
-    
-    SERGIS_JSON_Content.prototype.reset = function () {
-        this.json = {
-            type: "text"
-        };
-    };
     
     SERGIS_JSON_Content.prototype.getJSONValue = function () {
         return this.json;
     };
     
-    SERGIS_JSON_Content.prototype.getElement = function () {
+    SERGIS_JSON_Content.prototype.getElement = function (onchange) {
         var that = this,
             div = c("div"),
             id = "id_" + Math.random() + Math.random();
@@ -316,6 +305,7 @@ var AUTHOR_JSON = {
         }));
         var select = c("select", {}, function (event) {
             that.json.type = this.value;
+            onchange();
         });
         // Make sure default content type is first
         var defaultContentType;
@@ -339,6 +329,7 @@ var AUTHOR_JSON = {
         div.appendChild(document.createTextNode(": "));
         div.appendChild(c("input", {}, function (event) {
             that.json.value = this.value;
+            onchange();
         }));
         return div;
     };
@@ -348,44 +339,65 @@ var AUTHOR_JSON = {
      * An array of SerGIS_ArcGIS~Point objects for some action's data.
      * @constructor
      */
-    function SERGIS_JSON_PointsArray(label) {
+    function SERGIS_JSON_PointsArray(label, json) {
         this.label = label;
-        this.reset();
-    };
-    
-    SERGIS_JSON_PointsArray.prototype.reset = function () {
-        this.json = [];
-    };
+        this.json = (typeof json == "object" && json && json.length) ? json : [];
+    }
     
     SERGIS_JSON_PointsArray.prototype.getJSONValue = function () {
         return this.json;
     };
     
-    SERGIS_JSON_PointsArray.prototype.getElement = function () {
+    SERGIS_JSON_PointsArray.prototype.getElement = function (onchange) {
         var that = this,
             div = c("div"),
             id;
+        
+        return div;
     };
+    
     
     
     // Initialize the rest of AUTHOR_JSON
     
     /**
      * The Gameplay Actions in SerGIS (not frontend-specific).
-     * Each property is an array of the "data" params for the action, each
-     * represented by a SERGIS_... instance. The last element in the array can
-     * be a string whose value is "repeat", which indicates that the last
-     * parameter (before "repeat") can be repeated multiple times.
+     * Each property is a function that will return an array of SERGIS_...
+     * instances representing the "data" params for the action. If there is
+     * existing data (i.e. we're editing an action instead of creating a new
+     * one), that can be passed in as the `data` argument.
      */
     AUTHOR_JSON.actions = {
-        explain: [
-            new SERGIS_JSON_Content(_("Explanation")),
-            "repeat"
-        ],
-        "goto": [
-            new SERGIS_JSON_Number(_("Prompt Index"))
-        ],
-        logout: []
+        explain: function (data) {
+            if (!data) data = [];
+            // We need at least 1 slot
+            if (data.length < 1) data.length = 1;
+            
+            var params = [];
+            
+            // They're all SERGIS_JSON_Content objects
+            for (var i = 0; i < data.length; i++) {
+                params.push(new SERGIS_JSON_Content(_("Explanation"), data[i]));
+            }
+            
+            // We can repeat the last type
+            params.push("repeat");
+            
+            return params;
+        },
+        
+        "goto": function (data) {
+            if (!data) data = [];
+            // We need one and only one slot
+            if (data.length != 1) data.length = 1;
+            
+            return [new SERGIS_JSON_Number(_("Prompt Index"), data[0])];
+        },
+        
+        logout: function (data) {
+            // No parameters to this one
+            return [];
+        }
     };
     
     /**
@@ -395,18 +407,59 @@ var AUTHOR_JSON = {
      */
     AUTHOR_JSON.actionsByFrontend = {
         arcgis: {
-            clearGraphics: [],
-            showLayers: [
-                new SERGIS_JSON_Layer(_("Layer")),
-                "repeat"
-            ],
-            hideLayers: [
-                new SERGIS_JSON_String(_("Layer Group")),
-                "repeat"
-            ],
-            draw: [
-                new SERGIS_JSON_String(_("Object Name")),
-                new SERGIS_JSON_Dropdown(_("Type"), [
+            clearGraphics: function (data) {
+                // No parameters to this one
+                return [];
+            },
+            
+            showLayers: function (data) {
+                if (!data) data = [];
+                // We need at least one slot
+                if (data.length < 1) data.length = 1;
+                
+                var params = [];
+                
+                // They're all SERGIS_JSON_Layer objects
+                for (var i = 0; i < data.length; i++) {
+                    params.push(new SERGIS_JSON_Layer(_("Layer"), data[i]));
+                }
+                
+                // We can repeat the last type
+                params.push("repeat");
+                
+                return params;
+            },
+            
+            hideLayers: function (data) {
+                if (!data) data = [];
+                // We need at least one slot
+                if (data.length < 1) data.length = 1;
+                
+                var params = [];
+                
+                // They're all SERGIS_JSON_String objects
+                for (var i = 0; i < data.length; i++) {
+                    params.push(new SERGIS_JSON_String(_("Layer Group"), data[i]));
+                }
+                
+                // We can repeat the last type
+                params.push("repeat");
+                
+                return params;
+            },
+            
+            draw: function (data) {
+                if (!data) data = [];
+                // We need at least 4 slots
+                if (data.length < 4) data.length = 4;
+                
+                var params = [];
+                
+                // Index 0 is a SERGIS_JSON_String
+                params.push(new SERGIS_JSON_String(_("Object Name"), data[0]));
+                
+                // Index 1 is a SERGIS_JSON_Dropdown
+                params.push(new SERGIS_JSON_Dropdown(_("Type"), data[1], [
                     {
                         label: _("Point"),
                         value: "point"
@@ -419,17 +472,50 @@ var AUTHOR_JSON = {
                         label: _("Polygon"),
                         value: "polygon"
                     }
-                ]),
-                //new SERGIS_JSON_DrawStyle(_("Style")),
-                new SERGIS_JSON_PointsArray(_("Points")),
-                "repeat"
-            ],
-            buffer: [
-                new SERGIS_JSON_Number(_("Distance")),
-                new SERGIS_JSON_String(_("Distance Unit")),
-                new SERGIS_JSON_String(_("Object Name"))
-                //new SERGIS_JSON_DrawStyle(_("Style"))
-            ]
+                ]));
+                
+                // Index 2 is a SERGIS_JSON_DrawStyle
+                params.push(new SERGIS_JSON_String(_("TODO: Style"), data[2]));
+                
+                // The rest are SERGIS_JSON_PointsArray objects
+                for (var i = 3; i < data.length; i++) {
+                    params.push(new SERGIS_JSON_PointsArray(_("Points"), data[i]));
+                }
+                
+                // We can repeat the last type
+                params.push("repeat");
+                
+                return params;
+            },
+            
+            buffer: function (data) {
+                if (!data) data = [];
+                // We need 4 slots
+                if (data.length != 4) data.length = 4;
+                
+                var params = [];
+                
+                // Index 0 is a SERGIS_JSON_Number
+                params.push(new SERGIS_JSON_Number(_("Distance"), data[0]));
+                
+                // Index 1 is a SERGIS_JSON_Dropdown
+                params.push(new SERGIS_JSON_Dropdown(_("Distance Unit"), data[1], [
+                    {label: _("Feet"), value: "foot"},
+                    {label: _("Kilometers"), value: "kilometer"},
+                    {label: _("Meters"), value: "meter"},
+                    {label: _("Statute Miles"), value: "statute_mile"},
+                    {label: _("Nautical Miles"), value: "nautical_mile"},
+                    {label: _("US Nautical Miles"), value: "us_nautical_mile"}
+                ]));
+                
+                // Index 2 is a SERGIS_JSON_String
+                params.push(new SERGIS_JSON_String(_("Object Name"), data[2]));
+                
+                // Index 3 is a SERGIS_JSON_DrawStyle
+                params.push(new SERGIS_JSON_String(_("TODO: Style"), data[3]));
+                
+                return params;
+            }
         }
     };
 })();
