@@ -92,7 +92,7 @@
 </div>
 
 <div id="overlay" class="overlay_outer">
-  <table><tbody><tr><td>
+  <!-- <table><tbody><tr><td> -->
     <!-- Loading overlay -->
     <div id="overlay_loading" class="overlay_inner" style="text-align: center;">
       <!--[if lt IE 9]><p>Please upgrade to a <a href="http://whatbrowser.org/">modern browser</a>.</p><![endif]-->
@@ -130,12 +130,16 @@
     </div>
 
     <!-- Add Action overlay -->
-    <div id="overlay_addAction" class="overlay_inner" style="display: none;">
-        <h2>Add Action</h2>
-        
-        <p style="text-align: center;"><button id="overlay_addAction_cancel" class="cancel-button">Cancel</button><button id="overlay_addAction_save" class="save-button">Add</button></p>
+    <div id="overlay_actionEditor" class="overlay_inner" style="display: none;">
+      <h2>Add Action</h2>
+
+      <p style="text-align: center;"><label for="overlay_actionEditor_name">Action Name: </label><select id="overlay_actionEditor_name"></select></p>
+      <div id="overlay_actionEditor_contentContainer"></div>
+      <hr>
+
+      <p style="text-align: center;"><button id="overlay_actionEditor_cancel" class="cancel-button">Cancel</button><button id="overlay_actionEditor_save" class="save-button">Save</button></p>
     </div>
-  </td></tr></tbody></table>
+  <!-- </td></tr></tbody></table> -->
 </div>
 
 <div style="display: none;"><input id="fileinput" type="file"></div>
@@ -146,7 +150,7 @@
 <script type="text/javascript" src="javascripts/author-json.js"></script>
 <script type="text/javascript" src="javascripts/author-table.js"></script>
 <script type="text/javascript" src="javascripts/author-editor.js"></script>
-<script type="text/javascript" src="javascripts/author-editor-action.js"></script>
+<script type="text/javascript" src="javascripts/author-action-editor.js"></script>
 
 </body>
 </html>

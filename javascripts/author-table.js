@@ -265,7 +265,7 @@ var AUTHOR_TABLE = {
          */
         addAction: function (event, promptIndex, choiceIndex) {
             event.preventDefault();
-            AUTHOR_EDITOR_ACTION.addAction(promptIndex, choiceIndex);
+            AUTHOR_ACTION_EDITOR.addAction(promptIndex, choiceIndex);
         }
     };
     
