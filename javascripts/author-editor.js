@@ -6,6 +6,7 @@
     in the LICENSE.txt file.
  */
 
+// This file handles adding or editing content or choices through the Content Editor.
 // Globals: AUTHOR_EDITOR
 
 var AUTHOR_EDITOR = {

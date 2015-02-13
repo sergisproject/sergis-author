@@ -6,23 +6,67 @@
     in the LICENSE.txt file.
  */
 
+// This file handles adding or editing actions through the Action Editor.
 // Globals: AUTHOR_ACTION_EDITOR
 
 var AUTHOR_ACTION_EDITOR = {
-    /* addAction */
+    /* editAction */
 };
 
 (function () {
+    /**
+     * The current state of the action editor.
+     *
+     * @property {object} action_json - The current state of the "action" json
+     *           that we're editing.
+     * @property {number} promptIndex - The promptIndex of the prompt containing
+     *           the action that we're editing.
+     * @property {number} contentIndex - The contentIndex of the content
+     *           containing the action that we're editing.
+     * @property {number} actionIndex - The actionIndex of the action that we're
+     *           editing.
+     */
     var editor_state = {
         action_json: {},
         promptIndex: null,
-        choiceIndex: null
+        choiceIndex: null,
+        actionIndex: null
     };
+
+    /**
+     * Show a certain title for the action editor.
+     *
+     * @param {string} title - The ID of the element with the
+     *        "overlay_editor_title" class that we should show. (May include
+     *        the "overlay_actionEditor_title" at the front, but not required.)
+     */
+    function editorTitle(title) {
+        var elems = document.getElementsByClassName("overlay_actionEditor_title"), id;
+        for (var i = 0; i < elems.length; i++) {
+            id = elems[i].getAttribute("id");
+            if (id == title || id.substring(id.lastIndexOf("_") + 1) == title) {
+                elems[i].style.display = "block";
+            } else {
+                elems[i].style.display = "none";
+            }
+        }
+    }
     
     /**
-     * Add a new action.
+     * Open the editor to edit a content.
+     * @memberof AUTHOR_ACTION_EDITOR
+     *
+     * @param {number} promptIndex - The prompt index of the prompt containing
+     *        the action to edit.
+     * @param {number} choiceIndex - The choice index of the choice containing
+     *        the action to edit.
+     * @param {number} actionIndex - The action index to edit (within the
+     *        choice).
+     * @param {boolean} isAdding - Whether this actionIndex has just been added
+     *        (affects the title of the editor).
      */
-    AUTHOR_ACTION_EDITOR.addAction = function (promptIndex, choiceIndex) {
+    AUTHOR_ACTION_EDITOR.editAction = function (promptIndex, choiceIndex, actionIndex, isAdding) {
+        editorTitle(isAdding ? "addaction" : "editaction");
         overlay("overlay_actionEditor");
     };
 

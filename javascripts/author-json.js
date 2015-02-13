@@ -6,6 +6,7 @@
     in the LICENSE.txt file.
  */
 
+// This file contains all the details about the SerGIS JSON Game Data format.
 // Globals: AUTHOR_JSON
 
 var AUTHOR_JSON = {

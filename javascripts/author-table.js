@@ -6,6 +6,7 @@
     in the LICENSE.txt file.
  */
 
+// This file handles the drawing of the main table.
 // Globals: AUTHOR_TABLE
 
 var AUTHOR_TABLE = {
@@ -23,6 +24,8 @@ var AUTHOR_TABLE = {
      * @namespace
      */
     var tableEvents = {
+        ////////////////////////////////////////////////////////////////////////
+        // PROMPT EVENTS
         /**
          * Handler for the "Move Prompt Up" button.
          */
@@ -116,6 +119,8 @@ var AUTHOR_TABLE = {
         },
         
         
+        ////////////////////////////////////////////////////////////////////////
+        // CONTENT EVENTS
         /**
          * Handler for the "Add Content" button.
          */
@@ -171,6 +176,8 @@ var AUTHOR_TABLE = {
         },
         
         
+        ////////////////////////////////////////////////////////////////////////
+        // CHOICE EVENTS
         /**
          * Handler for the "Add Choice" button.
          */
@@ -260,13 +267,62 @@ var AUTHOR_TABLE = {
             generate();
         },
         
+        
+        ////////////////////////////////////////////////////////////////////////
+        // ACTION EVENTS
         /**
          * Handler for the "Add Action" button.
          */
         addAction: function (event, promptIndex, choiceIndex) {
             event.preventDefault();
-            AUTHOR_ACTION_EDITOR.addAction(promptIndex, choiceIndex);
-        }
+            AUTHOR_ACTION_EDITOR.editAction(promptIndex, choiceIndex, json.promptList[promptIndex].actionList[choiceIndex].actions.length, true);
+        },
+        
+        /**
+         * Handler for the "Move Action Up" button.
+         */
+        moveActionUp: function (event, promptIndex, choiceIndex, actionIndex) {
+            event.preventDefault();
+            if (actionIndex != 0) {
+                var olditem = json.promptList[promptIndex].actionList[choiceIndex].actions[actionIndex - 1];
+                json.promptList[promptIndex].actionList[choiceIndex].actions[actionIndex - 1] = json.promptList[promptIndex].actionList[choiceIndex].actions[actionIndex];
+                json.promptList[promptIndex].actionList[choiceIndex].actions[actionIndex] = olditem;
+            }
+            // Regenerate the table and update the save button
+            generate(true);
+        },
+        
+        /**
+         * Handler for the "Move Action Down" button.
+         */
+        moveActionDown: function (event, promptIndex, choiceIndex, actionIndex) {
+            event.preventDefault();
+            if (choiceIndex != json.promptList[promptIndex].actionList[choiceIndex].actions.length - 1) {
+                var olditem = json.promptList[promptIndex].actionList[choiceIndex].actions[actionIndex + 1];
+                json.promptList[promptIndex].actionList[choiceIndex].actions[actionIndex + 1] = json.promptList[promptIndex].actionList[choiceIndex].actions[actionIndex];
+                json.promptList[promptIndex].actionList[choiceIndex].actions[actionIndex] = olditem;
+            }
+            // Regenerate the table and update the save button
+            generate(true);
+        },
+        
+        /**
+         * Handler for the "Edit Action" button.
+         */
+        editAction: function (event, promptIndex, choiceIndex, actionIndex) {
+            event.preventDefault();
+            AUTHOR_ACTION_EDITOR.editAction(promptIndex, choiceIndex, actionIndex);
+        },
+        
+        /**
+         * Handler for the "Delete Action" button.
+         */
+        deleteAction: function (event, promptIndex, choiceIndex, actionIndex) {
+            event.preventDefault();
+            json.promptList[promptIndex].actionList[choiceIndex].actions.splice(actionIndex, 1);
+            // Regenerate the table and update the save button
+            generate(true);
+        },
     };
     
     /**
