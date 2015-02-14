@@ -83,7 +83,7 @@ var AUTHOR_JSON = {
         
         div.appendChild(c("label", {
             "for": id,
-            text: this.label + " "
+            text: this.label + ": "
         }));
         var span = c("span");
         span.appendChild(c("input", {
@@ -123,14 +123,15 @@ var AUTHOR_JSON = {
         
         div.appendChild(c("label", {
             "for": id,
-            text: this.label + " "
+            text: this.label + ": "
         }));
         div.appendChild(c("input", {
             id: id,
             type: "number",
             min: this.min || undefined,
             max: this.max || undefined,
-            step: this.step || undefined
+            step: this.step || undefined,
+            value: this.number
         }, function (event) {
             var num = Number(this.value);
             if (isNaN(num)) {
@@ -173,7 +174,7 @@ var AUTHOR_JSON = {
         
         div.appendChild(c("label", {
             "for": id,
-            text: this.label + " "
+            text: this.label + ": "
         }));
         var select = c("select", {
             id: id
@@ -217,21 +218,21 @@ var AUTHOR_JSON = {
         
         inner_div = c("div");
         inner_div.appendChild(c("b", {
-            text: this.label + " "
+            text: this.label
         }));
         div.appendChild(inner_div);
         
         // Each item is an array: [label, value, change event handler]
         var textfields = [
-            [_("Name: "), this.json.name || "", function (event) {
+            [_("Name"), this.json.name || "", function (event) {
                 that.json.name = this.value;
                 onchange();
             }],
-            [_("Group: "), this.json.group || "", function (event) {
+            [_("Group"), this.json.group || "", function (event) {
                 that.json.group = this.value;
                 onchange();
             }],
-            [_("URL: "), this.json.urls[0] || "", function (event) {
+            [_("URL"), this.json.urls[0] || "", function (event) {
                 that.json.urls[0] = this.value;
                 onchange();
             }]
@@ -241,7 +242,7 @@ var AUTHOR_JSON = {
             inner_div = c("div", {className: "inputcontainer"});
             inner_div.appendChild(c("label", {
                 "for": id,
-                text: textfields[i][0]
+                text: textfields[i][0] + ": "
             }));
             inner_span = c("span");
             inner_span.appendChild(c("input", {
@@ -256,7 +257,7 @@ var AUTHOR_JSON = {
         id = "id_" + Math.random();
         div.appendChild(c("label", {
             "for": id,
-            text: _("Opacity: ")
+            text: _("Opacity") + ": "
         }));
         div.appendChild(c("input", {
             id: id,
@@ -287,7 +288,8 @@ var AUTHOR_JSON = {
     function SERGIS_JSON_Content(label, json) {
         this.label = label;
         this.json = (typeof json == "object" && json) ? json : {};
-        if (!this.json.type) this.json.type = "text";
+        if (!this.json.type) this.json.type = AUTHOR_JSON.defaultContentType;
+        if (typeof this.json.value != "string") this.json.value = "";
     }
     
     SERGIS_JSON_Content.prototype.getJSONValue = function () {
@@ -296,13 +298,14 @@ var AUTHOR_JSON = {
     
     SERGIS_JSON_Content.prototype.getElement = function (onchange) {
         var that = this,
-            div = c("div"),
-            id = "id_" + Math.random() + Math.random();
+            div = c("div", {
+                className: "inputcontainer"
+            });
         
         div.appendChild(c("label", {
-            "for": id,
-            text: this.label + " "
+            text: this.label + ": "
         }));
+        
         var select = c("select", {}, function (event) {
             that.json.type = this.value;
             onchange();
@@ -313,7 +316,8 @@ var AUTHOR_JSON = {
             defaultContentType = AUTHOR_JSON.defaultContentType;
             select.appendChild(c("option", {
                 value: defaultContentType,
-                text: AUTHOR_JSON.contentTypes[defaultContentType].name
+                text: AUTHOR_JSON.contentTypes[defaultContentType].name,
+                selected: this.json.type == defaultContentType ? "selected" : undefined
             }));
         }
         // Make the rest of the content types
@@ -321,16 +325,28 @@ var AUTHOR_JSON = {
             if (AUTHOR_JSON.contentTypes.hasOwnProperty(type) && type != defaultContentType) {
                 select.appendChild(c("option", {
                     value: type,
-                    text: AUTHOR_JSON.contentTypes[type].name
+                    text: AUTHOR_JSON.contentTypes[type].name,
+                    selected: this.json.type == type ? "selected" : undefined
                 }));
             }
         }
-        div.appendChild(select);
-        div.appendChild(document.createTextNode(": "));
-        div.appendChild(c("input", {}, function (event) {
+        
+        var span = c("span", {
+            className: "label"
+        });
+        span.appendChild(select);
+        span.appendChild(document.createTextNode(": "));
+        div.appendChild(span);
+        
+        span = c("span");
+        span.appendChild(c("input", {
+            value: this.json.value || undefined
+        }, function (event) {
             that.json.value = this.value;
             onchange();
         }));
+        div.appendChild(span);
+        
         return div;
     };
     

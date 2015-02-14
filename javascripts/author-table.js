@@ -325,6 +325,7 @@ var AUTHOR_TABLE = {
         },
     };
     
+    
     /**
      * Make the prompt table.
      */
@@ -363,7 +364,7 @@ var AUTHOR_TABLE = {
     };
     
     /**
-     * Make a row for generateTable.
+     * Make a row for initTable.
      */
     function generateTableRow(tbody, promptIndex) {
         var tr, td, div;
@@ -668,39 +669,69 @@ var AUTHOR_TABLE = {
             className: "row_action"
         });
         if (action.actions.length > 0) {
-            ul = c("ul", {
-                className: "row_action_ul"
-            });
             for (i = 0; i < action.actions.length; i++) {
-                li = c("li", {
-                    className: "row_action_li"
+                div = c("div", {
+                    className: "row_action_div minirow"
                 });
+                
+                // Make "Edit Action" and "Delete Action" buttons
+                div.appendChild(c("a", {
+                    className: "row_action_delete icon icon_delete",
+                    href: "#",
+                    text: " ",
+                    title: _("Delete Action"),
+                    tabindex: tabindex + 4
+                }, tableEvents.deleteAction, promptIndex, choiceIndex, i));
+                div.appendChild(c("a", {
+                    className: "row_action_edit icon icon_edit",
+                    href: "#",
+                    text: " ",
+                    title: _("Edit Action"),
+                    tabindex: tabindex + 3
+                }, tableEvents.editAction, promptIndex, choiceIndex, i));
+                
+                // Make "Move Action Up/Down" buttons
+                div.appendChild(c("a", {
+                    className: "row_action_up icon icon_up" + (i == 0 ? " invisible" : ""),
+                    href: "#",
+                    text: " ",
+                    title: _("Move Action Up"),
+                    tabindex: tabindex + 1
+                }, tableEvents.moveActionUp, promptIndex, choiceIndex, i));
+                div.appendChild(c("a", {
+                    className: "row_action_down icon icon_down" + (i == action.actions.length - 1 ? " invisible" : ""),
+                    href: "#",
+                    text: " ",
+                    title: _("Move Action Down"),
+                    tabindex: tabindex + 2
+                }, tableEvents.moveActionDown, promptIndex, choiceIndex, i));
+                tabindex += 4;
+                
                 if (action.actions[i].frontend) {
-                    li.appendChild(c("span", {
+                    div.appendChild(c("span", {
                         className: "row_action_frontend",
                         text: action.actions[i].frontend + ": ",
                         title: _("Action Frontend")
                     }));
                 }
-                li.appendChild(c("b", {
+                div.appendChild(c("b", {
                     className: "row_action_name",
                     text: action.actions[i].name,
                     title: _("Action Name")
                 }));
                 if (action.actions[i].data.length > 0) {
-                    li.appendChild(c("span", {
+                    div.appendChild(c("span", {
                         className: "row_action_data_barrier",
                         text: ": "
                     }));
-                    li.appendChild(c("code", {
+                    div.appendChild(c("code", {
                         className: "row_action_data short",
                         text: JSON.stringify(action.actions[i].data),
                         title: JSON.stringify(action.actions[i].data)
                     }));
                 }
-                ul.appendChild(li);
+                td.appendChild(div);
             }
-            td.appendChild(ul);
         } else {
             td.appendChild(c("span", {
                 className: "row_action_noActions",

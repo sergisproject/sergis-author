@@ -45,7 +45,7 @@ a.icon_up {
   position: relative;
 }
 
-.row_content a.icon_up {
+.row_content a.icon_up, .row_action a.icon_up {
   left: -16px;
   bottom: 6px;
 }
@@ -63,7 +63,7 @@ a.icon_down {
   left: -24px;
 }
 
-.row_content a.icon_down {
+.row_content a.icon_down, .row_action a.icon_down {
   left: -40px;
   top: 16px;
 }
@@ -73,7 +73,7 @@ a.icon_down {
   top: 12px;
 }
 
-.row_content_text {
+.row_content_text, .row_action_div {
   text-indent: -36px;
 }
 
@@ -81,7 +81,8 @@ a.icon_down {
   text-indent: -30px;
 }
 
-.row_content_text code, .row_choice > div.row code {
+.row_content_text code, .row_choice > div.row code,
+.row_action_div code {
   text-indent: 0;
 }
 
@@ -95,7 +96,7 @@ a.icon_down {
 
 code {
   display: inline-block;
-  max-width: 200px;
+  max-width: 230px;
   max-height: 10ex;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -120,6 +121,7 @@ code.short {
 
 /* .inputcontainer is used to make a text input take up the rest of the width:
  * <div class="inputcontainer"><label></label><span><input></span></div>
+ * <div class="inputcontainer"><span class="label"></span><span><input></span></div>
  */
 
 .inputcontainer {
@@ -127,13 +129,17 @@ code.short {
   width: 100%;
 }
 
-.inputcontainer label {
+.inputcontainer label, .inputcontainer span.label {
   display: table-cell;
   width: 1px;
   white-space: nowrap;
 }
 
-.inputcontainer span {
+.inputcontainer label:not(:first-child), .inputcontainer span.label:not(:first-child) {
+  padding-left: 5px;
+}
+
+.inputcontainer span:not(.label) {
   display: table-cell;
   padding: 0 0 0 5px
 }
@@ -340,7 +346,7 @@ tr.toprow td {
 }
 
 table .minirow {
-  border-top: 1px solid #373737;
+  border-top: 1px solid #D2D2D2;
   padding: 8px;
 }
 
