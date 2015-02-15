@@ -79,7 +79,7 @@ var AUTHOR_JSON = {
     SERGIS_JSON_String.prototype.getElement = function (onchange) {
         var that = this,
             div = c("div", {className: "inputcontainer"}),
-            id = "id_" + Math.random() + Math.random();
+            id = "id_" + randID();
         
         div.appendChild(c("label", {
             "for": id,
@@ -119,7 +119,7 @@ var AUTHOR_JSON = {
     SERGIS_JSON_Number.prototype.getElement = function (onchange) {
         var that = this,
             div = c("div"),
-            id = "id_" + Math.random() + Math.random();
+            id = "id_" + randID();
         
         div.appendChild(c("label", {
             "for": id,
@@ -170,7 +170,7 @@ var AUTHOR_JSON = {
     SERGIS_JSON_Dropdown.prototype.getElement = function (onchange) {
         var that = this,
             div = c("div"),
-            id = "id_" + Math.random() + Math.random();
+            id = "id_" + randID();
         
         div.appendChild(c("label", {
             "for": id,
@@ -238,7 +238,7 @@ var AUTHOR_JSON = {
             }]
         ];
         for (var i = 0; i < textfields.length; i++) {
-            id = "id_" + Math.random();
+            id = "id_" + randID();
             inner_div = c("div", {className: "inputcontainer"});
             inner_div.appendChild(c("label", {
                 "for": id,
@@ -254,7 +254,7 @@ var AUTHOR_JSON = {
         }
         
         // Opacity
-        id = "id_" + Math.random();
+        id = "id_" + randID();
         div.appendChild(c("label", {
             "for": id,
             text: _("Opacity") + ": "

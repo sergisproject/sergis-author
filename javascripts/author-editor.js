@@ -154,7 +154,7 @@ var AUTHOR_EDITOR = {
             value = typeof editor_state.content_json[property] != "undefined" ? editor_state.content_json[property] : fields[i][3];
             
             p = c("p");
-            id = "id_contenteditor_" + Math.random();
+            id = "id_contenteditor_" + randID();
             // Create the field editor based on its type
             if (type == "boolean") {
                 // Boolean type (checkbox)

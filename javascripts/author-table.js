@@ -445,7 +445,7 @@ var AUTHOR_TABLE = {
             tr_inner, td_inner;
         for (i = 0; i < mapstuff.length; i++) {
             tr_inner = c("tr");
-            id = "row_map_" + mapstuff[i][0] + "_" + Math.random();
+            id = "row_map_" + mapstuff[i][0] + "_" + randID();
             td_inner = c("td");
             td_inner.appendChild(c("label", {
                 text: mapstuff[i][1] + " ",
@@ -553,7 +553,7 @@ var AUTHOR_TABLE = {
         // Make "Randomize Choices" input checkbox
         div = c("div");
         div.style.cssFloat = "right";
-        id = "row_randomizeChoices_cbox_" + Math.random();
+        id = "row_randomizeChoices_cbox_" + randID();
         div.appendChild(c("input", {
             className: "row_randomizeChoices_cbox",
             type: "checkbox",
@@ -649,7 +649,7 @@ var AUTHOR_TABLE = {
         td.appendChild(div);
         
         // Make "Point Value" input
-        id = "row_choice_pointValue_" + Math.random();
+        id = "row_choice_pointValue_" + randID();
         div = c("div");
         div.style.clear = "both";
         div.appendChild(c("label", {
