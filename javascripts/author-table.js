@@ -817,5 +817,4 @@ var AUTHOR_TABLE = {
         }, false);
         checkScroll();
     }, false);
-    // NOTE: author-main.js and author-editor.js also have "window load" event listeners.
 })();

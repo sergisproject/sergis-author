@@ -6,13 +6,14 @@
     in the LICENSE.txt file.
 */
 
-// Globals: json, overlay, c, selectAll, checkJSON, swapGotos, decrementGotos, generate, readJSONFile
+// Globals: json, randInt, randID, overlay, c, selectAll, checkJSON, swapGotos, decrementGotos, generate, makeLabel, loadJSON, readJSONFile
 
 /**
  * The current state of the SerGIS JSON Game Data that we're working on.
  */
 var json = {
     // Metadata:
+    id: "",
     name: "",
     author: "",
     generator: "",
@@ -27,6 +28,22 @@ var json = {
     showActionsInUserOrder: false,
     promptList: [{}]
 };
+
+/**
+ * Make a quick and dirty random integer.
+ *
+ * @param {number} d - The number of digits in the number.
+ */
+function randInt(d) {
+    return Math.floor((Math.random() * 9 + 1) * Math.pow(10, d-1));
+}
+
+/**
+ * Make a unique random ID.
+ */
+function randID() {
+    return Number(randInt(10) + "" + (new Date()).getTime() + "" + randInt(10)).toString(36);
+}
 
 /**
  * Show/hide a big overlay (see #overlay in index.html).
@@ -128,6 +145,9 @@ function selectAll(elem) {
  */
 function checkJSON() {
     var i, item, j, k;
+    
+    // Check "id"
+    if (!json.id) json.id = randID();
     
     // Check "name"
     if (!json.name) {
@@ -306,39 +326,87 @@ function decrementGotos(leastIndex) {
  * table.
  *
  * @param {boolean} [updateTable] - Whether to update the table.
+ * @param {boolean} [dontSave] - Whether to skip saving as a recent file
+ *                  (i.e. if there's no actual data yet).
  */
-function generate(updateTable) {
+function generate(updateTable, dontSave) {
     // Make sure our data is good
     checkJSON();
-    // And our save button
+    
+    // Update our save button
     var a = document.getElementById("downloads_save");
-    a.setAttribute("download", json.name + " " + icu.getDateFormat("SHORT").format(json.modified) + ".json");
-    a.setAttribute("href", "data:application/json;base64," + btoa(JSON.stringify(json, null, 2)));
+    a.setAttribute("download", makeLabel() + ".json");
+    var jsonString = JSON.stringify(json, function (key, value) {
+        return key == "id" ? undefined : value;
+    }, 2);
+    a.setAttribute("href", "data:application/json;base64," + btoa(jsonString));
+    
+    // Save as a recent file
+    if (!dontSave) AUTHOR_RECENT.saveRecentFile();
+    
     // And, update the table (if needed)
     if (updateTable) AUTHOR_TABLE.initTable();
 }
 
 /**
- * Update the "Recent Files" dropdown.
+ * Make a label for some JSON data.
  *
- * @return {boolean} True if there are recent files, false otherwise.
+ * @param {object} [data] - The JSON data to use (if not the global `json`).
+ *
+ * @return {string} The label for the JSON data.
  */
-function updateRecentFiles() {
-    var recent = window.localStorage && window.localStorage.getItem("recent_files");
-    if (recent) {
-        try {
-            recent = JSON.parse(recent);
-        } catch (err) {
-            recent = null;
-        }
+function makeLabel(data) {
+    if (!data) data = json;
+    var label = "";
+    
+    if (data.name) {
+        label += data.name + " - ";
     }
-    if (recent) {
-        // TODO...
-        //return true;
-        return false;
+    if (data.author) {
+        label += data.name + " - ";
+    }
+    if (!data.name && !data.author) {
+        label += data.id;
+    }
+    
+    // Make decently not ugly date
+    var modified = new Date(data.modified),
+        today = new Date();
+    if (modified.getFullYear() != today.getFullYear()) {
+        label += icu.getDateFormat("SHORT").format(json.modified)
+    } else if (modified.getMonth() != today.getMonth() || modified.getDate() != today.getDate()) {
+        label += icu.getDateFormat("SHORT_NOYEAR").format(modified);
     } else {
-        return false;
+        label += modified.getHours() + ":" + ("0" + modified.getMinutes()).substr(-2);
     }
+    
+    return label;
+}
+
+/**
+ * Update the page based on new JSON data.
+ */
+function loadJSON() {
+    // Hide instructions and "Loaded from"
+    document.getElementById("instructions").style.display = "none";
+    document.getElementById("loadedFrom").style.display = "none";
+    
+    // Check the JSON
+    checkJSON();
+    
+    // Set the values for the General Properties
+    document.getElementById("general_name").value = json.name || "";
+    document.getElementById("general_author").value = json.author || "";
+    document.getElementById("general_jumpingBackAllowed").checked = !!json.jumpingBackAllowed;
+    document.getElementById("general_onJumpBack").value = json.onJumpBack;
+    document.getElementById("general_jumpingForwardAllowed").checked = !!json.jumpingForwardAllowed;
+    document.getElementById("general_showActionsInUserOrder").checked = !!json.showActionsInUserOrder;
+    
+    // Regenerate the table and update the save button
+    generate(true);
+    
+    // Scroll up to the top of the page
+    window.scrollTo(0, 0);
 }
 
 /**
@@ -360,33 +428,19 @@ function readJSONFile(file) {
                 if (filename.substring(filename.length - 5) == ".json") {
                     filename = filename.substring(0, filename.length - 5);
                 }
-                // Hide instructions; show "Loaded from filename.json"
-                document.getElementById("instructions").style.display = "none";
-                if (filename) {
-                    document.getElementById("loadedFrom_filename").textContent = filename + ".json";
-                    document.getElementById("loadedFrom").style.display = "block";
-                }
                 
                 // Store the new JSON
                 json = result;
                 // Make sure it has a name
                 if (!json.name && filename) json.name = filename;
-                // Check the new JSON
-                checkJSON();
+                // Load the new JSON
+                loadJSON();
                 
-                // Set the values for the General Properties
-                document.getElementById("general_name").value = json.name || "";
-                document.getElementById("general_author").value = json.author || "";
-                document.getElementById("general_jumpingBackAllowed").checked = !!json.jumpingBackAllowed;
-                document.getElementById("general_onJumpBack").value = json.onJumpBack;
-                document.getElementById("general_jumpingForwardAllowed").checked = !!json.jumpingForwardAllowed;
-                document.getElementById("general_showActionsInUserOrder").checked = !!json.showActionsInUserOrder;
-                
-                // Regenerate the table and update the save button
-                generate(true);
-                
-                // Scroll up to the top of the page
-                window.scrollTo(0, 0);
+                // Show "Loaded from filename.json"
+                if (filename) {
+                    document.getElementById("loadedFrom_filename").textContent = filename + ".json";
+                    document.getElementById("loadedFrom").style.display = "block";
+                }
             } else {
                 alert(_("Error reading file!\nDetails: Could not parse JSON."));
             }
@@ -445,11 +499,6 @@ function readJSONFile(file) {
                     event.preventDefault();
                 }, false);
             }
-        }
-        
-        // "Recent Files" button (if supported and available)
-        if (updateRecentFiles()) {
-            document.getElementById("instructions_recent").style.display = "block";
         }
         
         // "Add Prompt" button
@@ -524,12 +573,11 @@ function readJSONFile(file) {
         }, false);
         
         // Make our JSON defaults and generate the default table
-        generate(true);
+        generate(true, true);
         
         // Get rid of loading sign
         overlay();
     }
 
     window.addEventListener("load", init, false);
-    // NOTE: author-table.js, author-editor.js, and author-editor-action.js also have "window load" event listeners.
 })();
