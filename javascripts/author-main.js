@@ -64,7 +64,9 @@ function overlay(overlayID) {
         }
     }
     // Show/hide overlay container
-    document.getElementById("overlay").style.display = overlayShown > -1 ? "flex" : "none";
+    var className = (" " + document.getElementById("overlay").className + " ").replace(/ hidden /g, " ");
+    if (overlayShown == -1) className += " hidden";
+    document.getElementById("overlay").className = className;
     if (overlayShown > -1) overlays[overlayShown].scrollTop = 0;
 }
 
