@@ -13,9 +13,13 @@ var AUTHOR_JSON = {
     /**
      * Reference for the SerGIS JSON Content Object types used by "Edit
      * Content" and "Edit Choices".
-     * Each property is an array of the options that that content type takes.
-     * Each array item is another array:
+     *
+     * Each `fields` property is an array of the options that that content type
+     * takes. Each array item is another array:
      *     [JSON property, display name, type, default value]
+     *
+     * Each content type also has a "toHTML" that is passed an object of this
+     * content type and should return a simple rendering of the content.
      */
     contentTypes: {
         "text": {
@@ -24,14 +28,31 @@ var AUTHOR_JSON = {
                 ["value", _("Text Content:"), "string_multiline"],
                 ["centered", _("Center Text"), "boolean", false],
                 ["style", _("CSS style:"), "string"]
-            ]
+            ],
+            toHTML: function (content) {
+                var span = c("span");
+                span.appendChild(c("span", {
+                    text: content.value || "",
+                    style: content.style || undefined
+                }));
+                console.log(span.innerHTML);
+                return span.innerHTML;
+            }
         },
         "html": {
             name: _("HTML"),
             fields: [
                 ["value", _("HTML Content:"), "string_multiline"],
                 ["style", _("CSS style:"), "string"]
-            ]
+            ],
+            toHTML: function (content) {
+                var span = c("span");
+                span.appendChild(c("span", {
+                    html: content.value || "",
+                    style: content.style || undefined
+                }));
+                return span.innerHTML;
+            }
         },
         "image": {
             name: _("Image"),
@@ -39,7 +60,15 @@ var AUTHOR_JSON = {
                 ["value", _("URL of Image:"), "string"],
                 ["centered", _("Center Image"), "boolean", true],
                 ["style", _("CSS style:"), "string"]
-            ]
+            ],
+            toHTML: function (content) {
+                var span = c("span");
+                span.appendChild(c("img", {
+                    src: content.value || "",
+                    style: content.style || undefined
+                }));
+                return span.innerHTML;
+            }
         },
         "youtube": {
             name: _("YouTube Video"),
@@ -49,8 +78,19 @@ var AUTHOR_JSON = {
                 ["height", _("Video Height:"), "number", 300],
                 ["centered", _("Center Video"), "boolean", true],
                 ["style", _("CSS style:"), "string"]
-                // NOT SUPPORTED: playerVars
-            ]
+                // TODO: NOT SUPPORTED: playerVars
+            ],
+            toHTML: function (content) {
+                var span = c("span", {
+                    text: _("YouTube Video") + ": "
+                });
+                span.appendChild(c("a", {
+                    href: "http://www.youtube.com/watch?v=" + encodeURIComponent(content.value),
+                    text: content.value,
+                    target: "_blank"
+                }));
+                return span.innerHTML;
+            }
         }
     },
     
@@ -62,8 +102,17 @@ var AUTHOR_JSON = {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// And, the rest is all for defining actions and their data.
+// And, the rest is all for defining the remaining properties of AUTHOR_JSON.
 (function () {
+    /*
+    What follows here is a lot of constructors for SERGIS_JSON_... objects.
+    These represent data fields for actions and frontend info.
+    The usage of these constructors and classes can be seen below, where
+    "AUTHOR_JSON.actions", "AUTHOR_JSON.actionsByFrontend", and
+    "AUTHOR_JSON.frontendInfo" are defined.
+    */
+    
+    
     /**
      * A string for some action's data.
      * @constructor
@@ -197,6 +246,7 @@ var AUTHOR_JSON = {
     
     /**
      * A SerGIS_ArcGIS~Layer object for some action's data.
+     * @see https://github.com/sergisproject/sergis-client/blob/master/lib/frontends/arcgis.js
      * @constructor
      */
     function SERGIS_JSON_Layer(label, json) {
@@ -354,6 +404,7 @@ var AUTHOR_JSON = {
     
     /**
      * An array of SerGIS_ArcGIS~Point objects for some action's data.
+     * @see https://github.com/sergisproject/sergis-client/blob/master/lib/frontends/arcgis.js
      * @constructor
      */
     function SERGIS_JSON_PointsArray(label, json) {
@@ -423,6 +474,9 @@ var AUTHOR_JSON = {
      * follows the same format as AUTHOR_JSON.actions.
      */
     AUTHOR_JSON.actionsByFrontend = {
+        /**
+         * @see https://github.com/sergisproject/sergis-client/blob/master/lib/frontends/arcgis.js
+         */
         arcgis: {
             clearGraphics: function (data) {
                 // No parameters to this one
@@ -538,7 +592,7 @@ var AUTHOR_JSON = {
     
     /**
      * The Frontend Info for a SerGIS Prompt.
-     * Property names are the frontends. Values are another object:
+     * Property names are the frontends. Values are another object, where...
      *     Property names are frontend info properties;
      *     values are functions that are passed the current value and return an
      *     array of SerGIS_... instances (or just one SerGIS_... instance).

@@ -77,7 +77,8 @@ function overlay(overlayID) {
  * @param {Object.<string, string>} [attributes] - Any DOM attributes for the
  *        element. Also can include some special properties:
  *        "class" or "className" --> CSS class(es) for the element,
- *        "text" or "textContent" --> Text content for the element
+ *        "text" or "textContent" --> Text content for the element,
+ *        "html" or "innerHTML" --> HTML content for the element
  * @param {Function} [event] - A function to call when there is either a
  *        "change" event on the element (in the case of <input>, <select>, and
  *        <textarea>) or a "click" event (in any other case).
@@ -100,6 +101,8 @@ function c(elem, attributes, event /*, [parameter, [parameter, [...]]] */) {
                     elem.className = attributes[prop];
                 } else if (prop == "textContent" || prop == "text") {
                     elem.appendChild(document.createTextNode(attributes[prop]));
+                } else if (prop == "html" || prop == "innerHTML") {
+                    elem.innerHTML = attributes[prop];
                 } else {
                     elem.setAttribute(prop, "" + attributes[prop]);
                 }

@@ -9,7 +9,6 @@ by Jason Costello, @jsncostello
 @import url(pygment_trac.css);
 
 a.icon {
-  display: inline-block;
   width: 20px;
   height: 20px;
   border: 1px solid #373737;
@@ -19,8 +18,12 @@ a.icon {
   background-repeat: no-repeat;
   background-position: 50% 50%;
   color: #222;
-  float: right;
+  display: inline-block;
   margin: 2px;
+}
+
+a.icon.side {
+  float: right;
 }
 
 a.icon:hover {
@@ -40,39 +43,46 @@ a.icon_delete {
 a.icon_up {
   /* http://www.iconarchive.com/show/flatastic-1-icons-by-custom-icon-design/up-icon.html */
   background-image: url(../images/up-icon.png);
+}
+
+a.icon_up.side {
   float: left;
   bottom: 10px;
   position: relative;
 }
 
-.row_content a.icon_up, .row_action a.icon_up {
+.row_content a.icon_up.side, .row_action a.icon_up.side {
   left: -16px;
   bottom: 6px;
 }
 
-.row_choice a.icon_up {
+.row_choice a.icon_up.side {
   left: -10px;
 }
 
 a.icon_down {
   /* http://www.iconarchive.com/show/flatastic-1-icons-by-custom-icon-design/down-icon.html */
   background-image: url(../images/down-icon.png);
+}
+
+a.icon_down.side {
   float: left;
   position: relative;
   top: 12px;
   left: -24px;
 }
 
-.row_content a.icon_down, .row_action a.icon_down {
+.row_content a.icon_down.side, .row_action a.icon_down.side {
   left: -40px;
   top: 16px;
 }
 
-.row_choice a.icon_down {
+.row_choice a.icon_down.side {
   left: -34px;
   top: 12px;
 }
 
+/*
 .row_content_text, .row_action_div {
   text-indent: -36px;
 }
@@ -81,10 +91,11 @@ a.icon_down {
   text-indent: -30px;
 }
 
-.row_content_text code, .row_choice > div.row code,
-.row_action_div code {
+.row_content_text code,     .row_choice > div.row code,     .row_action_div code,
+.row_content_text span.box, .row_choice > div.row span.box, .row_action_div span.box{
   text-indent: 0;
 }
+*/
 
 .row_title {
   padding-top: 30px;
@@ -94,13 +105,20 @@ a.icon_down {
   margin-left: -20px;
 }
 
-code {
+code, span.box {
   display: inline-block;
   max-width: 230px;
-  max-height: 12ex;
   overflow: hidden;
   text-overflow: ellipsis;
   word-wrap: break-word;
+}
+
+span.box img {
+  max-width: 100%;
+}
+
+code {
+  max-height: 12ex;
 }
 
 code.short {
@@ -109,6 +127,16 @@ code.short {
 
 .invisible {
   visibility: hidden;
+}
+
+.icon-row {
+  text-align: center;
+}
+
+.icon-row .invisible {
+  /* display: none; */
+  /* This was originally to override the "visibility: hidden" above, but I kinda
+     like the way it looks with the blank space. */
 }
 
 .cancel-button, .save-button {
@@ -256,12 +284,11 @@ p img {
   border: none;
 }
 
-pre, code {
-  width: 100%;
+pre, code, span.box {
   color: #222;
   background-color: #fff;
 
-  font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
+  width: 100%;
   font-size: 14px;
 
   border-radius: 2px;
@@ -271,12 +298,16 @@ pre, code {
   box-shadow: 0 0 10px rgba(0,0,0,.1);
 }
 
+pre, code {
+  font-family: Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
+}
+
 pre {
   padding: 10px;
   overflow: auto;
 }
 
-code {
+code, span.box {
   padding: 3px;
   margin: 0 3px;
 }
@@ -596,7 +627,7 @@ table button, table label, table input, table select, table .minirow, table .row
     font-size: 12px;
   }
 
-  code, pre {
+  code, pre, span.box {
     min-width: 320px;
     max-width: 480px;
     font-size: 11px;

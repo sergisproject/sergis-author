@@ -365,9 +365,14 @@ var AUTHOR_TABLE = {
     
     /**
      * Make a row for initTable.
+     *
+     * @param {Element} tbody - The tbody that we're working with (that we
+     *        should append the new row(s) to).
+     * @param {number} promptIndex - The promptIndex of the prompt to add to the
+     *        table.
      */
     function generateTableRow(tbody, promptIndex) {
-        var tr, td, div;
+        var tr, td, div, iconRow;
         var i, id;
         var prompt = json.promptList[promptIndex].prompt;
         
@@ -389,14 +394,14 @@ var AUTHOR_TABLE = {
         
         // Make "Move Prompt Up/Down" buttons
         div.appendChild(c("a", {
-            className: "row_title_buttons_up icon icon_up" + (promptIndex == 0 ? " invisible" : ""),
+            className: "row_title_buttons_up icon side icon_up" + (promptIndex == 0 ? " invisible" : ""),
             href: "#",
             text: " ",
             title: _("Move Prompt Up"),
             tabindex: ++tabindex
         }, tableEvents.moveUp, promptIndex));
         div.appendChild(c("a", {
-            className: "row_title_buttons_down icon icon_down" + (promptIndex == json.promptList.length - 1 ? " invisible" : ""),
+            className: "row_title_buttons_down icon side icon_down" + (promptIndex == json.promptList.length - 1 ? " invisible" : ""),
             href: "#",
             text: " ",
             title: _("Move Prompt Down"),
@@ -406,7 +411,7 @@ var AUTHOR_TABLE = {
         
         // Make "Delete Prompt" button
         td.appendChild(c("a", {
-            className: "row_title_delete icon icon_delete",
+            className: "row_title_delete icon side icon_delete",
             href: "#",
             text: " ",
             title: _("Delete Prompt"),
@@ -491,15 +496,19 @@ var AUTHOR_TABLE = {
                 className: "row_content_text minirow"
             });
             
+            // Make icons/buttons
+            iconRow = c("div", {
+                className: "icon-row"
+            });
             // Make "Move Content Up/Down" buttons
-            div.appendChild(c("a", {
+            iconRow.appendChild(c("a", {
                 className: "row_content_up icon icon_up" + (i == 0 ? " invisible" : ""),
                 href: "#",
                 text: " ",
                 title: _("Move Content Up"),
                 tabindex: ++tabindex
             }, tableEvents.moveContentUp, promptIndex, i));
-            div.appendChild(c("a", {
+            iconRow.appendChild(c("a", {
                 className: "row_content_down icon icon_down" + (i == prompt.contents.length - 1 ? " invisible" : ""),
                 href: "#",
                 text: " ",
@@ -508,28 +517,27 @@ var AUTHOR_TABLE = {
             }, tableEvents.moveContentDown, promptIndex, i));
             
             // Make "Edit Content" and "Delete Content" buttons
-            div.appendChild(c("a", {
-                className: "row_content_delete icon icon_delete",
-                href: "#",
-                text: " ",
-                title: _("Delete Content"),
-                tabindex: ++tabindex + 1,
-            }, tableEvents.deleteContent, promptIndex, i));
-            div.appendChild(c("a", {
+            iconRow.appendChild(c("a", {
                 className: "row_content_edit icon icon_edit",
                 href: "#",
                 text: " ",
                 title: _("Edit Content"),
-                tabindex: tabindex,
+                tabindex: ++tabindex,
             }, tableEvents.editContent, promptIndex, i));
+            iconRow.appendChild(c("a", {
+                className: "row_content_delete icon icon_delete",
+                href: "#",
+                text: " ",
+                title: _("Delete Content"),
+                tabindex: ++tabindex,
+            }, tableEvents.deleteContent, promptIndex, i));
+            
+            div.appendChild(iconRow);
             
             // Show the actual content
-            div.appendChild(c("b", {
-                text: AUTHOR_JSON.contentTypes[prompt.contents[i].type].name
-            }));
-            div.appendChild(document.createTextNode(": "));
-            div.appendChild(c("code", {
-                text: prompt.contents[i].value,
+            div.appendChild(c("span", {
+                className: "box",
+                html: AUTHOR_JSON.contentTypes[prompt.contents[i].type].toHTML(prompt.contents[i]),
                 title: prompt.contents[i].value
             }));
             td.appendChild(div);
@@ -584,9 +592,16 @@ var AUTHOR_TABLE = {
     
     /**
      * Make the "choices" and "actions" rows columns for generateTableRow.
+     *
+     * @param {Element} tbody - The tbody that we're working with (that we
+     *        should append the new row(s) to).
+     * @param {number} promptIndex - The promptIndex of the prompt that we're in
+     *        the process of adding to the table.
+     * @param {number} choiceIndex - The choiceIndex of the choice within the
+     *        current prompt that we're adding to the table.
      */
     function generateTableChoice(tbody, promptIndex, choiceIndex) {
-        var tr, td, div, ul, li;
+        var tr, td, div, ul, li, iconRow;
         var i, id;
         var prompt = json.promptList[promptIndex].prompt,
             choice = prompt.choices[choiceIndex],
@@ -603,47 +618,49 @@ var AUTHOR_TABLE = {
             className: "row"
         });
         
-        // Make "Edit Choice" and "Delete Choice" buttons
-        div.appendChild(c("a", {
-            className: "row_choice_delete icon icon_delete",
-            href: "#",
-            text: " ",
-            title: _("Delete Choice"),
-            tabindex: tabindex + 4
-        }, tableEvents.deleteChoice, promptIndex, choiceIndex));
-        div.appendChild(c("a", {
-            className: "row_choice_edit icon icon_edit",
-            href: "#",
-            text: " ",
-            title: _("Edit Choice"),
-            tabindex: tabindex + 3
-        }, tableEvents.editChoice, promptIndex, choiceIndex));
+        // Make icons/buttons
+        iconRow = c("div", {
+            className: "icon-row"
+        });
         
         // Make "Move Choice Up/Down" buttons
-        div.appendChild(c("a", {
+        iconRow.appendChild(c("a", {
             className: "row_choice_up icon icon_up" + (choiceIndex == 0 ? " invisible" : ""),
             href: "#",
             text: " ",
             title: _("Move Choice Up"),
-            tabindex: tabindex + 1
+            tabindex: ++tabindex
         }, tableEvents.moveChoiceUp, promptIndex, choiceIndex));
-        div.appendChild(c("a", {
+        iconRow.appendChild(c("a", {
             className: "row_choice_down icon icon_down" + (choiceIndex == prompt.choices.length - 1 ? " invisible" : ""),
             href: "#",
             text: " ",
             title: _("Move Choice Down"),
-            tabindex: tabindex + 2
+            tabindex: ++tabindex
         }, tableEvents.moveChoiceDown, promptIndex, choiceIndex));
-        tabindex += 4;
+        
+        // Make "Edit Choice" and "Delete Choice" buttons
+        iconRow.appendChild(c("a", {
+            className: "row_choice_edit icon icon_edit",
+            href: "#",
+            text: " ",
+            title: _("Edit Choice"),
+            tabindex: ++tabindex
+        }, tableEvents.editChoice, promptIndex, choiceIndex));
+        iconRow.appendChild(c("a", {
+            className: "row_choice_delete icon icon_delete",
+            href: "#",
+            text: " ",
+            title: _("Delete Choice"),
+            tabindex: ++tabindex
+        }, tableEvents.deleteChoice, promptIndex, choiceIndex));
+        
+        div.appendChild(iconRow);
         
         // Make choice content
-        div.appendChild(c("b", {
-            text: AUTHOR_JSON.contentTypes[choice.type].name
-        }));
-        div.appendChild(document.createTextNode(": "));
-        div.appendChild(c("br"));
-        div.appendChild(c("code", {
-            text: choice.value,
+        div.appendChild(c("span", {
+            className: "box",
+            html: AUTHOR_JSON.contentTypes[choice.type].toHTML(choice),
             title: choice.value
         }));
         td.appendChild(div);
@@ -676,14 +693,14 @@ var AUTHOR_TABLE = {
                 
                 // Make "Edit Action" and "Delete Action" buttons
                 div.appendChild(c("a", {
-                    className: "row_action_delete icon icon_delete",
+                    className: "row_action_delete icon side icon_delete",
                     href: "#",
                     text: " ",
                     title: _("Delete Action"),
                     tabindex: tabindex + 4
                 }, tableEvents.deleteAction, promptIndex, choiceIndex, i));
                 div.appendChild(c("a", {
-                    className: "row_action_edit icon icon_edit",
+                    className: "row_action_edit icon side icon_edit",
                     href: "#",
                     text: " ",
                     title: _("Edit Action"),
@@ -692,14 +709,14 @@ var AUTHOR_TABLE = {
                 
                 // Make "Move Action Up/Down" buttons
                 div.appendChild(c("a", {
-                    className: "row_action_up icon icon_up" + (i == 0 ? " invisible" : ""),
+                    className: "row_action_up icon side icon_up" + (i == 0 ? " invisible" : ""),
                     href: "#",
                     text: " ",
                     title: _("Move Action Up"),
                     tabindex: tabindex + 1
                 }, tableEvents.moveActionUp, promptIndex, choiceIndex, i));
                 div.appendChild(c("a", {
-                    className: "row_action_down icon icon_down" + (i == action.actions.length - 1 ? " invisible" : ""),
+                    className: "row_action_down icon side icon_down" + (i == action.actions.length - 1 ? " invisible" : ""),
                     href: "#",
                     text: " ",
                     title: _("Move Action Down"),
