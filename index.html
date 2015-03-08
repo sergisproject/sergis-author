@@ -113,6 +113,9 @@
     <!-- Edit Frontend Info overlay -->
     <div id="overlay_editFrontendInfo" class="overlay_inner" style="display: none;">
       <h2>Frontend Info</h2>
+      <div id="overlay_editFrontendInfo_contentContainer"></div>
+      <hr>
+      <p style="text-align: center;"><button id="overlay_editFrontendInfo_reset" class="cancel-button">Reset</button><button id="overlay_editFrontendInfo_close" class="close-button">Close</button></p>
     </div>
 
     <!-- Edit Content/Choice overlay -->
@@ -156,6 +159,7 @@
 
 <script type="text/javascript" src="javascripts/author-editor.js"></script>
 <script type="text/javascript" src="javascripts/author-action-editor.js"></script>
+<script type="text/javascript" src="javascripts/author-frontend-info-editor.js"></script>
 
 <!--
 Files with onload handlers:
@@ -163,7 +167,8 @@ Files with onload handlers:
     author-recent.js
     author-table.js
     author-editor.js
-    author-editor-action.js
+    author-action-editor.js
+    author-frontend-info-editor.js
 -->
 
 </body>

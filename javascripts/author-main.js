@@ -201,6 +201,20 @@ function checkJSON() {
             item.prompt.map = {};
         }
         
+        // Check "prompt.map.frontendInfo"
+        if (!item.prompt.map.frontendInfo) {
+            item.prompt.map.frontendInfo = {};
+        }
+        
+        // Check "prompt.map.frontendInfo.*"
+        for (j in AUTHOR_JSON.frontendInfo) {
+            if (AUTHOR_JSON.frontendInfo.hasOwnProperty(j)) {
+                if (!item.prompt.map.frontendInfo[j]) {
+                    item.prompt.map.frontendInfo[j] = {};
+                }
+            }
+        }
+        
         // Check "prompt.contents"
         if (!item.prompt.contents || !item.prompt.contents.length) {
             item.prompt.contents = [];

@@ -58,6 +58,7 @@ var AUTHOR_JSON = {
     
     /* actions */
     /* actionsByFrontend */
+    /* frontendInfo */
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -228,7 +229,7 @@ var AUTHOR_JSON = {
                 that.json.name = this.value;
                 onchange();
             }],
-            [_("Group"), this.json.group || "", function (event) {
+            [_("Group (optional)"), this.json.group || "", function (event) {
                 that.json.group = this.value;
                 onchange();
             }],
@@ -530,6 +531,44 @@ var AUTHOR_JSON = {
                 // Index 3 is a SERGIS_JSON_DrawStyle
                 params.push(new SERGIS_JSON_String(_("TODO: Style"), data[3]));
                 
+                return params;
+            }
+        }
+    };
+    
+    /**
+     * The Frontend Info for a SerGIS Prompt.
+     * Property names are the frontends. Values are another object:
+     *     Property names are frontend info properties;
+     *     values are functions that are passed the current value and return an
+     *     array of SerGIS_... instances (or just one SerGIS_... instance).
+     */
+    AUTHOR_JSON.frontendInfo = {
+        arcgis: {
+            basemap: function (data) {
+                return new SERGIS_JSON_Dropdown(_("Basemap"), data || "streets", [
+                    {label: _("Streets"), value: "streets"},
+                    {label: _("Satellite"), value: "satellite"},
+                    {label: _("Street/Satellite Hybrid"), value: "hybrid"},
+                    {label: _("Topographic"), value: "topo"},
+                    {label: _("Gray Canvas"), value: "gray"},
+                    {label: _("Oceans"), value: "oceans"},
+                    {label: _("OSM"), value: "osm"},
+                    {label: _("National Geographic"), value: "national-geographic"}
+                ]);
+            },
+            
+            layers: function (data) {
+                if (!data) data = [];
+                // We need at least 1 slot
+                if (data.length < 1) data.length = 1;
+                
+                var params = [];
+                for (var i = 0; i < data.length; i++) {
+                    params.push(new SERGIS_JSON_Layer(_("Layer"), data[i]));
+                }
+                // We can repeat these
+                params.push("repeat");
                 return params;
             }
         }

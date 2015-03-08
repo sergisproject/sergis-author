@@ -115,7 +115,7 @@ var AUTHOR_TABLE = {
          */
         editFrontendInfo: function (event, promptIndex) {
             event.preventDefault();
-            alert("Editing frontend info for " + promptIndex + "!");
+            AUTHOR_FRONTEND_INFO_EDITOR.editFrontendInfo(promptIndex);
         },
         
         
