@@ -10,6 +10,11 @@ The SerGIS Prompt Author is hosted at this URL: http://sergisproject.github.io/s
 
 Alternatively, you can clone this repository and open `index.html`.
 
+## TODO
+
+- `SERGIS_JSON_PointsArray` in javascripts/author-json.js
+- `SERGIS_JSON_Style` in javascripts/author-json.js
+
 ## License
 
     Copyright (c) 2015, SerGIS Project Contributors. All rights reserved.
