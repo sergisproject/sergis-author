@@ -97,14 +97,14 @@ a.icon_down {
 code {
   display: inline-block;
   max-width: 230px;
-  max-height: 10ex;
+  max-height: 12ex;
   overflow: hidden;
   text-overflow: ellipsis;
   word-wrap: break-word;
 }
 
 code.short {
-  max-height: 6ex;
+  max-height: 9ex;
 }
 
 .invisible {
