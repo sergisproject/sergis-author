@@ -377,13 +377,27 @@ function generate(updateTable, dontSave) {
     // Make sure our data is good
     checkJSON();
     
-    // Update our save button
-    var a = document.getElementById("downloads_save");
-    a.setAttribute("download", makeLabel() + ".json");
+    // Stringify stuff
     var jsonString = JSON.stringify(json, function (key, value) {
         return key == "id" ? undefined : value;
+    });
+    var jsonPrettyString = JSON.stringify(json, function (key, value) {
+        return key == "id" ? undefined : value;
     }, 2);
-    a.setAttribute("href", "data:application/json;base64," + btoa(jsonString));
+    
+    // Update our save button
+    if (typeof btoa == "function") {
+        var a = document.getElementById("downloads_save");
+        a.setAttribute("download", makeLabel() + ".json");
+        a.setAttribute("href", "data:application/json;base64," + btoa(jsonPrettyString));
+    }
+    
+    // Update "Preview Game" link
+    if (AUTHOR_CONFIG.clientPreviewURL) {
+        document.getElementById("preview_link_container").style.display = "block";
+        document.getElementById("preview_link").setAttribute("href",
+            AUTHOR_CONFIG.clientPreviewURL + "?jsongamedata=" + encodeURIComponent(jsonString));
+    }
     
     // Save as a recent file
     if (!dontSave) AUTHOR_RECENT.saveRecentFile();
