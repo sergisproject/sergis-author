@@ -407,7 +407,7 @@ function generate(updateTable, dontSave) {
     if (AUTHOR_CONFIG.clientPreviewURL) {
         document.getElementById("preview_link_container").style.display = "block";
         document.getElementById("preview_link").setAttribute("href",
-            AUTHOR_CONFIG.clientPreviewURL + "?jsongamedata=" + encodeURIComponent(jsonString));
+            AUTHOR_CONFIG.clientPreviewURL + "#jsongamedata::" + encodeURIComponent(jsonString));
     }
     
     // Save as a recent file
