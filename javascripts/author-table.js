@@ -565,7 +565,7 @@ var AUTHOR_TABLE = {
             }));
             tr_inner.appendChild(c("td", {
                 className: "smaller",
-                text: prompt.map[mapstuff[i][0]] || ""
+                text: prompt.map[mapstuff[i][0]]
             }));
             tbody_inner.appendChild(tr_inner);
         }
@@ -688,7 +688,7 @@ var AUTHOR_TABLE = {
                 size: "4",
                 type: "number",
                 tabindex: ++tabindex,
-                value: prompt.map[mapstuff[i][0]] || ""
+                value: prompt.map[mapstuff[i][0]]
             }, tableEvents.updateMapStuff, mapstuff[i][0], promptIndex));
             tr_inner.appendChild(td_inner);
             tbody_inner.appendChild(tr_inner);
