@@ -25,6 +25,10 @@
         <!--<label for="downloads_recent_select">Recent Files: </label>-->
         <select id="downloads_recent_select" tabindex="2"></select>
       </div>
+      <div id="downloads_links">
+        <span id="preview_link_container" style="display: none;"><a href="#" id="preview_link" target="_blank">Preview Game</a></span>
+        <span><a href="#" id="viewjson_link">View JSON Data</a></span>
+      </div>
     </section>
   </header>
 </div>
@@ -85,8 +89,6 @@
 
 <div id="footer_wrap" class="outer">
   <footer class="inner">
-    <p id="preview_link_container" style="display: none;"><a href="#" id="preview_link" target="_blank">Preview Game</a></p>
-    <p><a href="#" id="viewjson_link">View JSON Data</a></p>
     <p><a href="http://sergisproject.github.io/">The SerGIS Project</a> &mdash; SerGIS Prompt Author<span id="version_outer" style="display: none;"> version <span id="version_inner"></span></span></p>
     <p><a href="https://github.com/sergisproject/sergis-author/">View SerGIS Author on GitHub</a></p>
   </footer>

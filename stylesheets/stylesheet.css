@@ -506,6 +506,11 @@ Full-Width Styles
   margin-top: 55px;
 }
 
+#downloads > div > span:not(:last-child)::after {
+  content: '\2022';
+  margin-left: 5px;
+}
+
 #downloads_save {
   background: url(../images/sprite.png) no-repeat top right;
   background-size: 200%;

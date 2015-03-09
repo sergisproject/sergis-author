@@ -405,7 +405,7 @@ function generate(updateTable, dontSave) {
     
     // Update "Preview Game" link
     if (AUTHOR_CONFIG.clientPreviewURL) {
-        document.getElementById("preview_link_container").style.display = "block";
+        document.getElementById("preview_link_container").style.display = "inline";
         document.getElementById("preview_link").setAttribute("href",
             AUTHOR_CONFIG.clientPreviewURL + "#jsongamedata::" + encodeURIComponent(jsonString));
     }
