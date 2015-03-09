@@ -229,6 +229,17 @@ function checkJSON() {
             item.prompt.map = {};
         }
         
+        // Check "prompt.map.{latitude,longitude,zoom}"
+        if (typeof item.prompt.map.latitude != "number") {
+            item.prompt.map.latitude = 0;
+        }
+        if (typeof item.prompt.map.longitude != "number") {
+            item.prompt.map.longitude = 0;
+        }
+        if (typeof item.prompt.map.zoom != "number") {
+            item.prompt.map.zoom = 3;
+        }
+        
         // Check "prompt.map.frontendInfo"
         if (!item.prompt.map.frontendInfo) {
             item.prompt.map.frontendInfo = {};
