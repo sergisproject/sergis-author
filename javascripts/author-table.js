@@ -42,7 +42,10 @@ var AUTHOR_TABLE = {
          */
         moveUp: function (event, promptIndex) {
             event.preventDefault();
+            event.stopPropagation();
             if (promptIndex != 0) {
+                // No more current prompt index
+                currentPromptIndex = null;
                 // Swap with the previous one
                 var olditem = json.promptList[promptIndex - 1];
                 json.promptList[promptIndex - 1] = json.promptList[promptIndex];
@@ -59,7 +62,10 @@ var AUTHOR_TABLE = {
          */
         moveDown: function (event, promptIndex) {
             event.preventDefault();
+            event.stopPropagation();
             if (promptIndex != json.promptList.length - 1) {
+                // No more current prompt index
+                currentPromptIndex = null;
                 // Swap with the next one
                 var olditem = json.promptList[promptIndex + 1];
                 json.promptList[promptIndex + 1] = json.promptList[promptIndex];
@@ -76,6 +82,9 @@ var AUTHOR_TABLE = {
          */
         deletePrompt: function (event, promptIndex) {
             event.preventDefault();
+            event.stopPropagation();
+            // No more current prompt index
+            currentPromptIndex = null;
             json.promptList.splice(promptIndex, 1);
             // Update any "goto" actions (and see if there were any pointing to the prompt we just deleted).
             var occurrences = decrementGotos(promptIndex);
