@@ -499,6 +499,9 @@ Full-Width Styles
   height: 70px;
   padding-top: 68px;
   text-align: center;
+  background-image: url(../images/sprite.png);
+  background-size: 300%;
+  /*margin-left: 10px;*/
 }
 
 #downloads > div {
@@ -511,25 +514,36 @@ Full-Width Styles
   margin-left: 5px;
 }
 
-#downloads_save {
-  background: url(../images/sprite.png) no-repeat top right;
-  background-size: 200%;
-}
-
-#downloads_save:hover {
-  background: url(../images/sprite.png) no-repeat bottom right;
-  background-size: 200%;
-}
-
 #downloads_open {
-  background: url(../images/sprite.png) no-repeat top left;
-  background-size: 200%;
-  margin-left: 10px;
+  background-position: 0 0;
 }
 
 #downloads_open:hover {
-  background: url(../images/sprite.png) no-repeat bottom left;
-  background-size: 200%;
+  background-position: 0 100%;
+}
+
+#downloads_save {
+  background-position: 50% 0;
+}
+
+#downloads_save:hover {
+  background-position: 50% 100%;
+}
+
+#downloads_view {
+  background-position: 100% 0;
+}
+
+#downloads_view:hover {
+  background-position: 100% 100%;
+}
+
+#downloads_preview {
+  background-position: 100% 0;
+}
+
+#downloads_preview:hover {
+  background-position: 100% 100%;
 }
 
 #main_content_wrap {

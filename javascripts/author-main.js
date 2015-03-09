@@ -405,8 +405,8 @@ function generate(updateTable, dontSave) {
     
     // Update "Preview Game" link
     if (AUTHOR_CONFIG.clientPreviewURL) {
-        document.getElementById("preview_link_container").style.display = "inline";
-        document.getElementById("preview_link").setAttribute("href",
+        document.getElementById("downloads_preview").style.display = "block";
+        document.getElementById("downloads_preview").setAttribute("href",
             AUTHOR_CONFIG.clientPreviewURL + "#jsongamedata::" + encodeURIComponent(jsonString));
     }
     
@@ -553,6 +553,14 @@ function readJSONFile(file) {
             }, false);
         }
         
+        // "View JSON" button
+        document.getElementById("downloads_view").addEventListener("click", function (event) {
+            event.preventDefault();
+            document.getElementById("overlay_viewjson_content").innerHTML = "";
+            document.getElementById("overlay_viewjson_content").appendChild(document.createTextNode(JSON.stringify(json, null, 2)));
+            overlay("overlay_viewjson");
+        }, false);
+        
         // "Save" button (if base64 and data URIs are supported)
         /* Yes, you can shoot me later for the use of browser detection, but IE
          * is the only major browser that *still* doesn't fully support "data:"
@@ -626,13 +634,7 @@ function readJSONFile(file) {
             generate();
         }, false);
         
-        // "View JSON" button/overlay
-        document.getElementById("viewjson_link").addEventListener("click", function (event) {
-            event.preventDefault();
-            document.getElementById("overlay_viewjson_content").innerHTML = "";
-            document.getElementById("overlay_viewjson_content").appendChild(document.createTextNode(JSON.stringify(json, null, 2)));
-            overlay("overlay_viewjson");
-        }, false);
+        // "View JSON" overlay:
         // "Select All" button
         if (typeof document.body.createTextRange == "function" || typeof window.getSelection == "function") {
             document.getElementById("overlay_viewjson_selectall").style.display = "block";
