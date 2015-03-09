@@ -507,6 +507,7 @@ Full-Width Styles
 #downloads > div {
   float: right;
   margin-top: 55px;
+  margin-right: 10px;
 }
 
 #downloads > div > span:not(:last-child)::after {
