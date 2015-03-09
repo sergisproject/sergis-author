@@ -35,7 +35,6 @@ var AUTHOR_JSON = {
                     text: content.value || "",
                     style: content.style || undefined
                 }));
-                console.log(span.innerHTML);
                 return span.innerHTML;
             }
         },
@@ -97,6 +96,7 @@ var AUTHOR_JSON = {
     defaultContentType: "text"
     
     /* actions */
+    /* frontendNames */
     /* actionsByFrontend */
     /* frontendInfo */
 };
@@ -430,42 +430,96 @@ var AUTHOR_JSON = {
     
     /**
      * The Gameplay Actions in SerGIS (not frontend-specific).
-     * Each property is a function that will return an array of SERGIS_...
-     * instances representing the "data" params for the action. If there is
-     * existing data (i.e. we're editing an action instead of creating a new
-     * one), that can be passed in as the `data` argument.
+     * Each property is an object with 3 properties:
+     *   "name": a string representing a localized name for the action.
+     *   "getFields": a function that will return an array of SERGIS_...
+     *     instances representing the "data" params for the action. If there is
+     *     existing data (i.e. we're editing an action instead of creating a new
+     *     one), that can be passed in as the `data` argument.
+     *   "toHTML": a function that takes an action of that type and returns an
+     *     HTML representation of the object.
      */
     AUTHOR_JSON.actions = {
-        explain: function (data) {
-            if (!data) data = [];
-            // We need at least 1 slot
-            if (data.length < 1) data.length = 1;
+        explain: {
+            name: _("Explanation"),
             
-            var params = [];
+            getFields: function (data) {
+                if (!data) data = [];
+                // We need at least 1 slot
+                if (data.length < 1) data.length = 1;
+
+                var params = [];
+
+                // They're all SERGIS_JSON_Content objects
+                for (var i = 0; i < data.length; i++) {
+                    params.push(new SERGIS_JSON_Content(_("Explanation"), data[i]));
+                }
+
+                // We can repeat the last type
+                params.push("repeat");
+
+                return params;
+            },
             
-            // They're all SERGIS_JSON_Content objects
-            for (var i = 0; i < data.length; i++) {
-                params.push(new SERGIS_JSON_Content(_("Explanation"), data[i]));
+            toHTML: function (data) {
+                var span = c("span");
+                span.appendChild(c("b", {
+                    text: this.name + ": "
+                }));
+                for (var i = 0; i < data.length; i++) {
+                    span.appendChild(c("br"));
+                    span.appendChild(c("span", {
+                        html: AUTHOR_JSON.contentTypes[data[i].type].toHTML(data[i])
+                    }));
+                }
+                return span.innerHTML;
             }
-            
-            // We can repeat the last type
-            params.push("repeat");
-            
-            return params;
         },
         
-        "goto": function (data) {
-            if (!data) data = [];
-            // We need one and only one slot
-            if (data.length != 1) data.length = 1;
+        "goto": {
+            name: _("Go To Prompt Index"),
             
-            return [new SERGIS_JSON_Number(_("Prompt Index"), data[0])];
+            getFields: function (data) {
+                if (!data) data = [];
+                // We need one and only one slot
+                if (data.length != 1) data.length = 1;
+
+                return [new SERGIS_JSON_Number(_("Prompt Index"), data[0])];
+            },
+            
+            toHTML: function (data) {
+                var span = c("span");
+                span.appendChild(c("b", {
+                    text: this.name + ": "
+                }));
+                span.appendChild(c("span", {
+                    text: data[0]
+                }));
+                return span.innerHTML;
+            }
         },
         
-        logout: function (data) {
-            // No parameters to this one
-            return [];
+        logout: {
+            name: _("Log Out"),
+            
+            getFields: function (data) {
+                // No parameters to this one
+                return [];
+            },
+            
+            toHTML: function (data) {
+                return c("span", {
+                    text: this.name
+                }).innerHTML;
+            }
         }
+    };
+    
+    /**
+     * Human-readable names for the frontends.
+     */
+    AUTHOR_JSON.frontendNames = {
+        arcgis: "ArcGIS"
     };
     
     /**
@@ -478,114 +532,216 @@ var AUTHOR_JSON = {
          * @see https://github.com/sergisproject/sergis-client/blob/master/lib/frontends/arcgis.js
          */
         arcgis: {
-            clearGraphics: function (data) {
-                // No parameters to this one
-                return [];
-            },
-            
-            showLayers: function (data) {
-                if (!data) data = [];
-                // We need at least one slot
-                if (data.length < 1) data.length = 1;
+            clearGraphics: {
+                name: _("Clear Graphics"),
                 
-                var params = [];
+                getFields: function (data) {
+                    // No parameters to this one
+                    return [];
+                },
                 
-                // They're all SERGIS_JSON_Layer objects
-                for (var i = 0; i < data.length; i++) {
-                    params.push(new SERGIS_JSON_Layer(_("Layer"), data[i]));
+                toHTML: function (data) {
+                    var span = c("span");
+                    span.appendChild(c("b", {
+                        text: "ArcGIS: " + this.name
+                    }));
+                    return span.innerHTML;
                 }
-                
-                // We can repeat the last type
-                params.push("repeat");
-                
-                return params;
             },
             
-            hideLayers: function (data) {
-                if (!data) data = [];
-                // We need at least one slot
-                if (data.length < 1) data.length = 1;
+            showLayers: {
+                name: _("Show Layers"),
                 
-                var params = [];
-                
-                // They're all SERGIS_JSON_String objects
-                for (var i = 0; i < data.length; i++) {
-                    params.push(new SERGIS_JSON_String(_("Layer Group"), data[i]));
-                }
-                
-                // We can repeat the last type
-                params.push("repeat");
-                
-                return params;
-            },
-            
-            draw: function (data) {
-                if (!data) data = [];
-                // We need at least 4 slots
-                if (data.length < 4) data.length = 4;
-                
-                var params = [];
-                
-                // Index 0 is a SERGIS_JSON_String
-                params.push(new SERGIS_JSON_String(_("Object Name"), data[0]));
-                
-                // Index 1 is a SERGIS_JSON_Dropdown
-                params.push(new SERGIS_JSON_Dropdown(_("Type"), data[1], [
-                    {
-                        label: _("Point"),
-                        value: "point"
-                    },
-                    {
-                        label: _("Line"),
-                        value: "line"
-                    },
-                    {
-                        label: _("Polygon"),
-                        value: "polygon"
+                getFields: function (data) {
+                    if (!data) data = [];
+                    // We need at least one slot
+                    if (data.length < 1) data.length = 1;
+
+                    var params = [];
+
+                    // They're all SERGIS_JSON_Layer objects
+                    for (var i = 0; i < data.length; i++) {
+                        params.push(new SERGIS_JSON_Layer(_("Layer"), data[i]));
                     }
-                ]));
+
+                    // We can repeat the last type
+                    params.push("repeat");
+
+                    return params;
+                },
                 
-                // Index 2 is a SERGIS_JSON_DrawStyle
-                params.push(new SERGIS_JSON_String(_("TODO: Style"), data[2]));
-                
-                // The rest are SERGIS_JSON_PointsArray objects
-                for (var i = 3; i < data.length; i++) {
-                    params.push(new SERGIS_JSON_PointsArray(_("Points"), data[i]));
+                toHTML: function (data) {
+                    var span = c("span");
+                    span.appendChild(c("b", {
+                        text: "ArcGIS: " + this.name + ": "
+                    }));
+                    for (var i = 0; i < data.length; i++) {
+                        span.appendChild(c("br"));
+                        span.appendChild(c("span", {
+                            text: data[i].name + (data[i].group
+                                                  ? " (" + data[i].group + ")"
+                                                  : "") +
+                                  ": " + data[i].urls.join(", ")
+                        }));
+                    }
+                    return span.innerHTML;
                 }
-                
-                // We can repeat the last type
-                params.push("repeat");
-                
-                return params;
             },
             
-            buffer: function (data) {
-                if (!data) data = [];
-                // We need 4 slots
-                if (data.length != 4) data.length = 4;
+            hideLayers: {
+                name: _("Hide Layers"),
                 
-                var params = [];
+                getFields: function (data) {
+                    if (!data) data = [];
+                    // We need at least one slot
+                    if (data.length < 1) data.length = 1;
+
+                    var params = [];
+
+                    // They're all SERGIS_JSON_String objects
+                    for (var i = 0; i < data.length; i++) {
+                        params.push(new SERGIS_JSON_String(_("Layer Group"), data[i]));
+                    }
+
+                    // We can repeat the last type
+                    params.push("repeat");
+
+                    return params;
+                },
                 
-                // Index 0 is a SERGIS_JSON_Number
-                params.push(new SERGIS_JSON_Number(_("Distance"), data[0]));
+                toHTML: function (data) {
+                    var span = c("span");
+                    span.appendChild(c("b", {
+                        text: "ArcGIS: " + this.name + ": "
+                    }));
+                    for (var i = 0; i < data.length; i++) {
+                        span.appendChild(c("br"));
+                        span.appendChild(c("span", {
+                            text: data[i]
+                        }));
+                    }
+                    return span.innerHTML;
+                }
+            },
+            
+            draw: {
+                name: _("Draw"),
                 
-                // Index 1 is a SERGIS_JSON_Dropdown
-                params.push(new SERGIS_JSON_Dropdown(_("Distance Unit"), data[1], [
-                    {label: _("Feet"), value: "foot"},
-                    {label: _("Kilometers"), value: "kilometer"},
-                    {label: _("Meters"), value: "meter"},
-                    {label: _("Statute Miles"), value: "statute_mile"},
-                    {label: _("Nautical Miles"), value: "nautical_mile"},
-                    {label: _("US Nautical Miles"), value: "us_nautical_mile"}
-                ]));
+                drawTypes: {
+                    point: _("Point"),
+                    line: _("Line"),
+                    polygon: _("Polygon")
+                },
                 
-                // Index 2 is a SERGIS_JSON_String
-                params.push(new SERGIS_JSON_String(_("Object Name"), data[2]));
+                getFields: function (data) {
+                    if (!data) data = [];
+                    // We need at least 4 slots
+                    if (data.length < 4) data.length = 4;
+
+                    var params = [];
+
+                    // Index 0 is a SERGIS_JSON_String
+                    params.push(new SERGIS_JSON_String(_("Object Name"), data[0]));
+
+                    // Index 1 is a SERGIS_JSON_Dropdown
+                    params.push(new SERGIS_JSON_Dropdown(_("Type"), data[1], [
+                        {
+                            label: this.drawTypes.point,
+                            value: "point"
+                        },
+                        {
+                            label: this.drawTypes.line,
+                            value: "line"
+                        },
+                        {
+                            label: this.drawTypes.polygon,
+                            value: "polygon"
+                        }
+                    ]));
+
+                    // Index 2 is a SERGIS_JSON_DrawStyle
+                    params.push(new SERGIS_JSON_String(_("TODO: Style"), data[2]));
+
+                    // The rest are SERGIS_JSON_PointsArray objects
+                    for (var i = 3; i < data.length; i++) {
+                        params.push(new SERGIS_JSON_PointsArray(_("Points"), data[i]));
+                    }
+
+                    // We can repeat the last type
+                    params.push("repeat");
+
+                    return params;
+                },
                 
-                // Index 3 is a SERGIS_JSON_DrawStyle
-                params.push(new SERGIS_JSON_String(_("TODO: Style"), data[3]));
+                toHTML: function (data) {
+                    var span = c("span");
+                    span.appendChild(c("b", {
+                        text: "ArcGIS: " + this.name + ": "
+                    }));
+                    span.appendChild(c("span", {
+                        text: (this.drawTypes[data[1]] || data[1]) + " "
+                    }));
+                    span.appendChild(c("i", {
+                        text: "(" + data[0] + ")"
+                    }));
+                    return span.innerHTML;
+                }
+            },
+            
+            buffer: {
+                name: _("Buffer"),
                 
-                return params;
+                distanceUnits: {
+                    foot: _("Feet"),
+                    kilometer: _("Kilometers"),
+                    meter: _("Meters"),
+                    statute_mile: _("Statute Miles"),
+                    nautical_mile: _("Nautical Miles"),
+                    us_nautical_mile: _("US Nautical Miles")
+                },
+                
+                getFields: function (data) {
+                    if (!data) data = [];
+                    // We need 4 slots
+                    if (data.length != 4) data.length = 4;
+
+                    var params = [];
+
+                    // Index 0 is a SERGIS_JSON_Number
+                    params.push(new SERGIS_JSON_Number(_("Distance"), data[0]));
+
+                    // Index 1 is a SERGIS_JSON_Dropdown
+                    params.push(new SERGIS_JSON_Dropdown(_("Distance Unit"), data[1], [
+                        {label: this.distanceUnits.foot, value: "foot"},
+                        {label: this.distanceUnits.kilometer, value: "kilometer"},
+                        {label: this.distanceUnits.meter, value: "meter"},
+                        {label: this.distanceUnits.statute_mile, value: "statute_mile"},
+                        {label: this.distanceUnits.nautical_mile, value: "nautical_mile"},
+                        {label: this.distanceUnits.us_nautical_mile, value: "us_nautical_mile"}
+                    ]));
+
+                    // Index 2 is a SERGIS_JSON_String
+                    params.push(new SERGIS_JSON_String(_("Object Name"), data[2]));
+
+                    // Index 3 is a SERGIS_JSON_DrawStyle
+                    params.push(new SERGIS_JSON_String(_("TODO: Style"), data[3]));
+
+                    return params;
+                },
+                
+                toHTML: function (data) {
+                    var span = c("span");
+                    span.appendChild(c("b", {
+                        text: "ArcGIS: " + this.name + ": "
+                    }));
+                    span.appendChild(c("span", {
+                        text: data[0] + " " + (this.distanceUnits[data[1]] || data[1]) + " "
+                    }));
+                    span.appendChild(c("i", {
+                        text: "(" + data[2] + ")"
+                    }));
+                    return span.innerHTML;
+                }
             }
         }
     };
@@ -594,36 +750,51 @@ var AUTHOR_JSON = {
      * The Frontend Info for a SerGIS Prompt.
      * Property names are the frontends. Values are another object, where...
      *     Property names are frontend info properties;
-     *     values are functions that are passed the current value and return an
-     *     array of SerGIS_... instances (or just one SerGIS_... instance).
+     *     values are yet another object, with 2 properties:
+     *       "getFields": a function that is passed the current value and
+     *         returns an array of SerGIS_... instances (or just one instance).
+     *       "toHTML": a function that is passed a value and returns an HTML
+     *         representation of the frontend.
      */
     AUTHOR_JSON.frontendInfo = {
         arcgis: {
-            basemap: function (data) {
-                return new SERGIS_JSON_Dropdown(_("Basemap"), data || "streets", [
-                    {label: _("Streets"), value: "streets"},
-                    {label: _("Satellite"), value: "satellite"},
-                    {label: _("Street/Satellite Hybrid"), value: "hybrid"},
-                    {label: _("Topographic"), value: "topo"},
-                    {label: _("Gray Canvas"), value: "gray"},
-                    {label: _("Oceans"), value: "oceans"},
-                    {label: _("OSM"), value: "osm"},
-                    {label: _("National Geographic"), value: "national-geographic"}
-                ]);
+            basemap: {
+                getFields: function (data) {
+                    return new SERGIS_JSON_Dropdown(_("Basemap"), data || "streets", [
+                        {label: _("Streets"), value: "streets"},
+                        {label: _("Satellite"), value: "satellite"},
+                        {label: _("Street/Satellite Hybrid"), value: "hybrid"},
+                        {label: _("Topographic"), value: "topo"},
+                        {label: _("Gray Canvas"), value: "gray"},
+                        {label: _("Oceans"), value: "oceans"},
+                        {label: _("OSM"), value: "osm"},
+                        {label: _("National Geographic"), value: "national-geographic"}
+                    ]);
+                },
+                
+                toHTML: function (data) {
+                    
+                }
             },
             
-            layers: function (data) {
-                if (!data) data = [];
-                // We need at least 1 slot
-                if (data.length < 1) data.length = 1;
+            layers: {
+                getFields: function (data) {
+                    if (!data) data = [];
+                    // We need at least 1 slot
+                    if (data.length < 1) data.length = 1;
+
+                    var params = [];
+                    for (var i = 0; i < data.length; i++) {
+                        params.push(new SERGIS_JSON_Layer(_("Layer"), data[i]));
+                    }
+                    // We can repeat these
+                    params.push("repeat");
+                    return params;
+                },
                 
-                var params = [];
-                for (var i = 0; i < data.length; i++) {
-                    params.push(new SERGIS_JSON_Layer(_("Layer"), data[i]));
+                toHTML: function (data) {
+                    
                 }
-                // We can repeat these
-                params.push("repeat");
-                return params;
             }
         }
     };

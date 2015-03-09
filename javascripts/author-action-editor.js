@@ -133,7 +133,7 @@ var AUTHOR_ACTION_EDITOR = {
         } else {
             actionsDataList = AUTHOR_JSON.actions;
         }
-        var fields = actionsDataList[data.name](editor_state.action_json.data);
+        var fields = actionsDataList[data.name].getFields(editor_state.action_json.data);
         
         for (var i = 0; i < fields.length; i++) {
             if (fields[i] == "repeat") continue;
@@ -168,7 +168,7 @@ var AUTHOR_ACTION_EDITOR = {
             if (AUTHOR_JSON.actions.hasOwnProperty(actionName)) {
                 select.appendChild(c("option", {
                     value: JSON.stringify({name: actionName, frontend: null}),
-                    text: actionName
+                    text: AUTHOR_JSON.actions[actionName].name
                 }));
             }
         }
@@ -179,7 +179,8 @@ var AUTHOR_ACTION_EDITOR = {
                     if (AUTHOR_JSON.actionsByFrontend[frontendName].hasOwnProperty(actionName)) {
                         select.appendChild(c("option", {
                             value: JSON.stringify({name: actionName, frontend: frontendName}),
-                            text: frontendName + ": " + actionName
+                            text: (AUTHOR_JSON.frontendNames[frontendName] || frontendName) +
+                                  ": " + AUTHOR_JSON.actionsByFrontend[frontendName][actionName].name
                         }));
                     }
                 }

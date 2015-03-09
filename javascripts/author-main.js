@@ -6,7 +6,7 @@
     in the LICENSE.txt file.
 */
 
-// Globals: json, randInt, randID, overlay, c, selectAll, checkJSON, swapGotos, decrementGotos, generate, makeLabel, loadJSON, readJSONFile
+// Globals: json, randInt, randID, removeFromString, overlay, c, selectAll, checkJSON, swapGotos, decrementGotos, generate, makeLabel, loadJSON, readJSONFile
 
 /**
  * The current state of the SerGIS JSON Game Data that we're working on.
@@ -46,6 +46,31 @@ function randID() {
 }
 
 /**
+ * Remove something from a string.
+ *
+ * @param {string} str - The string to remove stuff from.
+ * @param {string} toRemove - The substring to remove.
+ * @param {string} [separator=" "] - The separator between the "words" in str.
+ */
+function removeFromString(str, toRemove, separator) {
+    if (!toRemove) return str;
+    
+    if (typeof separator != "string" || !separator) separator = " ";
+    str = separator + str + separator;
+    toRemove = separator + toRemove + separator;
+    
+    var beforeStr, afterStr;
+    while (str.indexOf(toRemove) != -1) {
+        beforeStr = str.substring(0, str.indexOf(toRemove));
+        afterStr = str.substring(str.indexOf(toRemove) + toRemove.length);
+        str = beforeStr + separator + afterStr;
+    }
+    
+    str = str.slice(separator.length, -separator.length);
+    return str;
+}
+
+/**
  * Show/hide a big overlay (see #overlay in index.html).
  *
  * @param {string} [overlayID] - The ID of the overlay to show. If not
@@ -64,7 +89,7 @@ function overlay(overlayID) {
         }
     }
     // Show/hide overlay container
-    var className = (" " + document.getElementById("overlay").className + " ").replace(/ hidden /g, " ");
+    var className = removeFromString(document.getElementById("overlay").className, "hidden");
     if (overlayShown == -1) className += " hidden";
     document.getElementById("overlay").className = className;
     if (overlayShown > -1) overlays[overlayShown].scrollTop = 0;
@@ -527,6 +552,12 @@ function readJSONFile(file) {
             // Regenerate the table and update the save button
             generate(true);
         }, false);
+        
+        // "Expand All Prompts" checkbox
+        document.getElementById("expandAllPrompts").addEventListener("change", function (event) {
+            AUTHOR_TABLE.setExpandAllPrompts(this.checked);
+        }, false);
+        document.getElementById("expandAllPrompts").checked = false;
         
         // "Prompt Set Name" textbox
         document.getElementById("general_name").addEventListener("change", function (event) {

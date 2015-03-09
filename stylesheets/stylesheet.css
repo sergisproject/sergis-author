@@ -99,10 +99,20 @@ a.icon_down.side {
 
 .row_title {
   padding-top: 30px;
+  min-width: 160px;
 }
 
 .row_title_index {
   margin-left: -20px;
+}
+
+.row_minimal_index {
+  margin-left: -20px;
+}
+
+.row_minimal_title {
+  margin-top: 10px;
+  margin-left: 27px;
 }
 
 code, span.box {
@@ -111,6 +121,10 @@ code, span.box {
   overflow: hidden;
   text-overflow: ellipsis;
   word-wrap: break-word;
+}
+
+code.wide, span.box.wide {
+  max-width: 500px;
 }
 
 span.box img {
@@ -139,11 +153,11 @@ code.short {
      like the way it looks with the blank space. */
 }
 
-.cancel-button, .save-button {
+.sub-button, .main-button {
   margin-right: 20px;
 }
 
-.save-button {
+.main-button {
   font-weight: bold;
 }
 
@@ -174,6 +188,27 @@ code.short {
 
 .inputcontainer input {
   width: 100%
+}
+
+tr.prompt-row-minimal {
+  background-color: rgb(110, 110, 110);
+  color: white;
+  cursor: pointer;
+  -webkit-transition: background-color 0.2s;
+  transition: background-color 0.2s;
+}
+
+tr.prompt-row-minimal:hover {
+  background-color: inherit;
+  color: inherit;
+}
+
+tr.prompt-row-minimal.origcolors:hover {
+  background-color: rgb(200, 200, 200);
+}
+
+tr.prompt-row-hidden {
+  display: none;
 }
 
 /*******************************************************************************
@@ -372,6 +407,10 @@ td {
   vertical-align: top;
 }
 
+td.prompt-container-header-cell-spacer {
+  border: none;
+}
+
 tr.toprow td {
   border-top: 4px solid #373737;
 }
@@ -379,6 +418,10 @@ tr.toprow td {
 table .minirow {
   border-top: 1px solid #D2D2D2;
   padding: 8px;
+}
+
+table tr.prompt-row-minimal .minirow {
+  border-top: none;
 }
 
 table .minirow:first-child {
@@ -576,7 +619,7 @@ Full-Width Styles
 Small Device Styles
 *******************************************************************************/
 
-table button, table label, table input, table select, table .minirow, table .row, table li {
+table button, table label, table input, table select, table .minirow, table .row, table li, .smaller {
   font-size: 80%;
 }
 

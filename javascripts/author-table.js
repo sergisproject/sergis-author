@@ -11,6 +11,7 @@
 
 var AUTHOR_TABLE = {
     /* initTable */
+    /* setExpandAllPrompts */
 };
 
 (function () {
@@ -18,6 +19,16 @@ var AUTHOR_TABLE = {
      * The last-used tabindex (resets at the top of initTable).
      */
     var tabindex = 100;
+    
+    /**
+     * The current promptIndex that we have "open" (if expandAllPrompts==false).
+     */
+    var currentPromptIndex = null;
+    
+    /**
+     * Whether all prompts should be expanded.
+     */
+    var expandAllPrompts = false;
     
     /**
      * Event handlers for buttons and inputs in the prompt table.
@@ -327,6 +338,63 @@ var AUTHOR_TABLE = {
     
     
     /**
+     * Set whether all prompts should be expanded.
+     */
+    AUTHOR_TABLE.setExpandAllPrompts = function (yesorno) {
+        expandAllPrompts = yesorno;
+        currentPromptIndex = null;
+        checkCurrentPrompt();
+    };
+    
+    /**
+     * Set the current prompt.
+     */
+    function setCurrentPrompt(promptIndex) {
+        currentPromptIndex = promptIndex;
+        checkCurrentPrompt();
+    }
+    
+    /**
+     * Update the table based on currentPrompt and/or expandAllRows, then make
+     * sure scrolling is all set up well.
+     */
+    function checkCurrentPrompt() {
+        var elems = document.getElementsByClassName("prompt-row-minimal");
+        var expandAllPromptsHere = json.promptList.length <= 1 ? true : expandAllPrompts;
+        for (var i = 0; i < elems.length; i++) {
+            if (!expandAllPromptsHere && (currentPromptIndex === null || elems[i].getAttribute("data-promptIndex") != currentPromptIndex.toString())) {
+                elems[i].className = removeFromString(elems[i].className, "prompt-row-hidden");
+            } else {
+                elems[i].className += " prompt-row-hidden";
+            }
+        }
+        elems = document.getElementsByClassName("prompt-row-full");
+        var finalElem;
+        for (i = 0; i < elems.length; i++) {
+            if (expandAllPromptsHere || (currentPromptIndex !== null && elems[i].getAttribute("data-promptIndex") == currentPromptIndex.toString())) {
+                elems[i].className = removeFromString(elems[i].className, "prompt-row-hidden");
+                if (elems[i].className.indexOf("toprow") != -1) {
+                    finalElem = elems[i];
+                }
+            } else {
+                elems[i].className += " prompt-row-hidden";
+            }
+        }
+        
+        // Check scrolling
+        checkScroll();
+        
+        // Scroll the current prompt into view
+        if (finalElem) {
+            var bodyRect = document.body.getBoundingClientRect(),
+                elemRect = finalElem.getBoundingClientRect(),
+                offset   = elemRect.top - bodyRect.top;
+            window.scrollTo(0, offset - 60);
+        }
+    }
+    
+    
+    /**
      * Make the prompt table.
      */
     AUTHOR_TABLE.initTable = function () {
@@ -355,12 +423,22 @@ var AUTHOR_TABLE = {
             generateTableRow(tbody, i);
         }
         
+        // Make spacer row
+        tr = c("tr");
+        for (i = 0; i < titles.length; i++) {
+            tr.appendChild(c("td", {
+                text: " ",
+                className: "prompt-container-header-cell-spacer"
+            }));
+        }
+        tbody.appendChild(tr);
+        
         // Stick it all in there
         table.appendChild(tbody);
         document.getElementById("promptContainer").appendChild(table);
         
-        // Make sure scrolling is good
-        checkScroll();
+        // Make sure current prompt is selected and scrolling is good
+        checkCurrentPrompt();
     };
     
     /**
@@ -375,11 +453,154 @@ var AUTHOR_TABLE = {
         var tr, td, div, iconRow;
         var i, id;
         var prompt = json.promptList[promptIndex].prompt;
+        var mapstuff = [
+            // ["SerGIS JSON Map Object property name", "label"]
+            ["latitude", _("Latitude:")],
+            ["longitude", _("Longitude:")],
+            ["zoom", _("Zoom:")]
+        ];
         
         ///////////////////////////////////////////////////////////////////////
-        // Make row
+        ///////////////////////////////////////////////////////////////////////
+        // Make "minimal" row
         tr = c("tr", {
-            className: "toprow"
+            className: "toprow prompt-row-minimal",
+            "data-promptIndex": promptIndex
+        });
+        
+        tr.addEventListener("click", function (event) {
+            setCurrentPrompt(promptIndex);
+        }, false);
+
+        ///////////////////////////////////////////////////////////////////////
+        // Make title column
+        td = c("td", {
+            className: "row_title"
+        });
+        div = c("div", {
+            className: "row_title_buttons"
+        });
+
+        var iconbtns = [],
+            iconbtn;
+
+        // Make "Move Prompt Up/Down" buttons
+        div.appendChild(iconbtn = c("a", {
+            className: "row_title_buttons_up icon side icon_up" + (promptIndex == 0 ? " invisible" : ""),
+            href: "#",
+            text: " ",
+            title: _("Move Prompt Up"),
+            tabindex: ++tabindex
+        }, tableEvents.moveUp, promptIndex));
+        iconbtns.push(iconbtn);
+
+        div.appendChild(iconbtn = c("a", {
+            className: "row_title_buttons_down icon side icon_down" + (promptIndex == json.promptList.length - 1 ? " invisible" : ""),
+            href: "#",
+            text: " ",
+            title: _("Move Prompt Down"),
+            tabindex: ++tabindex
+        }, tableEvents.moveDown, promptIndex));
+        iconbtns.push(iconbtn);
+        td.appendChild(div);
+
+        // Make "Delete Prompt" button
+        td.appendChild(iconbtn = c("a", {
+            className: "row_title_delete icon side icon_delete",
+            href: "#",
+            text: " ",
+            title: _("Delete Prompt"),
+            tabindex: ++tabindex
+        }, tableEvents.deletePrompt, promptIndex));
+        iconbtns.push(iconbtn);
+
+        // Set up hover for buttons (to make tr background back to normal)
+        for (i = 0; i < iconbtns.length; i++) {
+            var myTR = tr;
+            iconbtns[i].addEventListener("mouseover", function (event) {
+                myTR.className += " origcolors";
+            }, false);
+            iconbtns[i].addEventListener("mouseout", function (event) {
+                if (myTR.className.indexOf("origcolors") != -1) {
+                    myTR.className = removeFromString(myTR.className, "origcolors");
+                }
+            }, false);
+        }
+
+        // Add "Prompt #" and title
+        td.appendChild(c("span", {
+            className: "row_minimal_index",
+            text: _("Prompt {0}", promptIndex)
+        }));
+        if (prompt.title) {
+            td.appendChild(c("div", {
+                className: "row_minimal_title",
+                text: prompt.title
+            }));
+        }
+
+        tr.appendChild(td);
+
+        ///////////////////////////////////////////////////////////////////////
+        // Make map column
+        // Make inner table to hold the `mapstuff`
+        var table_inner = c("table", {className: "noborder"}),
+            tbody_inner = c("tbody"),
+            tr_inner, td_inner;
+        // Add basic map properties (`mapstuff`)
+        for (i = 0; i < mapstuff.length; i++) {
+            tr_inner = c("tr");
+            tr_inner.appendChild(c("td", {
+                className: "smaller",
+                text: mapstuff[i][1] + " "
+            }));
+            tr_inner.appendChild(c("td", {
+                className: "smaller",
+                text: prompt.map[mapstuff[i][0]] || ""
+            }));
+            tbody_inner.appendChild(tr_inner);
+        }
+        // TODO: Add frontend properties
+        table_inner.appendChild(tbody_inner);
+        td = c("td");
+        td.appendChild(table_inner);
+        tr.appendChild(td);
+
+        ///////////////////////////////////////////////////////////////////////
+        // Make content column
+        td = c("td", {
+            colspan: 3
+        });
+        // Make a "minirow" for each content
+        for (i = 0; i < prompt.contents.length; i++) {
+            div = c("div", {
+                className: "row_content_text minirow"
+            });
+            // The actual content
+            div.appendChild(c("span", {
+                className: "box wide",
+                html: AUTHOR_JSON.contentTypes[prompt.contents[i].type].toHTML(prompt.contents[i]),
+                title: prompt.contents[i].value
+            }));
+            td.appendChild(div);
+        }
+        // Show the number of choices
+        td.appendChild(c("div", {
+            text: _("{0} choices", prompt.choices.length),
+            style: "text-align: right;"
+        }));
+        tr.appendChild(td);
+
+        // Add minimal row to table
+        tbody.appendChild(tr);
+        
+        
+        ///////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////
+        // Make "full" row
+        tr = c("tr", {
+            className: "toprow prompt-row-full",
+            "data-promptIndex": promptIndex
         });
         
         ///////////////////////////////////////////////////////////////////////
@@ -438,12 +659,6 @@ var AUTHOR_TABLE = {
         
         ///////////////////////////////////////////////////////////////////////
         // Make map column
-        var mapstuff = [
-            // ["SerGIS JSON Map Object property name", "label"]
-            ["latitude", _("Latitude:")],
-            ["longitude", _("Longitude:")],
-            ["zoom", _("Zoom:")]
-        ];
         // Make inner table to hold the `mapstuff`
         var table_inner = c("table", {className: "noborder"}),
             tbody_inner = c("tbody"),
@@ -582,6 +797,8 @@ var AUTHOR_TABLE = {
             tabindex: tabindex
         }, tableEvents.addChoice, promptIndex));
         tr.appendChild(td);
+        
+        // Add full row to table
         tbody.appendChild(tr);
         
         // Generate each choice/action row
@@ -602,13 +819,16 @@ var AUTHOR_TABLE = {
      */
     function generateTableChoice(tbody, promptIndex, choiceIndex) {
         var tr, td, div, ul, li, iconRow;
-        var i, id;
+        var i, id, dataContent;
         var prompt = json.promptList[promptIndex].prompt,
             choice = prompt.choices[choiceIndex],
             action = json.promptList[promptIndex].actionList[choiceIndex];
         
         // Make row
-        tr = c("tr");
+        tr = c("tr", {
+            className: "prompt-row-full prompt-row-hidden",
+            "data-promptIndex": promptIndex
+        });
         
         // Make choice column
         td = c("td", {
@@ -691,52 +911,60 @@ var AUTHOR_TABLE = {
                     className: "row_action_div minirow"
                 });
                 
-                // Make "Edit Action" and "Delete Action" buttons
-                div.appendChild(c("a", {
-                    className: "row_action_delete icon side icon_delete",
-                    href: "#",
-                    text: " ",
-                    title: _("Delete Action"),
-                    tabindex: tabindex + 4
-                }, tableEvents.deleteAction, promptIndex, choiceIndex, i));
-                div.appendChild(c("a", {
-                    className: "row_action_edit icon side icon_edit",
-                    href: "#",
-                    text: " ",
-                    title: _("Edit Action"),
-                    tabindex: tabindex + 3
-                }, tableEvents.editAction, promptIndex, choiceIndex, i));
+                // Make icons/buttons
+                iconRow = c("div", {
+                    className: "icon-row"
+                });
                 
                 // Make "Move Action Up/Down" buttons
-                div.appendChild(c("a", {
-                    className: "row_action_up icon side icon_up" + (i == 0 ? " invisible" : ""),
+                iconRow.appendChild(c("a", {
+                    className: "row_action_up icon icon_up" + (i == 0 ? " invisible" : ""),
                     href: "#",
                     text: " ",
                     title: _("Move Action Up"),
-                    tabindex: tabindex + 1
+                    tabindex: ++tabindex
                 }, tableEvents.moveActionUp, promptIndex, choiceIndex, i));
-                div.appendChild(c("a", {
-                    className: "row_action_down icon side icon_down" + (i == action.actions.length - 1 ? " invisible" : ""),
+                iconRow.appendChild(c("a", {
+                    className: "row_action_down icon icon_down" + (i == action.actions.length - 1 ? " invisible" : ""),
                     href: "#",
                     text: " ",
                     title: _("Move Action Down"),
-                    tabindex: tabindex + 2
+                    tabindex: ++tabindex
                 }, tableEvents.moveActionDown, promptIndex, choiceIndex, i));
-                tabindex += 4;
                 
-                if (action.actions[i].frontend) {
-                    div.appendChild(c("span", {
-                        className: "row_action_frontend",
-                        text: action.actions[i].frontend + ": ",
-                        title: _("Action Frontend")
+                // Make "Edit Action" and "Delete Action" buttons
+                iconRow.appendChild(c("a", {
+                    className: "row_action_edit icon icon_edit",
+                    href: "#",
+                    text: " ",
+                    title: _("Edit Action"),
+                    tabindex: ++tabindex
+                }, tableEvents.editAction, promptIndex, choiceIndex, i));
+                iconRow.appendChild(c("a", {
+                    className: "row_action_delete icon icon_delete",
+                    href: "#",
+                    text: " ",
+                    title: _("Delete Action"),
+                    tabindex: ++tabindex
+                }, tableEvents.deleteAction, promptIndex, choiceIndex, i));
+
+                div.appendChild(iconRow);
+                
+                if (action.actions[i].data.length == 0) {
+                    if (action.actions[i].frontend) {
+                        div.appendChild(c("span", {
+                            className: "row_action_frontend",
+                            text: action.actions[i].frontend + ": ",
+                            title: _("Action Frontend")
+                        }));
+                    }
+                    div.appendChild(c("b", {
+                        className: "row_action_name",
+                        text: action.actions[i].name,
+                        title: _("Action Name")
                     }));
-                }
-                div.appendChild(c("b", {
-                    className: "row_action_name",
-                    text: action.actions[i].name,
-                    title: _("Action Name")
-                }));
-                if (action.actions[i].data.length > 0) {
+                } else {
+                    /*
                     div.appendChild(c("span", {
                         className: "row_action_data_barrier",
                         text: ": "
@@ -744,6 +972,17 @@ var AUTHOR_TABLE = {
                     div.appendChild(c("code", {
                         className: "row_action_data short",
                         text: JSON.stringify(action.actions[i].data),
+                        title: JSON.stringify(action.actions[i].data)
+                    }));
+                    */
+                    if (action.actions[i].frontend) {
+                        dataContent = AUTHOR_JSON.actionsByFrontend[action.actions[i].frontend][action.actions[i].name];
+                    } else {
+                        dataContent = AUTHOR_JSON.actions[action.actions[i].name];
+                    }
+                    div.appendChild(c("span", {
+                        className: "row_action_data box",
+                        html: dataContent.toHTML(action.actions[i].data),
                         title: JSON.stringify(action.actions[i].data)
                     }));
                 }
@@ -769,14 +1008,21 @@ var AUTHOR_TABLE = {
         tbody.appendChild(tr);
     }
     
-    /**
-     * Whether the browser supports "window.pageXOffset" (for checkScroll).
-     */
+    /** Whether the browser supports "window.pageXOffset" (for checkScroll). */
     var supportPageOffset = window.pageXOffset !== undefined;
-    /**
-     * Whether the browser's in "Standards Mode" (as opposed to "Quirks Mode").
-     */
+    /** Whether the browser's in "Standards Mode" (opposed to "Quirks Mode"). */
     var isCSS1Compat = ((document.compatMode || "") === "CSS1Compat");
+    
+    /** Helper function to set the proper width on the table columns. */
+    function setHeaderWidths(tbl, thead, auto) {
+        // Make sure the header cells stay the same width
+        thead.style.width = auto ? "auto" : thead.offsetWidth + "px";
+        var kids = tbl.getElementsByTagName("th");
+        var kidSpacers = tbl.getElementsByClassName("prompt-container-header-cell-spacer");
+        for (var j = 0; j < kids.length; j++) {
+            kidSpacers[j].style.minWidth = kids[j].style.width = auto ? "auto" : kids[j].offsetWidth + "px";
+        }
+    }
     
     /**
      * Check the scrolling and set up the table header accordingly.
@@ -807,22 +1053,15 @@ var AUTHOR_TABLE = {
                 offsetY += elem.offsetTop || 0;
             }
             
+            // Reset any and all spacing
+            tbl.className = removeFromString(tbl.className, "scrollFixed");
+            setHeaderWidths(tbl, thead, true);
+            
             // Check if we should be .scrollFixed
-            var i = tbl.className.indexOf("scrollFixed");
             if (scrollY >= offsetY) {
-                if (i == -1) {
-                    // Make sure the header cells stay the same width
-                    thead.style.width = thead.offsetWidth + "px";
-                    var kids = tbl.getElementsByTagName("th");
-                    for (var j = 0; j < kids.length; j++) {
-                        kids[j].style.width = kids[j].offsetWidth + "px";
-                    }
-                    // And, we should be .scrollFixed; let's add the class
-                    tbl.className += " scrollFixed";
-                }
-            } else if (i != -1) {
-                // We shouldn't be .scrollFixed; let's remove the class
-                tbl.className = tbl.className.substring(0, i) + tbl.className.substring(i + 11);
+                setHeaderWidths(tbl, thead);
+                // And, we should be .scrollFixed; let's add the class
+                tbl.className += " scrollFixed";
             }
         }
     }

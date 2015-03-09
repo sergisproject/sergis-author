@@ -66,7 +66,7 @@ var AUTHOR_FRONTEND_INFO_EDITOR = {
                       : function (arr) { return typeof arr.length == "number"; };
         var frontendBase = json.promptList[editor_state.promptIndex].prompt.map.frontendInfo[frontendName];
         
-        fields = fields(frontendBase[frontendInfoName]);
+        fields = fields.getFields(frontendBase[frontendInfoName]);
         if (!isArray(fields)) {
             // Let's assume that it's not an array
             var field = fields;
