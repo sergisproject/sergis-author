@@ -6,7 +6,7 @@
     in the LICENSE.txt file.
 */
 
-// This file handles the Frontend Info overlay.
+// This file handles the Map Properties (i.e. frontend info) overlay.
 // Globals: AUTHOR_FRONTEND_INFO_EDITOR
 
 var AUTHOR_FRONTEND_INFO_EDITOR = {
@@ -15,7 +15,7 @@ var AUTHOR_FRONTEND_INFO_EDITOR = {
 
 (function () {
     /**
-     * The current state of the Frontend Info Editor.
+     * The current state of the Map Properties Editor.
      *
      * @property {number} promptIndex - The promptIndex of the prompt whose
      *           frontend info we're editing.
@@ -102,7 +102,7 @@ var AUTHOR_FRONTEND_INFO_EDITOR = {
     }
     
     /**
-     * Update the Frontend Info editor.
+     * Update the Map Properties editor.
      */
     function updateFrontendInfoEditor() {
         // Remove the old fields
@@ -126,7 +126,7 @@ var AUTHOR_FRONTEND_INFO_EDITOR = {
     }
     
     /**
-     * Initialize the frontend info editor overlay.
+     * Initialize the Map Properties editor overlay.
      */
     function initFrontendInfoEditor() {
         // Set up Reset button

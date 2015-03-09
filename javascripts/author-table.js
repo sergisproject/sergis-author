@@ -131,7 +131,7 @@ var AUTHOR_TABLE = {
         },
         
         /**
-         * Handler for the "Edit Frontend Info" button.
+         * Handler for the "Edit Map Properties" button.
          */
         editFrontendInfo: function (event, promptIndex) {
             event.preventDefault();
@@ -700,10 +700,10 @@ var AUTHOR_TABLE = {
         });
         td.appendChild(table_inner);
         
-        // Make "Edit Frontend Info" button
+        // Make "Edit Map Properties" button
         td.appendChild(c("button", {
             className: "row_map_editFrontendInfo",
-            text: _("Edit Frontend Info"),
+            text: _("Edit Map Properties"),
             tabindex: ++tabindex
         }, tableEvents.editFrontendInfo, promptIndex));
         tr.appendChild(td);
