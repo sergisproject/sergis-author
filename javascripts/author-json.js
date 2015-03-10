@@ -466,8 +466,8 @@ var AUTHOR_JSON = {
                 span.appendChild(c("b", {
                     text: this.name + ": "
                 }));
-                if (data) {
-                    for (var i = 0; i < data.length; i++) {
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i]) {
                         span.appendChild(c("br"));
                         span.appendChild(c("span", {
                             html: AUTHOR_JSON.contentTypes[data[i].type || AUTHOR_JSON.defaultContentType].toHTML(data[i])
