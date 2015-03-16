@@ -410,6 +410,11 @@ function generate(updateTable, dontSave) {
             AUTHOR_CONFIG.clientPreviewURL + "#jsongamedata::" + encodeURIComponent(jsonString));
     }
     
+    // Update "Publish Game" form
+    if (AUTHOR_CONFIG.serverPublishURL) {
+        document.getElementById("publish-form-input").value = jsonString;
+    }
+    
     // Save as a recent file
     if (!dontSave) AUTHOR_RECENT.saveRecentFile();
     
@@ -576,6 +581,16 @@ function readJSONFile(file) {
                     event.preventDefault();
                 }, false);
             }
+        }
+        
+        // "Publish" button
+        if (AUTHOR_CONFIG.serverPublishURL) {
+            document.getElementById("downloads_publish").style.display = "block";
+            document.getElementById("publish-form").setAttribute("action", AUTHOR_CONFIG.serverPublishURL);
+            document.getElementById("downloads_publish").addEventListener("click", function (event) {
+                event.preventDefault();
+                document.getElementById("publish-form").submit();
+            }, false);
         }
         
         // "Add Prompt" button

@@ -515,6 +515,7 @@ Full-Width Styles
   margin-left: 5px;
 }
 
+/* SPRITE FILE POSITIONS FOR ICONS */
 #downloads_open {
   background-position: 0 0;
 }
@@ -544,6 +545,14 @@ Full-Width Styles
 }
 
 #downloads_preview:hover {
+  background-position: 100% 100%;
+}
+
+#downloads_publish {
+  background-position: 100% 0;
+}
+
+#downloads_publish:hover {
   background-position: 100% 100%;
 }
 

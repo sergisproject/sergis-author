@@ -19,7 +19,8 @@
     <h1 id="project_title">SerGIS Prompt Author</h1>
     <section id="downloads">
       <!-- Icons made by <a href="http://www.freepik.com">Freepik</a> from <a href="http://www.flaticon.com">www.flaticon.com</a> are licensed under <a href="http://creativecommons.org/licenses/by/3.0/">Creative Commons BY 3.0</a>. -->
-      <a id="downloads_view" href="#" title="View JSON Game Data" tabindex="6">View JSON</a>
+      <a id="downloads_view" href="#" title="View JSON Game Data" tabindex="7">View JSON</a>
+      <a id="downloads_publish" href="#" title="Publish Game on SerGIS Server" tabindex="6" style="display: none;">Publish</a>
       <a id="downloads_preview" href="#" target="_blank" title="Preview SerGIS Game" tabindex="5" style="display: none;">Preview</a>
       <a id="downloads_save" href="#" title="Save JSON Game Data File" tabindex="4" style="display: none;">Save File</a>
       <a id="downloads_open" href="#" title="Open JSON Game Data File" tabindex="3" style="display: none;">Open File</a>
@@ -147,7 +148,12 @@
   <!-- </td></tr></tbody></table> -->
 </div>
 
-<div style="display: none;"><input id="fileinput" type="file"></div>
+<div style="display: none;">
+    <input id="fileinput" type="file">
+    <form id="publish-form" method="POST">
+        <textarea id="publish-form-input" name="jsondata"></textarea>
+    </form>
+</div>
 
 <script src="http://www.localeplanet.com/api/auto/icu.js"></script>
 <script src="http://www.localeplanet.com/api/translate.js"></script>
@@ -158,7 +164,12 @@ var AUTHOR_CONFIG = {
     // This allows instant previews of games.
     // If not provided, then the "Preview Game" button is not available.
     //clientPreviewURL: "http://geoapps64.main.ad.rit.edu/serious_game_spatial_thinking/web_game/"
-    clientPreviewURL: "http://geoapps64.main.ad.rit.edu/sergis/preview"
+    clientPreviewURL: "http://geoapps64.main.ad.rit.edu/sergis/preview",
+    
+    // The URL of the "account/publish" page on a public hosting of the SerGIS Server.
+    // This allows publishing of games.
+    // If not provided, then the "Publish Game" button is not available.
+    serverPublishURL: "http://geoapps64.main.ad.rit.edu/sergis/account/publish"
 };
 </script>
 
