@@ -31,6 +31,13 @@ var AUTHOR_TABLE = {
     var expandAllPrompts = false;
     
     /**
+     * Whether it's our first time auto-scrolling to the prompt we're at (in
+     * which case, we don't want to scroll, because the user just opened the
+     * Author).
+     */
+    var firstTimeScrolling = true;
+    
+    /**
      * Event handlers for buttons and inputs in the prompt table.
      * @namespace
      */
@@ -398,7 +405,11 @@ var AUTHOR_TABLE = {
             var bodyRect = document.body.getBoundingClientRect(),
                 elemRect = finalElem.getBoundingClientRect(),
                 offset   = elemRect.top - bodyRect.top;
-            window.scrollTo(0, offset - 60);
+            if (firstTimeScrolling) {
+                firstTimeScrolling = false;
+            } else {
+                window.scrollTo(0, offset - 60);
+            }
         }
     }
     
