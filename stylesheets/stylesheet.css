@@ -500,7 +500,7 @@ Full-Width Styles
   padding-top: 68px;
   text-align: center;
   background-image: url(../images/sprite.png);
-  background-size: 300%;
+  background-size: 500%;
   /*margin-left: 10px;*/
 }
 
@@ -525,27 +525,27 @@ Full-Width Styles
 }
 
 #downloads_save {
-  background-position: 50% 0;
+  background-position: 25% 0;
 }
 
 #downloads_save:hover {
-  background-position: 50% 100%;
+  background-position: 25% 100%;
 }
 
 #downloads_view {
-  background-position: 100% 0;
+  background-position: 50% 0;
 }
 
 #downloads_view:hover {
-  background-position: 100% 100%;
+  background-position: 50% 100%;
 }
 
 #downloads_preview {
-  background-position: 100% 0;
+  background-position: 75% 0;
 }
 
 #downloads_preview:hover {
-  background-position: 100% 100%;
+  background-position: 75% 100%;
 }
 
 #downloads_publish {
