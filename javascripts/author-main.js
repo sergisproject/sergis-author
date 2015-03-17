@@ -538,7 +538,7 @@ function readJSONFile(file) {
         document.getElementById("version_outer").style.display = "inline";
         
         // "Open" button (if FileReader is supported)
-        if (typeof FileReader == "function") {
+        if (typeof FileReader != "undefined") {
             document.getElementById("instructions_open").style.display = "block";
             document.getElementById("downloads_open").style.display = "block";
             document.getElementById("downloads_open").addEventListener("click", function (event) {
