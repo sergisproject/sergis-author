@@ -12,8 +12,31 @@ Alternatively, you can clone this repository and open `index.html`.
 
 ## TODO
 
+Action Editor:
+
 - `SERGIS_JSON_PointsArray` in javascripts/author-json.js
+
 - `SERGIS_JSON_Style` in javascripts/author-json.js
+
+- Issue with "Add More..." for actions and then not being able to delete them
+  (Also, we need to find actions that are still "null" and get rid of them)
+  - "Adding more for add action doesn't work if I hit add after already entering one"
+
+- Make sure that required fields for an action are filled out
+
+- When creating a buffer action, make sure that the "objectName" that we're buffering has been created!
+  - If it hasn't, then the SerGIS Client spews up a "Error: Invalid objectName!" alert
+
+
+Other:
+
+- SerGIS Client: if title for a prompt spans multiple lines, weird things happen
+- Tutorial and help to show basic usage
+- Click/dblclick on content/actions/whatever to edit them
+- Ability to insert images from local computer (store them in JSON as data: URIs)
+- YouTube: take entire URL rather than video ID
+- Force text/content inputs to store a blank value instead of nothing for the "value" for the content
+  (otherwise the client stringifies the object and shows that instead).
 
 ## License
 
