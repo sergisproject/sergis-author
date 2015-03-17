@@ -121,11 +121,7 @@ var AUTHOR_ACTION_EDITOR = {
             editor_state.action_json.data = [];
         }
         
-        // Remove the old fields
-        var container = document.getElementById("overlay_actionEditor_contentContainer");
-        container.innerHTML = "";
-        
-        // Make the fields for this action name (and possibly frontend)
+        // Get the action data description
         var data = JSON.parse(select.value),
             actionsDataList;
         if (data.frontend) {
@@ -133,8 +129,19 @@ var AUTHOR_ACTION_EDITOR = {
         } else {
             actionsDataList = AUTHOR_JSON.actions;
         }
-        var fields = actionsDataList[data.name].getFields(editor_state.action_json.data);
         
+        // Set the description
+        document.getElementById("overlay_actionEditor_description").innerHTML = "";
+        if (actionsDataList[data.name].description) {
+            document.getElementById("overlay_actionEditor_description").appendChild(document.createTextNode(actionsDataList[data.name].description));
+        }
+        
+        // Remove the old fields
+        var container = document.getElementById("overlay_actionEditor_contentContainer");
+        container.innerHTML = "";
+        
+        // Make the fields for this action name (and possibly frontend)
+        var fields = actionsDataList[data.name].getFields(editor_state.action_json.data);
         for (var i = 0; i < fields.length; i++) {
             if (fields[i] == "repeat") continue;
             (function (i) {

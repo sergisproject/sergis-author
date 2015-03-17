@@ -117,8 +117,9 @@ var AUTHOR_JSON = {
      * A string for some action's data.
      * @constructor
      */
-    function SERGIS_JSON_String(label, json) {
+    function SERGIS_JSON_String(label, description, json) {
         this.label = label;
+        this.description = description;
         this.string = typeof json == "string" ? json : "";
     }
     
@@ -128,12 +129,14 @@ var AUTHOR_JSON = {
     
     SERGIS_JSON_String.prototype.getElement = function (onchange) {
         var that = this,
+            bigdiv = c("div", {className: "action-item"}),
             div = c("div", {className: "inputcontainer"}),
             id = "id_" + randID();
         
         div.appendChild(c("label", {
             "for": id,
-            text: this.label + ": "
+            text: this.label + ": ",
+            className: "action-label"
         }));
         var span = c("span");
         span.appendChild(c("input", {
@@ -144,7 +147,16 @@ var AUTHOR_JSON = {
             onchange();
         }));
         div.appendChild(span);
-        return div;
+        bigdiv.appendChild(div);
+        
+        if (this.description) {
+            bigdiv.appendChild(c("div", {
+                className: "action-description",
+                text: this.description
+            }));
+        }
+        
+        return bigdiv;
     };
     
     
@@ -152,8 +164,9 @@ var AUTHOR_JSON = {
      * A number for some action's data.
      * @constructor
      */
-    function SERGIS_JSON_Number(label, json, min, max, step) {
+    function SERGIS_JSON_Number(label, description, json, min, max, step) {
         this.label = label;
+        this.description = description;
         this.number = Number(json);
         if (isNaN(this.number)) this.number = 0;
         
@@ -168,12 +181,13 @@ var AUTHOR_JSON = {
     
     SERGIS_JSON_Number.prototype.getElement = function (onchange) {
         var that = this,
-            div = c("div"),
+            div = c("div", {className: "action-item"}),
             id = "id_" + randID();
         
         div.appendChild(c("label", {
             "for": id,
-            text: this.label + ": "
+            text: this.label + ": ",
+            className: "action-label"
         }));
         div.appendChild(c("input", {
             id: id,
@@ -192,6 +206,14 @@ var AUTHOR_JSON = {
                 onchange();
             }
         }));
+        
+        if (this.description) {
+            div.appendChild(c("div", {
+                className: "action-description",
+                text: this.description
+            }));
+        }
+        
         return div;
     };
     
@@ -201,8 +223,9 @@ var AUTHOR_JSON = {
      * objects with these properties: label (string), value (any valid JSON).
      * @constructor
      */
-    function SERGIS_JSON_Dropdown(label, json, items) {
+    function SERGIS_JSON_Dropdown(label, description, json, items) {
         this.label = label;
+        this.description = description;
         this.items = items;
         this.index = 0;
         for (var i = 0; i < this.items.length; i++) {
@@ -219,12 +242,13 @@ var AUTHOR_JSON = {
     
     SERGIS_JSON_Dropdown.prototype.getElement = function (onchange) {
         var that = this,
-            div = c("div"),
+            div = c("div", {className: "action-item"}),
             id = "id_" + randID();
         
         div.appendChild(c("label", {
             "for": id,
-            text: this.label + ": "
+            text: this.label + ": ",
+            className: "action-label"
         }));
         var select = c("select", {
             id: id
@@ -240,6 +264,14 @@ var AUTHOR_JSON = {
             }));
         }
         div.appendChild(select);
+        
+        if (this.description) {
+            div.appendChild(c("div", {
+                className: "action-description",
+                text: this.description
+            }));
+        }
+        
         return div;
     };
     
@@ -249,8 +281,9 @@ var AUTHOR_JSON = {
      * @see https://github.com/sergisproject/sergis-client/blob/master/lib/frontends/arcgis.js
      * @constructor
      */
-    function SERGIS_JSON_Layer(label, json) {
+    function SERGIS_JSON_Layer(label, description, json) {
         this.label = label;
+        this.description = description;
         this.json = (typeof json == "object" && json) ? json : {};
         if (typeof this.json.name != "string") this.json.name = "";
         if (typeof this.json.group != "string") this.json.group = "";
@@ -264,32 +297,41 @@ var AUTHOR_JSON = {
     
     SERGIS_JSON_Layer.prototype.getElement = function (onchange) {
         var that = this,
-            div = c("div"),
-            id, inner_div, inner_span;
+            div = c("div", {className: "action-item"}),
+            id, inner_div, inner_bigdiv, inner_span;
         
         inner_div = c("div");
-        inner_div.appendChild(c("b", {
-            text: this.label
+        inner_div.appendChild(c("label", {
+            text: this.label,
+            className: "action-label"
         }));
         div.appendChild(inner_div);
         
-        // Each item is an array: [label, value, change event handler]
+        if (this.description) {
+            div.appendChild(c("div", {
+                className: "action-description",
+                text: this.description
+            }));
+        }
+        
+        // Each item is an array: [label, description, value, change event handler]
         var textfields = [
-            [_("Name"), this.json.name || "", function (event) {
+            [_("Name"), _("The name of the layer (must be unique)."), this.json.name || "", function (event) {
                 that.json.name = this.value;
                 onchange();
             }],
-            [_("Group (optional)"), this.json.group || "", function (event) {
+            [_("Group (optional)"), _("A group name that this layer is part of (used in the \"hideLayers\" action)."), this.json.group || "", function (event) {
                 that.json.group = this.value;
                 onchange();
             }],
-            [_("URL"), this.json.urls[0] || "", function (event) {
+            [_("URL"), _("The URL to this layer on an ArcGIS Server."), this.json.urls[0] || "", function (event) {
                 that.json.urls[0] = this.value;
                 onchange();
             }]
         ];
         for (var i = 0; i < textfields.length; i++) {
             id = "id_" + randID();
+            inner_bigdiv = c("div", {className: "action-subitem"});
             inner_div = c("div", {className: "inputcontainer"});
             inner_div.appendChild(c("label", {
                 "for": id,
@@ -298,19 +340,25 @@ var AUTHOR_JSON = {
             inner_span = c("span");
             inner_span.appendChild(c("input", {
                 id: id,
-                value: textfields[i][1]
-            }, textfields[i][2]));
+                value: textfields[i][2]
+            }, textfields[i][3]));
             inner_div.appendChild(inner_span);
-            div.appendChild(inner_div);
+            inner_bigdiv.appendChild(inner_div);
+            inner_bigdiv.appendChild(c("div", {
+                className: "action-description",
+                text: textfields[i][1]
+            }));
+            div.appendChild(inner_bigdiv);
         }
         
         // Opacity
         id = "id_" + randID();
-        div.appendChild(c("label", {
+        inner_div = c("div", {className: "action-subitem"});
+        inner_div.appendChild(c("label", {
             "for": id,
             text: _("Opacity") + ": "
         }));
-        div.appendChild(c("input", {
+        inner_div.appendChild(c("input", {
             id: id,
             type: "number",
             min: 0,
@@ -327,6 +375,7 @@ var AUTHOR_JSON = {
                 onchange();
             }
         }));
+        div.appendChild(inner_div);
         
         return div;
     };
@@ -336,8 +385,9 @@ var AUTHOR_JSON = {
      * A SerGIS JSON Content object for some action's data.
      * @constructor
      */
-    function SERGIS_JSON_Content(label, json) {
+    function SERGIS_JSON_Content(label, description, json) {
         this.label = label;
+        this.description = description;
         this.json = (typeof json == "object" && json) ? json : {};
         if (!this.json.type) this.json.type = AUTHOR_JSON.defaultContentType;
         if (typeof this.json.value != "string") this.json.value = "";
@@ -349,12 +399,14 @@ var AUTHOR_JSON = {
     
     SERGIS_JSON_Content.prototype.getElement = function (onchange) {
         var that = this,
+            bigdiv = c("div", {className: "action-item"}),
             div = c("div", {
                 className: "inputcontainer"
             });
         
         div.appendChild(c("label", {
-            text: this.label + ": "
+            text: this.label + ": ",
+            className: "action-label"
         }));
         
         var select = c("select", {}, function (event) {
@@ -398,7 +450,16 @@ var AUTHOR_JSON = {
         }));
         div.appendChild(span);
         
-        return div;
+        bigdiv.appendChild(div);
+        
+        if (this.description) {
+            bigdiv.appendChild(c("div", {
+                className: "action-description",
+                text: this.description
+            }));
+        }
+        
+        return bigdiv;
     };
     
     
@@ -407,8 +468,9 @@ var AUTHOR_JSON = {
      * @see https://github.com/sergisproject/sergis-client/blob/master/lib/frontends/arcgis.js
      * @constructor
      */
-    function SERGIS_JSON_PointsArray(label, json) {
+    function SERGIS_JSON_PointsArray(label, description, json) {
         this.label = label;
+        this.description = description;
         this.json = (typeof json == "object" && json && json.length) ? json : [];
     }
     
@@ -418,8 +480,15 @@ var AUTHOR_JSON = {
     
     SERGIS_JSON_PointsArray.prototype.getElement = function (onchange) {
         var that = this,
-            div = c("div"),
+            div = c("div", {className: "action-item"}),
             id;
+        
+        if (this.description) {
+            div.appendChild(c("div", {
+                className: "action-description",
+                text: this.description
+            }));
+        }
         
         return div;
     };
@@ -432,6 +501,7 @@ var AUTHOR_JSON = {
      * The Gameplay Actions in SerGIS (not frontend-specific).
      * Each property is an object with 3 properties:
      *   "name": a string representing a localized name for the action.
+     *   "description": a string with a localized description for the action.
      *   "getFields": a function that will return an array of SERGIS_...
      *     instances representing the "data" params for the action. If there is
      *     existing data (i.e. we're editing an action instead of creating a new
@@ -442,6 +512,7 @@ var AUTHOR_JSON = {
     AUTHOR_JSON.actions = {
         explain: {
             name: _("Explanation"),
+            description: _("Show an explanation to the user to offer feedback on their choice or give them more information."),
             
             getFields: function (data) {
                 if (!data) data = [];
@@ -452,7 +523,7 @@ var AUTHOR_JSON = {
 
                 // They're all SERGIS_JSON_Content objects
                 for (var i = 0; i < data.length; i++) {
-                    params.push(new SERGIS_JSON_Content(_("Explanation"), data[i]));
+                    params.push(new SERGIS_JSON_Content(_("Explanation"), _("This explanation will be shown to the user."), data[i]));
                 }
 
                 // We can repeat the last type
@@ -480,13 +551,14 @@ var AUTHOR_JSON = {
         
         "goto": {
             name: _("Go To Prompt Index"),
+            description: _("Go to a different prompt instead of the next one in the sequence."),
             
             getFields: function (data) {
                 if (!data) data = [];
                 // We need one and only one slot
                 if (data.length != 1) data.length = 1;
 
-                return [new SERGIS_JSON_Number(_("Prompt Index"), data[0])];
+                return [new SERGIS_JSON_Number(_("Prompt Index"), _("Instead of advancing to the next sequential prompt, the game will advance to this prompt index."), data[0])];
             },
             
             toHTML: function (data) {
@@ -503,6 +575,7 @@ var AUTHOR_JSON = {
         
         logout: {
             name: _("Log Out"),
+            description: _("End the user's game session and log them out."),
             
             getFields: function (data) {
                 // No parameters to this one
@@ -536,6 +609,7 @@ var AUTHOR_JSON = {
         arcgis: {
             clearGraphics: {
                 name: _("Clear Graphics"),
+                description: _("Clear all graphics on the map, such as drawn objects (\"draw\" action) and buffers (\"buffer\" action)."),
                 
                 getFields: function (data) {
                     // No parameters to this one
@@ -552,7 +626,9 @@ var AUTHOR_JSON = {
             },
             
             showLayers: {
-                name: _("Show Layers"),
+                //name: _("Show Layers"),
+                name: _("Show Layer"),
+                description: _("Add a new ArcGIS Server map layer to the map."),
                 
                 getFields: function (data) {
                     if (!data) data = [];
@@ -563,11 +639,12 @@ var AUTHOR_JSON = {
 
                     // They're all SERGIS_JSON_Layer objects
                     for (var i = 0; i < data.length; i++) {
-                        params.push(new SERGIS_JSON_Layer(_("Layer"), data[i]));
+                        params.push(new SERGIS_JSON_Layer(_("Layer"), null, data[i]));
                     }
 
                     // We can repeat the last type
-                    params.push("repeat");
+                    // Except, that's rather confusing, so we're not going to.
+                    //params.push("repeat");
 
                     return params;
                 },
@@ -591,7 +668,9 @@ var AUTHOR_JSON = {
             },
             
             hideLayers: {
-                name: _("Hide Layers"),
+                //name: _("Hide Layers"),
+                name: _("Hide Layer"),
+                description: _("Hide a map layer that was previously added with the \"showLayer\" action."),
                 
                 getFields: function (data) {
                     if (!data) data = [];
@@ -602,11 +681,12 @@ var AUTHOR_JSON = {
 
                     // They're all SERGIS_JSON_String objects
                     for (var i = 0; i < data.length; i++) {
-                        params.push(new SERGIS_JSON_String(_("Layer Group"), data[i]));
+                        params.push(new SERGIS_JSON_String(_("Layer Group"), _("The \"group\" name of the layer(s) to hide, specified in the \"Group\" attribute of the layers (in a previous \"showLayers\" action)."), data[i]));
                     }
 
                     // We can repeat the last type
-                    params.push("repeat");
+                    // Except, that's rather confusing, so we're not going to.
+                    //params.push("repeat");
 
                     return params;
                 },
@@ -628,6 +708,7 @@ var AUTHOR_JSON = {
             
             draw: {
                 name: _("Draw"),
+                description: _("Draw predetermined points, lines, and polygons on the map."),
                 
                 drawTypes: {
                     point: _("Point"),
@@ -643,10 +724,10 @@ var AUTHOR_JSON = {
                     var params = [];
 
                     // Index 0 is a SERGIS_JSON_String
-                    params.push(new SERGIS_JSON_String(_("Object Name"), data[0]));
+                    params.push(new SERGIS_JSON_String(_("Object Name"), _("A unique name for the object being drawn."), data[0]));
 
                     // Index 1 is a SERGIS_JSON_Dropdown
-                    params.push(new SERGIS_JSON_Dropdown(_("Type"), data[1], [
+                    params.push(new SERGIS_JSON_Dropdown(_("Type"), _("The type of object to draw."), data[1], [
                         {
                             label: this.drawTypes.point,
                             value: "point"
@@ -662,11 +743,11 @@ var AUTHOR_JSON = {
                     ]));
 
                     // Index 2 is a SERGIS_JSON_DrawStyle
-                    params.push(new SERGIS_JSON_String(_("TODO: Style"), data[2]));
+                    params.push(new SERGIS_JSON_String(_("TODO: Style"), _("The style of the visual representation of the object on the map."), data[2]));
 
                     // The rest are SERGIS_JSON_PointsArray objects
                     for (var i = 3; i < data.length; i++) {
-                        params.push(new SERGIS_JSON_PointsArray(_("Points"), data[i]));
+                        params.push(new SERGIS_JSON_PointsArray(_("Points"), _("The points that make up the object to draw. If multiple sets of points are created, then multiple objects are drawn."), data[i]));
                     }
 
                     // We can repeat the last type
@@ -692,6 +773,7 @@ var AUTHOR_JSON = {
             
             buffer: {
                 name: _("Buffer"),
+                description: _("Create a buffer on the map around a point, line, or polygon previously drawn with the \"draw\" action."),
                 
                 distanceUnits: {
                     foot: _("Feet"),
@@ -710,10 +792,10 @@ var AUTHOR_JSON = {
                     var params = [];
 
                     // Index 0 is a SERGIS_JSON_Number
-                    params.push(new SERGIS_JSON_Number(_("Distance"), data[0]));
+                    params.push(new SERGIS_JSON_Number(_("Distance"), _("The numerical distance of the buffer."), data[0]));
 
                     // Index 1 is a SERGIS_JSON_Dropdown
-                    params.push(new SERGIS_JSON_Dropdown(_("Distance Unit"), data[1], [
+                    params.push(new SERGIS_JSON_Dropdown(_("Distance Unit"), _("The unit for the numerical distance specified above."), data[1], [
                         {label: this.distanceUnits.foot, value: "foot"},
                         {label: this.distanceUnits.kilometer, value: "kilometer"},
                         {label: this.distanceUnits.meter, value: "meter"},
@@ -723,10 +805,10 @@ var AUTHOR_JSON = {
                     ]));
 
                     // Index 2 is a SERGIS_JSON_String
-                    params.push(new SERGIS_JSON_String(_("Object Name"), data[2]));
+                    params.push(new SERGIS_JSON_String(_("Object Name"), _("An object name (corresponding to an object previously created using the \"draw\" action) to buffer."), data[2]));
 
                     // Index 3 is a SERGIS_JSON_DrawStyle
-                    params.push(new SERGIS_JSON_String(_("TODO: Style"), data[3]));
+                    params.push(new SERGIS_JSON_String(_("TODO: Style"), _("The style of the visual representation of the buffer on the map."), data[3]));
 
                     return params;
                 },
@@ -762,7 +844,7 @@ var AUTHOR_JSON = {
         arcgis: {
             basemap: {
                 getFields: function (data) {
-                    return new SERGIS_JSON_Dropdown(_("Basemap"), data || "streets", [
+                    return new SERGIS_JSON_Dropdown(_("Basemap"), _("The basemap of the map for this prompt."), data || "streets", [
                         {label: _("Streets"), value: "streets"},
                         {label: _("Satellite"), value: "satellite"},
                         {label: _("Street/Satellite Hybrid"), value: "hybrid"},
@@ -787,7 +869,7 @@ var AUTHOR_JSON = {
 
                     var params = [];
                     for (var i = 0; i < data.length; i++) {
-                        params.push(new SERGIS_JSON_Layer(_("Layer"), data[i]));
+                        params.push(new SERGIS_JSON_Layer(_("Layer"), _("A map layer that the user can choose to enable while looking at the map."), data[i]));
                     }
                     // We can repeat these
                     params.push("repeat");

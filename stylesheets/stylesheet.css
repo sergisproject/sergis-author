@@ -161,6 +161,26 @@ code.short {
   font-weight: bold;
 }
 
+.action-item {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.action-subitem {
+  margin-top: 4px;
+  margin-bottom: 4px;
+  padding-left: 15px;
+}
+
+.action-label {
+  font-weight: bold;
+}
+
+.action-description {
+  font-size: 90%;
+  font-style: italic;
+}
+
 /* .inputcontainer is used to make a text input take up the rest of the width:
  * <div class="inputcontainer"><label></label><span><input></span></div>
  * <div class="inputcontainer"><span class="label"></span><span><input></span></div>
