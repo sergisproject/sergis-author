@@ -26,6 +26,9 @@ Other:
 - Tutorial and help to show basic usage
 - Click/dblclick on content/actions/whatever to edit them
 - YouTube: take entire URL rather than video ID
+- For preview, submit a POST to the server with the JSON (instead of in the URL),
+  and then the server just throws it in a JS variable that the local.js backend
+  can find.
 
 ## License
 

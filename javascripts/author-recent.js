@@ -102,7 +102,11 @@ var AUTHOR_RECENT = {
         
         // Add ourselves at the beginning and save the new recent list
         recent.unshift(json);
-        window.localStorage.setItem("sergis_author_recent_files", JSON.stringify(recent));
+        try {
+            window.localStorage.setItem("sergis_author_recent_files", JSON.stringify(recent));
+        } catch (err) {
+            alert(_("Error saving prompt set: {0}", err.name) + "\n" + err.message + "\n\n");
+        }
         
         // Update the recent file dropdown
         updateRecentFiles();
