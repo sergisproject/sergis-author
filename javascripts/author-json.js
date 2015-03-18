@@ -625,7 +625,7 @@ var AUTHOR_JSON = {
             type: "number",
             min: 0,
             max: 1,
-            step: 0.05,
+            step: 0.01,
             value: this.json.opacity,
             required: "required"
         }, function (event) {
@@ -800,7 +800,7 @@ var AUTHOR_JSON = {
             inner_td = c("td");
             inner_td.appendChild(c("input", {
                 type: "number",
-                step: 5,
+                step: 0.001,
                 value: that.json[i].latitude || 0,
                 required: "required"
             }, function (event) {
@@ -828,7 +828,7 @@ var AUTHOR_JSON = {
             inner_td = c("td");
             inner_td.appendChild(c("input", {
                 type: "number",
-                step: 5,
+                step: 0.001,
                 value: that.json[i].longitude || 0,
                 required: "required"
             }, function (event) {
