@@ -29,6 +29,8 @@ Other:
 - For preview, submit a POST to the server with the JSON (instead of in the URL),
   and then the server just throws it in a JS variable that the local.js backend
   can find.
+- Move storage from localStorage to indexedDB for more storage.
+- When we make a new prompt ("Add Prompt"), scroll to it and open it ("click" on it).
 
 ## License
 
