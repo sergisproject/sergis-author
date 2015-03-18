@@ -11,12 +11,216 @@
 
 var AUTHOR_JSON = {
     /**
+     * Reference for the different types that the SerGIS JSON Content Object
+     * fields can be.
+     * Each has a makeEditor function that takes these parameters:
+     *   `property`: The name of the property (passed as the first argument to
+     *       onchange).
+     *   `name`: The name or label of the field.
+     *   `value`: The current value of the field.
+     *   `data`: An object in which we can store arbitrary metadata about the
+     *       value or property.
+     *   `onchange`: A function to call after the value changes. Called with:
+     *       onchange(property, value)
+     */
+    fieldTypes: {
+        // Boolean type (checkbox)
+        boolean: {
+            makeEditor: function (property, name, value, data, onchange) {
+                // Initial value
+                value = !!value;
+                // Propogate initial value
+                onchange(property, value);
+                
+                var p = c("p"),
+                    id = "id_" + randID();
+                p.appendChild(c("input", {
+                    id: id,
+                    type: "checkbox",
+                    checked: value ? "checked" : undefined
+                }, function (event) {
+                    onchange(property, this.checked);
+                }));
+                p.appendChild(c("label", {
+                    "for": id,
+                    text: " " + name
+                }));
+                return p;
+            }
+        },
+        
+        // Number type (spinbox)
+        number: {
+            makeEditor: function (property, name, value, data, onchange) {
+                // Initial value
+                value = Number(value || 0);
+                // Propogate initial value
+                onchange(property, value);
+                
+                var p = c("p"),
+                    id = "id_" + randID();
+                p.appendChild(c("label", {
+                    "for": id,
+                    text: name + " "
+                }));
+                p.appendChild(c("input", {
+                    id: id,
+                    type: "number",
+                    value: value.toString()
+                }, function (event) {
+                    onchange(property, Number(this.value));
+                }));
+                return p;
+            }
+        },
+        
+        // String type (textbox)
+        string: {
+            makeEditor: function (property, name, value, data, onchange) {
+                // Initial value
+                value = (value || "").toString();
+                // Propogate initial value
+                onchange(property, value);
+                
+                var p = c("p", {
+                    className: "inputcontainer"
+                });
+                var id = "id_" + randID();
+                p.appendChild(c("label", {
+                    "for": id,
+                    text: name + " "
+                }));
+                var inner_container = c("span");
+                inner_container.appendChild(c("input", {
+                    id: id,
+                    value: value
+                }, function (event) {
+                    onchange(property, this.value);
+                }));
+                p.appendChild(inner_container);
+                return p;
+            }
+        },
+        
+        // Multiline string type (textarea)
+        string_multiline: {
+            makeEditor: function (property, name, value, data, onchange) {
+                // Initial value
+                value = (value || "").toString();
+                // Propogate initial value
+                onchange(property, value);
+                
+                var p = c("p"),
+                    id = "id_" + randID();
+                p.appendChild(c("label", {
+                    "for": id,
+                    text: name + " "
+                }));
+                p.appendChild(c("textarea", {
+                    id: id,
+                    rows: 3,
+                    text: value
+                }, function (event) {
+                    onchange(property, this.value);
+                }));
+                return p;
+            }
+        },
+        
+        // A string (URL) or file (data URL)
+        string_file: {
+            makeEditor: function (property, name, value, data, onchange) {
+                // Initial value
+                value = (value || "").toString();
+                // Propogate initial value
+                onchange(property, value);
+                
+                var p = c("p", {
+                    className: "inputcontainer"
+                });
+                var id = "id_" + randID();
+                p.appendChild(c("label", {
+                    "for": id,
+                    text: name + " "
+                }));
+                
+                var input = c("input", {
+                    id: id,
+                    value: data.filename || value || ""
+                }, function (event) {
+                    onchange(property, this.value);
+                });
+                if (data.filename) input.disabled = true;
+                
+                var inner_container = c("span");
+                inner_container.appendChild(input);
+                p.appendChild(inner_container);
+                
+                // Make button container
+                inner_container = c("span");
+                inner_container.style.width = "1px";
+                inner_container.style.whiteSpace = "nowrap";
+
+                // Make clear button
+                var clearButton = c("button", {
+                    text: _("Clear")
+                }, function (event) {
+                    event.preventDefault();
+                    // Clear stored file value
+                    data.filename = undefined;
+                    onchange(property, input.value = "")
+                    // Reset looks
+                    this.style.display = "none";
+                    input.disabled = false;
+                });
+                if (!data.filename) clearButton.style.display = "none";
+                inner_container.appendChild(clearButton);
+                
+                if (window.askForFile) {
+                    // Make browse button
+                    var browseButton = c("button", {
+                        text: _("Browse for file...")
+                    }, function (event) {
+                        event.preventDefault();
+                        askForFile(function (file) {
+                            var reader = new FileReader();
+                            reader.onload = function () {
+                                if (reader.result) {
+                                    // Store file name
+                                    input.value = data.filename = file.name;
+                                    // Set looks
+                                    input.disabled = true;
+                                    clearButton.style.display = "inline";
+                                    // Store file value
+                                    onchange(property, reader.result);
+                                } else {
+                                    alert(_("Error reading file!\nDetails: File is empty or unreadable."));
+                                }
+                            };
+                            reader.onerror = function () {
+                                alert(_("Error reading file!\nDetails: " + reader.error));
+                            };
+                            reader.readAsDataURL(file);
+                        });
+                    });
+                    browseButton.style.marginLeft = "5px";
+                    inner_container.appendChild(browseButton);
+                    p.appendChild(inner_container);
+                }
+                
+                return p;
+            }
+        }
+    },
+    
+    /**
      * Reference for the SerGIS JSON Content Object types used by "Edit
      * Content" and "Edit Choices".
      *
      * Each `fields` property is an array of the options that that content type
      * takes. Each array item is another array:
      *     [JSON property, display name, type, default value]
+     * The first element in `fields` must be the one for the `value` property.
      *
      * Each content type also has a "toHTML" that is passed an object of this
      * content type and should return a simple rendering of the content.
@@ -38,6 +242,7 @@ var AUTHOR_JSON = {
                 return span.innerHTML;
             }
         },
+        
         "html": {
             name: _("HTML"),
             fields: [
@@ -53,10 +258,11 @@ var AUTHOR_JSON = {
                 return span.innerHTML;
             }
         },
+        
         "image": {
             name: _("Image"),
             fields: [
-                ["value", _("URL of Image:"), "string"],
+                ["value", _("URL of Image:"), "string_file"],
                 ["centered", _("Center Image"), "boolean", true],
                 ["style", _("CSS style:"), "string"]
             ],
@@ -69,6 +275,7 @@ var AUTHOR_JSON = {
                 return span.innerHTML;
             }
         },
+        
         "youtube": {
             name: _("YouTube Video"),
             fields: [
@@ -117,10 +324,12 @@ var AUTHOR_JSON = {
      * A string for some action's data.
      * @constructor
      */
-    function SERGIS_JSON_String(label, description, json) {
+    function SERGIS_JSON_String(label, description, json, required, pattern) {
         this.label = label;
         this.description = description;
         this.string = typeof json == "string" ? json : "";
+        this.required = required;
+        this.pattern = pattern;
     }
     
     SERGIS_JSON_String.prototype.getJSONValue = function () {
@@ -128,6 +337,9 @@ var AUTHOR_JSON = {
     };
     
     SERGIS_JSON_String.prototype.getElement = function (onchange) {
+        // Propogate initial changes
+        onchange();
+        
         var that = this,
             bigdiv = c("div", {className: "action-item"}),
             div = c("div", {className: "inputcontainer"}),
@@ -141,7 +353,9 @@ var AUTHOR_JSON = {
         var span = c("span");
         span.appendChild(c("input", {
             id: id,
-            value: this.string
+            value: this.string,
+            required: this.required ? "required" : undefined,
+            pattern: this.pattern || undefined
         }, function (event) {
             that.string = this.value;
             onchange();
@@ -180,6 +394,9 @@ var AUTHOR_JSON = {
     };
     
     SERGIS_JSON_Number.prototype.getElement = function (onchange) {
+        // Propogate initial changes
+        onchange();
+        
         var that = this,
             div = c("div", {className: "action-item"}),
             id = "id_" + randID();
@@ -195,7 +412,8 @@ var AUTHOR_JSON = {
             min: this.min || undefined,
             max: this.max || undefined,
             step: this.step || undefined,
-            value: this.number
+            value: this.number,
+            required: "required"
         }, function (event) {
             var num = Number(this.value);
             if (isNaN(num)) {
@@ -241,6 +459,9 @@ var AUTHOR_JSON = {
     };
     
     SERGIS_JSON_Dropdown.prototype.getElement = function (onchange) {
+        // Propogate initial changes
+        onchange();
+        
         var that = this,
             div = c("div", {className: "action-item"}),
             id = "id_" + randID();
@@ -296,6 +517,9 @@ var AUTHOR_JSON = {
     };
     
     SERGIS_JSON_Layer.prototype.getElement = function (onchange) {
+        // Propogate initial changes
+        onchange();
+        
         var that = this,
             div = c("div", {className: "action-item"}),
             id, inner_div, inner_bigdiv, inner_span;
@@ -314,17 +538,17 @@ var AUTHOR_JSON = {
             }));
         }
         
-        // Each item is an array: [label, description, value, change event handler]
+        // Each item is an array: [label, description, value, required, change event handler]
         var textfields = [
-            [_("Name"), _("The name of the layer (must be unique)."), this.json.name || "", function (event) {
+            [_("Name"), _("The name of the layer (must be unique)."), this.json.name || "", true, function (event) {
                 that.json.name = this.value;
                 onchange();
             }],
-            [_("Group (optional)"), _("A group name that this layer is part of (used in the \"hideLayers\" action)."), this.json.group || "", function (event) {
+            [_("Group (optional)"), _("A group name that this layer is part of (used in the \"hideLayers\" action)."), this.json.group || "", false, function (event) {
                 that.json.group = this.value;
                 onchange();
             }],
-            [_("URL"), _("The URL to this layer on an ArcGIS Server."), this.json.urls[0] || "", function (event) {
+            [_("URL"), _("The URL to this layer on an ArcGIS Server."), this.json.urls[0] || "", true, function (event) {
                 that.json.urls[0] = this.value;
                 onchange();
             }]
@@ -340,8 +564,9 @@ var AUTHOR_JSON = {
             inner_span = c("span");
             inner_span.appendChild(c("input", {
                 id: id,
-                value: textfields[i][2]
-            }, textfields[i][3]));
+                value: textfields[i][2],
+                required: textfields[i][3] ? "required" : undefined
+            }, textfields[i][4]));
             inner_div.appendChild(inner_span);
             inner_bigdiv.appendChild(inner_div);
             inner_bigdiv.appendChild(c("div", {
@@ -364,7 +589,8 @@ var AUTHOR_JSON = {
             min: 0,
             max: 1,
             step: 0.05,
-            value: this.json.opacity
+            value: this.json.opacity,
+            required: "required"
         }, function (event) {
             var num = Number(this.value);
             if (isNaN(num) || num < 0 || num > 1) {
@@ -389,7 +615,9 @@ var AUTHOR_JSON = {
         this.label = label;
         this.description = description;
         this.json = (typeof json == "object" && json) ? json : {};
-        if (!this.json.type) this.json.type = AUTHOR_JSON.defaultContentType;
+        if (!this.json.type || !AUTHOR_JSON.contentTypes.hasOwnProperty(this.json.type)) {
+            this.json.type = AUTHOR_JSON.defaultContentType;
+        }
         if (typeof this.json.value != "string") this.json.value = "";
     }
     
@@ -398,11 +626,30 @@ var AUTHOR_JSON = {
     };
     
     SERGIS_JSON_Content.prototype.getElement = function (onchange) {
+        // Propogate initial changes
+        onchange();
+        
         var that = this,
             bigdiv = c("div", {className: "action-item"}),
-            div = c("div", {
-                className: "inputcontainer"
-            });
+            div = c("div"),
+            editor_div = c("div");
+        
+        if (!that.json._sergis_author_data) that.json._sergis_author_data = {};
+        
+        // Function to make the editor for the current content type
+        function makeEditor() {
+            // Clear out the old editor
+            editor_div.innerHTML = "";
+            
+            // Get info on "value" field (which is the only one that we care about here)
+            var field = AUTHOR_JSON.contentTypes[that.json.type].fields[0];
+            var name = field[1], type = field[2], value = that.json.value || field[3];
+            
+            editor_div.appendChild(AUTHOR_JSON.fieldTypes[type].makeEditor(null, name, value, that.json._sergis_author_data, function (property, value) {
+                that.json.value = value;
+                onchange();
+            }));
+        }
         
         div.appendChild(c("label", {
             text: this.label + ": ",
@@ -411,6 +658,12 @@ var AUTHOR_JSON = {
         
         var select = c("select", {}, function (event) {
             that.json.type = this.value;
+            // Clear data
+            that.json.value = "";
+            that.json._sergis_author_data = {};
+            // Update the editor
+            makeEditor();
+            // Propogate changes to whoever's storing them
             onchange();
         });
         // Make sure default content type is first
@@ -433,29 +686,20 @@ var AUTHOR_JSON = {
                 }));
             }
         }
-        
-        var span = c("span", {
-            className: "label"
-        });
-        span.appendChild(select);
-        span.appendChild(document.createTextNode(": "));
-        div.appendChild(span);
-        
-        span = c("span");
-        span.appendChild(c("input", {
-            value: this.json.value || undefined
-        }, function (event) {
-            that.json.value = this.value;
-            onchange();
-        }));
-        div.appendChild(span);
-        
+        div.appendChild(select);
         bigdiv.appendChild(div);
         
-        if (this.description) {
+        // Append the div that holds the editor
+        bigdiv.appendChild(editor_div);
+        
+        // Make the initial editor
+        makeEditor();
+
+        // Add the description, if needed
+        if (that.description) {
             bigdiv.appendChild(c("div", {
                 className: "action-description",
-                text: this.description
+                text: that.description
             }));
         }
         
@@ -475,13 +719,129 @@ var AUTHOR_JSON = {
     }
     
     SERGIS_JSON_PointsArray.prototype.getJSONValue = function () {
-        return this.json;
+        return this.json.filter(function (item) {
+            return !!item;
+        });
     };
     
     SERGIS_JSON_PointsArray.prototype.getElement = function (onchange) {
+        // Propogate initial changes
+        onchange();
+        
         var that = this,
             div = c("div", {className: "action-item"}),
-            id;
+            table = c("table"), tr = c("tr"), td;
+        
+        function makeInnerTable(i) {
+            var inner_table = c("table", {
+                className: "noborder"
+            });
+            inner_table.style.margin = "0";
+            var inner_tr, inner_td, id;
+            
+            // Latitude
+            inner_tr = c("tr");
+            inner_td = c("td");
+            id = "id_" + randID();
+            inner_td.appendChild(c("label", {
+                "for": id,
+                text: _("Latitude:") + " "
+            }));
+            inner_tr.appendChild(inner_td);
+            inner_td = c("td");
+            inner_td.appendChild(c("input", {
+                type: "number",
+                step: 5,
+                value: that.json[i].latitude || 0,
+                required: "required"
+            }, function (event) {
+                var num = Number(this.value);
+                if (isNaN(num)) {
+                    this.style.border = "1px solid red";
+                } else {
+                    this.style.border = "";
+                    that.json[i].latitude = num;
+                    onchange();
+                }
+            }));
+            inner_tr.appendChild(inner_td);
+            inner_table.appendChild(inner_tr);
+            
+            // Longitude
+            inner_tr = c("tr");
+            inner_td = c("td");
+            id = "id_" + randID();
+            inner_td.appendChild(c("label", {
+                "for": id,
+                text: _("Longitude:") + " "
+            }));
+            inner_tr.appendChild(inner_td);
+            inner_td = c("td");
+            inner_td.appendChild(c("input", {
+                type: "number",
+                step: 5,
+                value: that.json[i].longitude || 0,
+                required: "required"
+            }, function (event) {
+                var num = Number(this.value);
+                if (isNaN(num)) {
+                    this.style.border = "1px solid red";
+                } else {
+                    this.style.border = "";
+                    that.json[i].longitude = num;
+                    onchange();
+                }
+            }));
+            inner_tr.appendChild(inner_td);
+            inner_table.appendChild(inner_tr);
+            
+            // "Remove" button
+            inner_tr = c("tr");
+            inner_td = c("td", {
+                colspan: "2"
+            });
+            inner_td.style.textAlign = "center";
+            inner_td.appendChild(c("button", {
+                text: "Remove Point"
+            }, function (event) {
+                that.json[i] = undefined;
+                onchange();
+                var td = inner_table.parentNode;
+                if (td && td.parentNode) {
+                    td.parentNode.removeChild(td);
+                }
+            }));
+            inner_tr.appendChild(inner_td);
+            inner_table.appendChild(inner_tr);
+            
+            return inner_table;
+        }
+        
+        for (var i = 0; i < this.json.length; i++) {
+            //if (!this.json[i]) this.json[i] = {latitude: 0, longitude: 0};
+            if (this.json[i]) {
+                td = c("td");
+                td.appendChild(makeInnerTable(i));
+                tr.appendChild(td);
+            }
+        }
+        
+        // Add "Add Point" button
+        var button = c("button", {
+            text: "Add Point"
+        }, function (event) {
+            var new_td = c("td");
+            new_td.appendChild(makeInnerTable(that.json.push({latitude: 0, longitude: 0}) - 1));
+            onchange();
+            tr.insertBefore(new_td, td);
+        });
+        td = c("td");
+        td.style.verticalAlign = "middle";
+        td.appendChild(button);
+        tr.appendChild(td);
+        
+        table.appendChild(tr);
+        div.appendChild(table);
         
         if (this.description) {
             div.appendChild(c("div", {
@@ -681,7 +1041,7 @@ var AUTHOR_JSON = {
 
                     // They're all SERGIS_JSON_String objects
                     for (var i = 0; i < data.length; i++) {
-                        params.push(new SERGIS_JSON_String(_("Layer Group"), _("The \"group\" name of the layer(s) to hide, specified in the \"Group\" attribute of the layers (in a previous \"showLayers\" action)."), data[i]));
+                        params.push(new SERGIS_JSON_String(_("Layer Group"), _("The \"group\" name of the layer(s) to hide, specified in the \"Group\" attribute of the layers (in a previous \"showLayers\" action)."), data[i], true));
                     }
 
                     // We can repeat the last type
@@ -724,7 +1084,7 @@ var AUTHOR_JSON = {
                     var params = [];
 
                     // Index 0 is a SERGIS_JSON_String
-                    params.push(new SERGIS_JSON_String(_("Object Name"), _("A unique name for the object being drawn."), data[0]));
+                    params.push(new SERGIS_JSON_String(_("Object Name"), _("A unique name for the object being drawn."), data[0], true, "^(?!(userDrawing)).*$"));
 
                     // Index 1 is a SERGIS_JSON_Dropdown
                     params.push(new SERGIS_JSON_Dropdown(_("Type"), _("The type of object to draw."), data[1], [
@@ -743,15 +1103,16 @@ var AUTHOR_JSON = {
                     ]));
 
                     // Index 2 is a SERGIS_JSON_DrawStyle
-                    params.push(new SERGIS_JSON_String(_("TODO: Style"), _("The style of the visual representation of the object on the map."), data[2]));
+                    params.push(new SERGIS_JSON_String(_("TODO: Style"), _("The style of the visual representation of the object on the map."), data[2], false));
 
                     // The rest are SERGIS_JSON_PointsArray objects
                     for (var i = 3; i < data.length; i++) {
-                        params.push(new SERGIS_JSON_PointsArray(_("Points"), _("The points that make up the object to draw. If multiple sets of points are created, then multiple objects are drawn."), data[i]));
+                        params.push(new SERGIS_JSON_PointsArray(_("Points"), _("The points that make up the object to draw."), data[i]));
                     }
 
                     // We can repeat the last type
-                    params.push("repeat");
+                    // Except, that's rather confusing, so we're not gonna play that game
+                    //params.push("repeat");
 
                     return params;
                 },
@@ -805,10 +1166,10 @@ var AUTHOR_JSON = {
                     ]));
 
                     // Index 2 is a SERGIS_JSON_String
-                    params.push(new SERGIS_JSON_String(_("Object Name"), _("An object name (corresponding to an object previously created using the \"draw\" action) to buffer."), data[2]));
+                    params.push(new SERGIS_JSON_String(_("Object Name"), _("An object name (corresponding to an object previously created using the \"draw\" action) to buffer.") + "\n" + _("If the object name specified here has not already been drawn on the map via a \"draw\" option, then the SerGIS Client will show an \"Invalid objectName\" error."), data[2], true));
 
                     // Index 3 is a SERGIS_JSON_DrawStyle
-                    params.push(new SERGIS_JSON_String(_("TODO: Style"), _("The style of the visual representation of the buffer on the map."), data[3]));
+                    params.push(new SERGIS_JSON_String(_("TODO: Style"), _("The style of the visual representation of the buffer on the map."), data[3], false));
 
                     return params;
                 },

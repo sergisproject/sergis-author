@@ -141,7 +141,7 @@
 
       <p style="text-align: center;"><label for="overlay_actionEditor_name">Action Name: </label><select id="overlay_actionEditor_name"></select></p>
       <p style="text-align: center;" class="action-description" id="overlay_actionEditor_description"></p>
-      <div id="overlay_actionEditor_contentContainer"></div>
+      <form id="overlay_actionEditor_contentContainer"></form>
       <hr>
 
       <p style="text-align: center;"><button id="overlay_actionEditor_cancel" class="sub-button">Cancel</button><button id="overlay_actionEditor_save" class="main-button">Save</button></p>
@@ -150,7 +150,7 @@
 </div>
 
 <div style="display: none;">
-    <input id="fileinput" type="file">
+    <div id="fileinputs"></div>
     <form id="publish-form" method="POST" target="_blank">
         <textarea id="publish-form-input" name="jsondata"></textarea>
     </form>

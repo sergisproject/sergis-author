@@ -144,64 +144,22 @@ var AUTHOR_EDITOR = {
         
         // Make the fields for this content type (based on AUTHOR_JSON.contentTypes)
         var fields = AUTHOR_JSON.contentTypes[select.value].fields;
-        var property, name, type, value;
+        var property, name, type, value, data;
         var p, id, inner_container;
+        if (!editor_state.content_json._sergis_author_data) editor_state.content_json._sergis_author_data = {};
         for (var i = 0; i < fields.length; i++) {
             // Shortcuts for the 4 elements in the array
             property = fields[i][0];
             name = fields[i][1];
             type = fields[i][2];
             value = typeof editor_state.content_json[property] != "undefined" ? editor_state.content_json[property] : fields[i][3];
+            if (!editor_state.content_json._sergis_author_data[property]) editor_state.content_json._sergis_author_data[property] = {};
+            data = editor_state.content_json._sergis_author_data[property];
             
-            p = c("p");
-            id = "id_contenteditor_" + randID();
             // Create the field editor based on its type
-            if (type == "boolean") {
-                // Boolean type (checkbox)
-                p.appendChild(c("input", {
-                    id: id,
-                    type: "checkbox",
-                    checked: value ? "checked" : undefined
-                }, function (event, property) {
-                    editor_state.content_json[property] = this.checked;
-                }, property));
-                p.appendChild(c("label", {
-                    "for": id,
-                    text: " " + name
-                }));
-            } else {
-                // Not a boolean type (checkbox), so label comes first
-                p.appendChild(c("label", {
-                    "for": id,
-                    text: name + " "
-                }));
-                if (type == "string_multiline") {
-                    // Multiline string type (textarea)
-                    p.appendChild(c("textarea", {
-                        id: id,
-                        rows: 3,
-                        text: value || ""
-                    }, function (event, property) {
-                        editor_state.content_json[property] = this.value;
-                    }, property));
-                } else {
-                    if (type == "number") {
-                        inner_container = p;
-                    } else {
-                        p.className += " inputcontainer";
-                        p.appendChild(inner_container = c("span"));
-                    }
-                    // String or number (input)
-                    inner_container.appendChild(c("input", {
-                        id: id,
-                        type: type == "number" ? "number" : "",
-                        value: value || ""
-                    }, function (event, property, type) {
-                        editor_state.content_json[property] = type == "number" ? Number(this.value) : this.value;
-                    }, property, type));
-                }
-            }
-            container.appendChild(p);
+            container.appendChild(AUTHOR_JSON.fieldTypes[type].makeEditor(property, name, value, data, function (property, value) {
+                editor_state.content_json[property] = value;
+            }));
         }
     }
 

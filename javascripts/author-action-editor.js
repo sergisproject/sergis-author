@@ -84,6 +84,14 @@ var AUTHOR_ACTION_EDITOR = {
      * Save whatever we were editing and close the editor.
      */
     function saveEditor() {
+        // Check validation
+        var form = document.getElementById("overlay_actionEditor_contentContainer");
+        if (form && typeof form.reportValidity == "function") {
+            if (!form.reportValidity()) {
+                return;
+            }
+        }
+        // Store it
         json.promptList[editor_state.promptIndex].actionList[editor_state.choiceIndex].actions[editor_state.actionIndex] = editor_state.action_json;
         // Close the editor
         closeEditor();
@@ -205,6 +213,11 @@ var AUTHOR_ACTION_EDITOR = {
         
         // Update the Action editor based on type
         updateActionEditor();
+        
+        // Set up form to not submit
+        document.getElementById("overlay_actionEditor_contentContainer").addEventListener("submit", function (event) {
+            event.preventDefault();
+        }, false);
         
         // Set up Cancel button
         document.getElementById("overlay_actionEditor_cancel").addEventListener("click", function (event) {

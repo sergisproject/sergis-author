@@ -6,7 +6,7 @@
     in the LICENSE.txt file.
 */
 
-// Globals: json, randInt, randID, removeFromString, overlay, c, selectAll, checkJSON, swapGotos, decrementGotos, generate, makeLabel, loadJSON, readJSONFile
+// Globals: json, randInt, randID, removeFromString, overlay, c, selectAll, checkJSON, swapGotos, decrementGotos, generate, makeLabel, loadJSON, readJSONFile, askForFile
 
 /**
  * The current state of the SerGIS JSON Game Data that we're working on.
@@ -537,25 +537,36 @@ function readJSONFile(file) {
         document.getElementById("version_inner").appendChild(document.createTextNode("" + SERGIS_PROMPT_AUTHOR_VERSION));
         document.getElementById("version_outer").style.display = "inline";
         
-        // "Open" button (if FileReader is supported)
+        // "Open" button and "askForFile" (if FileReader is supported)
         if (typeof FileReader != "undefined") {
+            // Set up askForFile function
+            window.askForFile = function (onfile) {
+                var fileinput = c("input", {
+                    type: "file"
+                }, function (event) {
+                    if (event.target.files && event.target.files.length > 0 && typeof onfile == "function") {
+                        onfile(event.target.files[0]);
+                    }
+                });
+                document.getElementById("fileinputs").appendChild(fileinput);
+                fileinput.click();
+            };
+            
+            // Things releated to the "Open" button
             document.getElementById("instructions_open").style.display = "block";
             document.getElementById("downloads_open").style.display = "block";
             document.getElementById("downloads_open").addEventListener("click", function (event) {
                 event.preventDefault();
-                document.getElementById("fileinput").click();
-            }, false);
-            document.getElementById("fileinput").addEventListener("change", function (event) {
-                if (event.target.files && event.target.files.length > 0) {
-                    var file = event.target.files[0];
+                askForFile(function (file) {
                     var ext = file.name.substring(file.name.lastIndexOf(".") + 1).toLowerCase();
                     if (ext != "json") {
                         alert(_("Invalid file!\nPlease select a *.json file."));
                     } else {
                         readJSONFile(file);
                     }
-                }
+                });
             }, false);
+            
         }
         
         // "View JSON" button
