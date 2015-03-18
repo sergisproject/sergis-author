@@ -7,7 +7,11 @@
 */
 
 // This file contains all the details about the SerGIS JSON Game Data format.
-// Globals: AUTHOR_JSON
+// Globals: AUTHOR_JSON, AUTHOR_JSON_MAX_FILE_SIZE, AUTHOR_JSON_MAX_FILE_SIZE_HUMAN_READABLE
+
+// Max file size, in bytes
+var AUTHOR_JSON_MAX_FILE_SIZE = 1024 * 1024; // 1 MB
+var AUTHOR_JSON_MAX_FILE_SIZE_HUMAN_READABLE = "1 MB";
 
 var AUTHOR_JSON = {
     /**
@@ -184,6 +188,13 @@ var AUTHOR_JSON = {
                     }, function (event) {
                         event.preventDefault();
                         askForFile(function (file) {
+                            if (file.size > AUTHOR_JSON_MAX_FILE_SIZE) {
+                                // AHH! Huge file!
+                                if (!confirm(_("The file that you have chosen is larger than {0}, which is the recommended maximum file size. It is recommended that you upload the file elsewhere and just link to it here.", AUTHOR_JSON_MAX_FILE_SIZE_HUMAN_READABLE) + "\n\n" + _("Would you like to add the file anyway? (This may cause unexpected issues.)"))) {
+                                    // Nope
+                                    return;
+                                }
+                            }
                             var reader = new FileReader();
                             reader.onload = function () {
                                 if (reader.result) {
