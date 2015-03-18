@@ -146,7 +146,8 @@ var AUTHOR_JSON = {
                 
                 var input = c("input", {
                     id: id,
-                    value: data.filename || value || ""
+                    value: data.filename || value || "",
+                    placeholder: "http://"
                 }, function (event) {
                     onchange(property, this.value);
                 });
@@ -262,7 +263,7 @@ var AUTHOR_JSON = {
         "image": {
             name: _("Image"),
             fields: [
-                ["value", _("URL of Image:"), "string_file"],
+                ["value", _("Image URL/File:"), "string_file"],
                 ["centered", _("Center Image"), "boolean", true],
                 ["style", _("CSS style:"), "string"]
             ],
