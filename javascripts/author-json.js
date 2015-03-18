@@ -319,6 +319,31 @@ var AUTHOR_JSON = {
     "AUTHOR_JSON.frontendInfo" are defined.
     */
     
+    /**
+     * Convert an array of [red, green, blue] to a color hex.
+     */
+    function rgbToHex(arr) {
+        var hex = "#";
+        for (var i = 0; i <= 2; i++) {
+            hex += ("0" + (arr[i] || 0).toString(16)).slice(-2);
+        }
+        return hex;
+    }
+    window.rgbToHex = rgbToHex;
+    
+    /**
+     * Convert a color hex to [red, green, blue].
+     */
+    function hexToRgb(hex) {
+        if (hex[0] == "#") hex = hex.substring(1);
+        var arr = [];
+        for (var i = 0; i <= 2; i++) {
+            arr[i] = parseInt(hex.substring(i*2, i*2+2), 16);
+        }
+        return arr;
+    }
+    window.hexToRgb = hexToRgb;
+    
     
     /**
      * A string for some action's data.
@@ -732,6 +757,18 @@ var AUTHOR_JSON = {
             div = c("div", {className: "action-item"}),
             table = c("table"), tr = c("tr"), td;
         
+        div.appendChild(c("label", {
+            text: this.label + ": ",
+            className: "action-label"
+        }));
+        
+        if (this.description) {
+            div.appendChild(c("div", {
+                className: "action-description",
+                text: this.description
+            }));
+        }
+        
         function makeInnerTable(i) {
             var inner_table = c("table", {
                 className: "noborder"
@@ -843,12 +880,220 @@ var AUTHOR_JSON = {
         table.appendChild(tr);
         div.appendChild(table);
         
+        return div;
+    };
+    
+    
+    /**
+     * A SerGIS_ArcGIS~DrawStyle object for some action's data.
+     * @see https://github.com/sergisproject/sergis-client/blob/master/lib/frontends/arcgis.js
+     * @constructor
+     */
+    function SERGIS_JSON_DrawStyle(label, description, json) {
+        this.properties = [
+            ["dotStyle", _("Dot Style")],
+            ["dotColor", _("Dot Color")],
+            ["lineStyle", _("Line Style")],
+            ["lineColor", _("Line Color")],
+            ["lineWidth", _("Line Width")],
+            ["fillStyle", _("Fill Style")],
+            ["fillColor", _("Fill Color")]
+        ];
+        this.possibilities = {
+            dotStyle: [
+                ["circle", _("Circle")],
+                ["cross", _("Cross")],
+                ["diamond", _("Diamond")],
+                ["square", _("Square")],
+                ["x", "X"]
+            ],
+            dotColor: "color",
+            lineStyle: [
+                ["Solid", _("Solid")],
+                ["Dash", _("Dash")],
+                ["DashDot", _("Dash-Dot")],
+                ["DashDotDot", _("Dash-Dot-Dot")],
+                ["LongDash", _("Long Dash")],
+                ["LongDashDot", _("Long Dash-Dot")],
+                ["ShortDash", _("Short Dash")],
+                ["ShortDashDot", _("Short Dash-Dot")],
+                ["ShortDashDotDot", _("Short Dash-Dot-Dot")],
+                ["ShortDot", _("Short Dot")],
+                ["Null", _("None")]
+            ],
+            lineColor: "color",
+            lineWidth: "number",
+            fillStyle: [
+                ["solid", _("Solid")],
+                ["horizontal", _("Horizontal Lines")],
+                ["vertical", _("Vertical Lines")],
+                ["cross", _("Cross")],
+                ["diagonal_cross", _("Diagonal Cross")],
+                ["forward_diagonal", _("Forward Diagonal")],
+                ["backward_diagonal", _("Backward Diagonal")],
+                ["null", _("None")]
+            ],
+            fillColor: "color"
+        };
+        this.defaults = {
+            dotStyle: "circle",
+            dotColor: [0, 255, 0, 0.5],
+            lineStyle: "solid",
+            lineColor: [255, 0, 0],
+            lineWidth: 2,
+            fillStyle: "solid",
+            fillColor: [255, 0, 0, 0.25]
+        };
+        
+        this.checkJSON = function () {
+            // Set defaults if nonexistent
+            for (var item in this.defaults) {
+                if (this.defaults.hasOwnProperty(item)) {
+                    // Switch by the type of this item
+                    if (this.possibilities[item] == "number") {
+                        // It must be a positive number
+                        if (typeof this.json[item] != "number" || this.json[item] < 1) {
+                            this.json[item] = this.defaults[item];
+                        }
+                        // Make sure it's an integer
+                        this.json[item] = Math.floor(this.json[item]);
+                    } else if (this.possibilities[item] == "color") {
+                        // It must be an array of 3-4 values: [r, g, b, a]
+                        if (!this.json[item] || !this.json[item].length) this.json[item] = this.defaults[item];
+                        // Check r, g, and b
+                        for (var i = 0; i <= 2; i++) {
+                            if (typeof this.json[item][i] != "number" || this.json[item][i] < 0 || this.json[item][i] > 255) {
+                                this.json[item][i] = 0;
+                            }
+                        }
+                        // Check a
+                        if (typeof this.json[item][3] != "number" || this.json[item][3] < 0 || this.json[item][3] > 1) {
+                            this.json[item][3] = 1;
+                        }
+                    } else {
+                        // It must be a string that's a member of the list
+                        var possibilities = this.possibilities[item].map(function (it) {
+                            return it[0];
+                        });
+                        if (!this.json[item] || possibilities.indexOf(this.json[item]) == -1) {
+                            this.json[item] = this.defaults[item];
+                        }
+                    }
+                }
+            }
+        };
+        
+        this.label = label;
+        this.description = description;
+        this.json = json || {};
+        this.checkJSON();
+    }
+    
+    SERGIS_JSON_DrawStyle.prototype.getJSONValue = function () {
+        return this.json;
+    };
+    
+    SERGIS_JSON_DrawStyle.prototype.getElement = function (onchange) {
+        // Propogate initial changes
+        onchange();
+        
+        var that = this,
+            div = c("div", {className: "action-item"}),
+            table = c("table", {className: "noborder"}),
+            tr, td, input, select,
+            id, i, j;
+        
+        div.appendChild(c("label", {
+            text: this.label + ": ",
+            className: "action-label"
+        }));
+        
         if (this.description) {
             div.appendChild(c("div", {
                 className: "action-description",
                 text: this.description
             }));
         }
+        
+        var pre = "";
+        var rows = [];
+        var columns, prop;
+        for (i = 0; i < this.properties.length; i++) {
+            prop = this.properties[i][0];
+            
+            if (pre != prop.substring(0, 3)) {
+                // Make a new row
+                if (columns) rows.push(columns);
+                columns = [];
+                pre = prop.substring(0, 3);
+            }
+            
+            id = "id_" + randID();
+            td = c("td");
+            td.appendChild(c("label", {
+                "for": id,
+                text: this.properties[i][1] + ": "
+            }));
+            columns.push(td);
+            
+            td = c("td");
+            if (this.possibilities[prop] == "number") {
+                // It must be a positive number
+                td.appendChild(c("input", {
+                    id: id,
+                    type: "number",
+                    value: this.json[prop],
+                    min: 1
+                }, function (event, that, prop) {
+                    that.json[prop] = Number(this.value);
+                    onchange();
+                }, this, prop));
+            } else if (this.possibilities[prop] == "color") {
+                // It must be a color
+                input = c("input", {
+                    id: id,
+                    type: "color",
+                    //value: rgbToHex(this.json[prop]),
+                    // (above doesn't do it for chrome)
+                    size: "7",
+                    maxlength: "7"
+                }, function (event, that, prop) {
+                    that.json[prop] = hexToRgb(this.value).concat(that.json[prop][3]);
+                }, this, prop);
+                td.appendChild(input);
+                input.value = rgbToHex(this.json[prop]);
+            } else {
+                // It must be a select option
+                select = c("select", {
+                    id: id
+                }, function (event, that, prop) {
+                    that.json[prop] = this.value;
+                });
+                for (j = 0; j < this.possibilities[prop].length; j++) {
+                    select.appendChild(c("option", {
+                        value: this.possibilities[prop][j][0],
+                        text: this.possibilities[prop][j][1],
+                        selected: this.json[prop] == this.possibilities[prop][j][0] ? "selected" : undefined
+                    }));
+                }
+                td.appendChild(select);
+            }
+            columns.push(td);
+            // Spacing
+            columns.push(c("td"));
+        }
+        // Finish up the last row
+        rows.push(columns);
+        
+        // Add table contents
+        for (i = 0; i < rows.length; i++) {
+            tr = c("tr");
+            for (j = 0; j < rows[i].length; j++) {
+                tr.appendChild(rows[i][j]);
+            }
+            table.appendChild(tr);
+        }
+        div.appendChild(table);
         
         return div;
     };
@@ -1103,7 +1348,7 @@ var AUTHOR_JSON = {
                     ]));
 
                     // Index 2 is a SERGIS_JSON_DrawStyle
-                    params.push(new SERGIS_JSON_String(_("TODO: Style"), _("The style of the visual representation of the object on the map."), data[2], false));
+                    params.push(new SERGIS_JSON_DrawStyle(_("Style"), _("The style of the visual representation of the object on the map."), data[2]));
 
                     // The rest are SERGIS_JSON_PointsArray objects
                     for (var i = 3; i < data.length; i++) {
@@ -1169,7 +1414,7 @@ var AUTHOR_JSON = {
                     params.push(new SERGIS_JSON_String(_("Object Name"), _("An object name (corresponding to an object previously created using the \"draw\" action) to buffer.") + "\n" + _("If the object name specified here has not already been drawn on the map via a \"draw\" option, then the SerGIS Client will show an \"Invalid objectName\" error."), data[2], true));
 
                     // Index 3 is a SERGIS_JSON_DrawStyle
-                    params.push(new SERGIS_JSON_String(_("TODO: Style"), _("The style of the visual representation of the buffer on the map."), data[3], false));
+                    params.push(new SERGIS_JSON_DrawStyle(_("Style"), _("The style of the visual representation of the buffer on the map."), data[3]));
 
                     return params;
                 },
@@ -1218,7 +1463,10 @@ var AUTHOR_JSON = {
                 },
                 
                 toHTML: function (data) {
-                    
+                    var span = c("span", {
+                        text: data
+                    });
+                    return span.innerHTML;
                 }
             },
             
@@ -1238,7 +1486,12 @@ var AUTHOR_JSON = {
                 },
                 
                 toHTML: function (data) {
-                    
+                    var span = c("span", {
+                        text: data.map(function (item) {
+                            return item && item.name
+                        }).join(", ")
+                    });
+                    return span.innerHTML;
                 }
             }
         }

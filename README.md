@@ -14,8 +14,6 @@ Alternatively, you can clone this repository and open `index.html`.
 
 Action Editor:
 
-- `SERGIS_JSON_Style` in javascripts/author-json.js
-
 - Issue with "Add More..." for actions and then not being able to delete them
   - "Adding more for add action doesn't work if I hit add after already entering one"
 
