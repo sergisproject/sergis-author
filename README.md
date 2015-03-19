@@ -31,6 +31,9 @@ Other:
   can find.
 - Move storage from localStorage to indexedDB for more storage.
 - When we make a new prompt ("Add Prompt"), scroll to it and open it ("click" on it).
+- Whenever a property (like Title or Map) is updated, it needs to be updated in the "short" version too.
+- Replace "Prompt Index" with just "Prompt", which consists of a 1-based prompt number and its title.
+- arcgis:clearGraphics doesn't show up the same as the others in the "Actions" column
 
 ## License
 
