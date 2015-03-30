@@ -9,6 +9,18 @@
 // Globals: game, randInt, randID, removeFromString, overlay, getOverlay, c,
 // selectAll, checkJSON, swapGotos, decrementGotos, generate
 
+// Make sure console... exists
+if (!console) console = {};
+if (!console.log) console.log = function () {};
+if (!console.error) console.error = console.log;
+
+// Polyfill window.location.origin if needed
+if (!window.location.origin) {
+    window.location.origin = window.location.protocol + "//" +
+        window.location.hostname +
+        (window.location.port ? ":" + window.location.port: "");
+}
+
 // The current game
 var game = {
     name: null,
