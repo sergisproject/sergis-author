@@ -379,7 +379,8 @@ AUTHOR.TABLE = {
      */
     function setCurrentPrompt(promptIndex) {
         currentPromptIndex = promptIndex;
-        checkCurrentPrompt();
+        // Re-draw the table
+        AUTHOR.TABLE.initTable();
     }
     
     /**
@@ -428,8 +429,10 @@ AUTHOR.TABLE = {
     
     /**
      * Make the prompt table.
+     *
+     * @param {number} [newCurrentPromptIndex] - A new current prompt index.
      */
-    AUTHOR.TABLE.initTable = function () {
+    AUTHOR.TABLE.initTable = function (newCurrentPromptIndex) {
         // Get rid of the old table
         document.getElementById("promptContainer").innerHTML = "";
         // Create the new table; reset the tabindex
@@ -469,6 +472,10 @@ AUTHOR.TABLE = {
         table.appendChild(tbody);
         document.getElementById("promptContainer").appendChild(table);
         
+        if (typeof newCurrentPromptIndex == "number") {
+            // Select a new current prompt
+            currentPromptIndex = newCurrentPromptIndex;
+        }
         // Make sure current prompt is selected and scrolling is good
         checkCurrentPrompt();
     };

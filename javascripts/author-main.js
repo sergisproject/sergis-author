@@ -392,8 +392,9 @@ function decrementGotos(leastIndex) {
  * table.
  *
  * @param {boolean} [updateTable] - Whether to update the table.
+ * @param {number} [newCurrentPromptIndex] - A new current prompt index.
  */
-function generate(updateTable) {
+function generate(updateTable, newCurrentPromptIndex) {
     // Make sure our data is good
     checkJSON();
     
@@ -421,7 +422,7 @@ function generate(updateTable) {
     
     // And, update the table (if needed)
     if (updateTable) {
-        AUTHOR.TABLE.initTable();
+        AUTHOR.TABLE.initTable(newCurrentPromptIndex);
     }
 }
 
@@ -474,9 +475,9 @@ function generate(updateTable) {
         // "Add Prompt" button
         document.getElementById("addPrompt").addEventListener("click", function (event) {
             event.preventDefault();
-            game.jsondata.promptList.push({});
+            var newPromptIndex = game.jsondata.promptList.push({}) - 1;
             // Save and regenerate
-            generate(true);
+            generate(true, newPromptIndex);
         }, false);
         
         // "Expand All Prompts" checkbox
