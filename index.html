@@ -8,7 +8,7 @@
 <meta name="description" content="Slate is a responsive theme for GitHub Pages">
 <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 <!-- VERSION NUMBER -->
-<script>var SERGIS_PROMPT_AUTHOR_VERSION = "0.9";</script>
+<script>var SERGIS_PROMPT_AUTHOR_VERSION = "1.0";</script>
 <title>SerGIS Prompt Author</title>
 </head>
 
@@ -17,48 +17,23 @@
 <div id="header_wrap" class="outer">
   <header class="inner">
     <h1 id="project_title">SerGIS Prompt Author</h1>
-    <section id="downloads">
+    <section id="toolbar">
       <!-- Icons made by <a href="http://www.freepik.com">Freepik</a> from <a href="http://www.flaticon.com">www.flaticon.com</a> are licensed under <a href="http://creativecommons.org/licenses/by/3.0/">Creative Commons BY 3.0</a>. -->
-      <a id="downloads_view" href="#" title="View JSON Game Data" tabindex="7">View JSON</a>
-      <a id="downloads_publish" href="#" title="Publish Game on SerGIS Server" tabindex="6" style="display: none;">Publish</a>
-      <a id="downloads_preview" href="#" target="_blank" title="Preview SerGIS Game" tabindex="5" style="display: none;">Preview</a>
-      <a id="downloads_save" href="#" title="Save JSON Game Data File" tabindex="4" style="display: none;">Save File</a>
-      <a id="downloads_open" href="#" title="Open JSON Game Data File" tabindex="3" style="display: none;">Open File</a>
-      <div id="downloads_recent" style="display: none;">
-        <!--<label for="downloads_recent_select">Recent Files: </label>-->
-        <select id="downloads_recent_select" tabindex="2"></select>
-      </div>
+      <a id="toolbar_publish" href="#" title="Publish Game on SerGIS Server" tabindex="6" style="display: none;">Publish</a>
+      <a id="toolbar_preview" href="#" target="_blank" title="Preview SerGIS Game" tabindex="5" style="display: none;">Preview</a>
+      <a id="toolbar_export" href="#" title="Download JSON Game Data File" tabindex="4" style="display: none;">Export</a>
+      <a id="toolbar_open" href="#" title="Create, Open, or Import Game" tabindex="3">Create/Open</a>
     </section>
   </header>
 </div>
 
 <div id="main_content_wrap" class="outer">
   <section id="main_content" class="inner">
-    <div id="instructions">
-      <p>To make a new SerGIS JSON Game Data file, just start adding data below!</p>
-      <p id="instructions_open" style="display: none;">To load an existing SerGIS JSON Game Data, click the "Open File" button to the right.</p>
-      <p id="instructions_recent" style="display: none;">Files that you have edited before using the SerGIS Prompt Author are above in the <label for="downloads_recent_select" style="cursor: pointer;">"Recent Files" dropdown</label>.</p>
-      <p>To view the JSON data, click "View JSON Data" at the bottom of the page.</p>
-      <p id="instructions_save" style="display: none;">Once you are finished, be sure to click the "Save File" button to the right to download your SerGIS JSON Game Data file. (If you forget, no worries; it will appear next time in the "Recent Files" dropdown.)</p>
-    </div>
-    <div id="loadedFrom" style="display: none;">
-      <h3 id="loadedFrom_filename" style="text-align: center;"></h3>
-      <hr>
+    <div id="instructions" style="display: none;">
+      <p>To create your new SerGIS Game, just start adding data below!</p>
     </div>
 
     <h2>General Properties</h2>
-    <table class="noborder">
-      <tbody>
-        <tr>
-          <td><label for="general_name">Prompt Set Name:</label></td>
-          <td><input id="general_name" tabindex="10"></td>
-        </tr>
-        <tr>
-          <td><label for="general_author">Prompt Set Author:</label></td>
-          <td><input id="general_author" tabindex="11"></td>
-        </tr>
-      </tbody>
-    </table>
     <table class="noborder">
       <tbody>
         <tr>
@@ -68,9 +43,9 @@
         <tr>
           <td>&nbsp;</td>
           <td><label for="general_onJumpBack">When a user jumps back: </label><select id="general_onJumpBack" tabindex="13">
-              <option value="reset" title="Disregard all the choices that the user has made" selected>Disregard choices</option>
-              <option value="" title="Remember the user’s choices and show the corresponding Map Actions on the map">Remember choices and show actions</option>
-              <option value="hide" title="Remember the user’s choices, but don’t show any Map Actions on the map">Remember choices but hide actions</option>
+            <option value="reset" title="Disregard all the choices that the user has made" selected>Disregard choices</option>
+            <option value="" title="Remember the user’s choices and show the corresponding Map Actions on the map">Remember choices and show actions</option>
+            <option value="hide" title="Remember the user’s choices, but don’t show any Map Actions on the map">Remember choices but hide actions</option>
           </select><label> for prompts after the one that the user is jumping back to.</label></td>
         </tr>
         <tr>
@@ -92,20 +67,75 @@
 
 <div id="footer_wrap" class="outer">
   <footer class="inner">
-    <p><a href="http://sergisproject.github.io/">The SerGIS Project</a> &mdash; SerGIS Prompt Author<span id="version_outer" style="display: none;"> version <span id="version_inner"></span></span></p>
-    <p><a href="https://github.com/sergisproject/sergis-author/">View SerGIS Author on GitHub</a></p>
+    <p>SerGIS Prompt Author<span id="version_outer" style="display: none;"> version <span id="version_inner"></span></span></p>
+    <p><a id="viewjson" href="#">View JSON Game Data for current game</a></p>
+    <p><a href="http://sergisproject.github.io/">The SerGIS Project</a> &mdash; <a href="https://github.com/sergisproject/sergis-author/">View SerGIS Author on GitHub</a></p>
   </footer>
 </div>
 
 <div id="overlay" class="overlay_outer">
   <!-- <table><tbody><tr><td> -->
     <!-- Loading overlay -->
-    <div id="overlay_loading" class="overlay_inner" style="text-align: center;">
+    <div id="overlay_loading" class="overlay_inner" style="text-align: center; display: block;">
       <!--[if lt IE 9]><p>Please upgrade to a <a href="http://whatbrowser.org/">modern browser</a>.</p><![endif]-->
       <!--[if gte IE 9]>-->
       <p>Loading...</p>
       <noscript><p>Please enable JavaScript.</p></noscript>
       <!--<![endif]-->
+    </div>
+    
+    <!-- Prompt overlay -->
+    <div id="overlay_prompt" class="overlay_inner" style="display: none;">
+      <form id="overlay_prompt_form">
+        <p id="overlay_prompt_error"></p>
+        <p class="inputcontainer"><label for="overlay_prompt_input"><span id="overlay_prompt_text"></span> </label><span><input id="overlay_prompt_input"></span></p>
+        <p class="overlay_buttons"><input type="submit" class="main-button" value="OK"><button id="overlay_prompt_cancel" class="sub-button">Cancel</button></p>
+      </form>
+    </div>
+    
+    <!-- Confirm overlay -->
+    <div id="overlay_confirm" class="overlay_inner" style="display: none;">
+      <p id="overlay_confirm_text" style="text-align: center;"></p>
+      <p class="overlay_buttons"><button id="overlay_confirm_yes" class="main-button">Yes</button><button id="overlay_confirm_no" class="sub-button">No</button></p>
+    </div>
+    
+    <!-- Create/Open Game overlay -->
+    <div id="overlay_games" class="overlay_inner" style="display: none;">
+      <h2>SerGIS Prompt Author</h2>
+      <div class="tabs">
+        <a id="overlay_games_tab_create" href="#" class="selected">Create Game</a>
+        <a id="overlay_games_tab_open" href="#">Open Game</a>
+        <a id="overlay_games_tab_import" href="#">Import Game from File</a>
+      </div>
+      
+      <div id="overlay_games_create" class="tabcontent">
+        <form id="overlay_games_create_form">
+          <p id="overlay_games_create_invalid" style="display: none;">The game name that you provided is invalid.</p>
+          <p id="overlay_games_create_taken" style="display: none;">The game name that you provided is already in use.</p>
+          <p class="inputcontainer"><label for="overlay_games_create_name">Game Name: </label><span><input id="overlay_games_create_name"></span></p>
+          <p><input type="submit" value="Create Game"></p>
+        </form>
+      </div>
+      
+      <div id="overlay_games_open" class="tabcontent" style="display: none;">
+        <p>Your Games:</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Game Name</th>
+              <th>Last Modified</th>
+            </tr>
+          </thead>
+          <tbody id="overlay_games_open_gamescontainer"></tbody>
+        </table>
+      </div>
+      
+      <div id="overlay_games_import" class="tabcontent" style="display: none;">
+        <p>SerGIS Prompt Author can open JSON files with data in the <a href="http://sergisproject.github.io/legacy-docs/json.html" target="_blank">SerGIS JSON Game Data</a> format.<br>This includes any JSON files that were exported from the SerGIS Prompt Author.</p>
+        <p><button id="overlay_games_import_open">Select JSON File</button></p>
+      </div>
+
+      <p id="overlay_games_buttons" class="overlay_buttons" style="display: none;"><button id="overlay_games_cancel">Cancel</button></p>
     </div>
 
     <!-- View JSON overlay -->
@@ -113,7 +143,7 @@
       <h2>View JSON</h2>
       <p id="overlay_viewjson_selectall" style="display: none;"><a id="overlay_viewjson_selectall_link" href="#">Select All</a></p>
       <pre id="overlay_viewjson_content"></pre>
-      <p style="text-align: center;"><button id="overlay_viewjson_close">Close</button></p>
+      <p class="overlay_buttons"><button id="overlay_viewjson_close">Close</button></p>
     </div>
 
     <!-- Edit Map Properties overlay -->
@@ -121,7 +151,7 @@
       <h2>Map Properties</h2>
       <div id="overlay_editFrontendInfo_contentContainer"></div>
       <hr>
-      <p style="text-align: center;"><button id="overlay_editFrontendInfo_reset" class="sub-button">Reset</button><button id="overlay_editFrontendInfo_close" class="main-button">Close</button></p>
+      <p class="overlay_buttons"><button id="overlay_editFrontendInfo_reset" class="sub-button">Reset</button><button id="overlay_editFrontendInfo_close" class="main-button">Close</button></p>
     </div>
 
     <!-- Add/Edit Content/Choice overlay -->
@@ -135,7 +165,7 @@
       <div id="overlay_editor_contentContainer"></div>
       <hr>
 
-      <p style="text-align: center;"><button id="overlay_editor_cancel" class="sub-button">Cancel</button><button id="overlay_editor_save" class="main-button">Save</button></p>
+      <p class="overlay_buttons"><button id="overlay_editor_cancel" class="sub-button">Cancel</button><button id="overlay_editor_save" class="main-button">Save</button></p>
     </div>
 
     <!-- Add/Edit Action overlay -->
@@ -148,50 +178,67 @@
       <form id="overlay_actionEditor_contentContainer"></form>
       <hr>
 
-      <p style="text-align: center;"><button id="overlay_actionEditor_cancel" class="sub-button">Cancel</button><button id="overlay_actionEditor_save" class="main-button">Save</button></p>
+      <p class="overlay_buttons"><button id="overlay_actionEditor_cancel" class="sub-button">Cancel</button><button id="overlay_actionEditor_save" class="main-button">Save</button></p>
     </div>
   <!-- </td></tr></tbody></table> -->
 </div>
 
 <div style="display: none;">
-    <div id="fileinputs"></div>
-    <form id="publish-form" method="POST" target="_blank" enctype="multipart/form-data">
-        <textarea id="publish-form-input" name="jsondata"></textarea>
-    </form>
+  <div id="fileinputs"></div>
+  <form id="publish-form" method="POST" target="_blank" enctype="multipart/form-data">
+    <textarea id="publish-form-input" name="jsondata"></textarea>
+  </form>
 </div>
 
-<script src="http://www.localeplanet.com/api/auto/icu.js"></script>
-<script src="http://www.localeplanet.com/api/translate.js"></script>
+<!-- Translate ("_") API -->
+<script type="text/javascript" src="http://www.localeplanet.com/api/auto/icu.js"></script>
+<script type="text/javascript" src="http://www.localeplanet.com/api/translate.js"></script>
 
+<!-- Promise polyfill -->
+<script type="text/javascript" src="javascripts/es6-promise-2.0.0.min.js"></script>
 <script type="text/javascript">
-var AUTHOR_CONFIG = {
-    // The URL of a public hosting of the SerGIS Client, using the local.js backend.
-    // This allows instant previews of games.
-    // If not provided, then the "Preview Game" button is not available.
-    //clientPreviewURL: "http://geoapps64.main.ad.rit.edu/serious_game_spatial_thinking/web_game/"
-    clientPreviewURL: "http://geoapps64.main.ad.rit.edu/sergis/preview",
-    
-    // The URL of the "account/publish" page on a public hosting of the SerGIS Server.
-    // This allows publishing of games.
-    // If not provided, then the "Publish Game" button is not available.
-    serverPublishURL: "http://geoapps64.main.ad.rit.edu/sergis/account/publish"
+// Use Promise polyfill if needed
+if (typeof Promise == "undefined") Promise = ES6Promise.Promise;
+</script>
+
+<!-- LocalForage -->
+<script type="text/javascript" src="javascripts/localforage.nopromises.min.js"></script>
+
+<!-- SerGIS Prompt Author config -->
+<script type="text/javascript">
+var AUTHOR = {};
+AUTHOR.CONFIG = {
+    /**
+     * The URL of a public hosting of the SerGIS Web Client that is using the
+     * local.js backend.
+     * This allows instant previews of games via the "Preview Game" button.
+     * If the backend has a "previewGame" function, then that overrides this.
+     * If neither "previewGame" in the backend nor this is not provided, then
+     * the "Preview Game" button is not available.
+     */
+    clientPreviewURL: "http://geoapps64.main.ad.rit.edu/serious_game_spatial_thinking/web_game/"
 };
 </script>
 
 <script type="text/javascript" src="javascripts/author-main.js"></script>
+<script type="text/javascript" src="javascripts/author-ask.js"></script>
 
 <script type="text/javascript" src="javascripts/author-json.js"></script>
-<script type="text/javascript" src="javascripts/author-recent.js"></script>
+<script type="text/javascript" src="javascripts/author-games.js"></script>
 <script type="text/javascript" src="javascripts/author-table.js"></script>
 
 <script type="text/javascript" src="javascripts/author-editor.js"></script>
 <script type="text/javascript" src="javascripts/author-action-editor.js"></script>
 <script type="text/javascript" src="javascripts/author-frontend-info-editor.js"></script>
 
+<!-- SerGIS Prompt Author backend -->
+<script type="text/javascript" src="javascripts/author-backend_local.js" data-set-attribute="src author_backend_src"></script>
+
 <!--
 Files with onload handlers:
     author-main.js
-    author-recent.js
+    author-ask.js
+    author-games.js
     author-table.js
     author-editor.js
     author-action-editor.js

@@ -7,9 +7,8 @@
 */
 
 // This file handles adding or editing actions through the Action Editor.
-// Globals: AUTHOR_ACTION_EDITOR
 
-var AUTHOR_ACTION_EDITOR = {
+AUTHOR.ACTION_EDITOR = {
     /* editAction */
 };
 
@@ -56,7 +55,7 @@ var AUTHOR_ACTION_EDITOR = {
     
     /**
      * Open the editor to edit an action.
-     * @memberof AUTHOR_ACTION_EDITOR
+     * @memberof AUTHOR.ACTION_EDITOR
      *
      * @param {number} promptIndex - The prompt index of the prompt containing
      *        the action to edit.
@@ -67,10 +66,10 @@ var AUTHOR_ACTION_EDITOR = {
      * @param {boolean} isAdding - Whether this actionIndex has just been added
      *        (affects the title of the editor).
      */
-    AUTHOR_ACTION_EDITOR.editAction = function (promptIndex, choiceIndex, actionIndex, isAdding) {
+    AUTHOR.ACTION_EDITOR.editAction = function (promptIndex, choiceIndex, actionIndex, isAdding) {
         editorTitle(isAdding ? "addaction" : "editaction");
         
-        editor_state.action_json = json.promptList[promptIndex].actionList[choiceIndex].actions[actionIndex] || {};
+        editor_state.action_json = game.jsondata.promptList[promptIndex].actionList[choiceIndex].actions[actionIndex] || {};
         if (!editor_state.action_json.data) editor_state.action_json.data = [];
         
         editor_state.promptIndex = promptIndex;
@@ -92,7 +91,7 @@ var AUTHOR_ACTION_EDITOR = {
             }
         }
         // Store it
-        json.promptList[editor_state.promptIndex].actionList[editor_state.choiceIndex].actions[editor_state.actionIndex] = editor_state.action_json;
+        game.jsondata.promptList[editor_state.promptIndex].actionList[editor_state.choiceIndex].actions[editor_state.actionIndex] = editor_state.action_json;
         // Close the editor
         closeEditor();
     }
@@ -116,10 +115,10 @@ var AUTHOR_ACTION_EDITOR = {
         var select = document.getElementById("overlay_actionEditor_name");
         
         // Make sure the proper option in `select` is selected
-        if (AUTHOR_JSON.actions.hasOwnProperty(editor_state.action_json.name)) {
+        if (AUTHOR.JSON.actions.hasOwnProperty(editor_state.action_json.name)) {
             select.value = JSON.stringify({name: editor_state.action_json.name, frontend: null});
-        } else if (editor_state.action_json.frontend && AUTHOR_JSON.actionsByFrontend.hasOwnProperty(editor_state.action_json.frontend) &&
-                   AUTHOR_JSON.actionsByFrontend[editor_state.action_json.frontend].hasOwnProperty(editor_state.action_json.name)) {
+        } else if (editor_state.action_json.frontend && AUTHOR.JSON.actionsByFrontend.hasOwnProperty(editor_state.action_json.frontend) &&
+                   AUTHOR.JSON.actionsByFrontend[editor_state.action_json.frontend].hasOwnProperty(editor_state.action_json.name)) {
             select.value = JSON.stringify({name: editor_state.action_json.name, frontend: editor_state.action_json.frontend});
         } else {
             select.selectedIndex = 0;
@@ -133,9 +132,9 @@ var AUTHOR_ACTION_EDITOR = {
         var data = JSON.parse(select.value),
             actionsDataList;
         if (data.frontend) {
-            actionsDataList = AUTHOR_JSON.actionsByFrontend[data.frontend];
+            actionsDataList = AUTHOR.JSON.actionsByFrontend[data.frontend];
         } else {
-            actionsDataList = AUTHOR_JSON.actions;
+            actionsDataList = AUTHOR.JSON.actions;
         }
         
         // Set the description
@@ -179,23 +178,23 @@ var AUTHOR_ACTION_EDITOR = {
         // Set up the Action Name switcher
         var select = document.getElementById("overlay_actionEditor_name");
         
-        for (var actionName in AUTHOR_JSON.actions) {
-            if (AUTHOR_JSON.actions.hasOwnProperty(actionName)) {
+        for (var actionName in AUTHOR.JSON.actions) {
+            if (AUTHOR.JSON.actions.hasOwnProperty(actionName)) {
                 select.appendChild(c("option", {
                     value: JSON.stringify({name: actionName, frontend: null}),
-                    text: AUTHOR_JSON.actions[actionName].name
+                    text: AUTHOR.JSON.actions[actionName].name
                 }));
             }
         }
         
-        for (var frontendName in AUTHOR_JSON.actionsByFrontend) {
-            if (AUTHOR_JSON.actionsByFrontend.hasOwnProperty(frontendName)) {
-                for (actionName in AUTHOR_JSON.actionsByFrontend[frontendName]) {
-                    if (AUTHOR_JSON.actionsByFrontend[frontendName].hasOwnProperty(actionName)) {
+        for (var frontendName in AUTHOR.JSON.actionsByFrontend) {
+            if (AUTHOR.JSON.actionsByFrontend.hasOwnProperty(frontendName)) {
+                for (actionName in AUTHOR.JSON.actionsByFrontend[frontendName]) {
+                    if (AUTHOR.JSON.actionsByFrontend[frontendName].hasOwnProperty(actionName)) {
                         select.appendChild(c("option", {
                             value: JSON.stringify({name: actionName, frontend: frontendName}),
-                            text: (AUTHOR_JSON.frontendNames[frontendName] || frontendName) +
-                                  ": " + AUTHOR_JSON.actionsByFrontend[frontendName][actionName].name
+                            text: (AUTHOR.JSON.frontendNames[frontendName] || frontendName) +
+                                  ": " + AUTHOR.JSON.actionsByFrontend[frontendName][actionName].name
                         }));
                     }
                 }

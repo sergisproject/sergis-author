@@ -7,9 +7,8 @@
 */
 
 // This file handles the drawing of the main table.
-// Globals: AUTHOR_TABLE
 
-var AUTHOR_TABLE = {
+AUTHOR.TABLE = {
     /* initTable */
     /* setExpandAllPrompts */
 };
@@ -50,17 +49,18 @@ var AUTHOR_TABLE = {
         moveUp: function (event, promptIndex) {
             event.preventDefault();
             event.stopPropagation();
+            var promptList = game.jsondata.promptList;
             if (promptIndex != 0) {
                 // No more current prompt index
                 currentPromptIndex = null;
                 // Swap with the previous one
-                var olditem = json.promptList[promptIndex - 1];
-                json.promptList[promptIndex - 1] = json.promptList[promptIndex];
-                json.promptList[promptIndex] = olditem;
+                var olditem = promptList[promptIndex - 1];
+                promptList[promptIndex - 1] = promptList[promptIndex];
+                promptList[promptIndex] = olditem;
                 // Update any "goto" actions
                 swapGotos(promptIndex, promptIndex - 1);
             }
-            // Regenerate the table and update the save button
+            // Save and regenerate
             generate(true);
         },
         
@@ -70,17 +70,18 @@ var AUTHOR_TABLE = {
         moveDown: function (event, promptIndex) {
             event.preventDefault();
             event.stopPropagation();
-            if (promptIndex != json.promptList.length - 1) {
+            var promptList = game.jsondata.promptList;
+            if (promptIndex != promptList.length - 1) {
                 // No more current prompt index
                 currentPromptIndex = null;
                 // Swap with the next one
-                var olditem = json.promptList[promptIndex + 1];
-                json.promptList[promptIndex + 1] = json.promptList[promptIndex];
-                json.promptList[promptIndex] = olditem;
+                var olditem = promptList[promptIndex + 1];
+                promptList[promptIndex + 1] = promptList[promptIndex];
+                promptList[promptIndex] = olditem;
                 // Update any "goto" actions
                 swapGotos(promptIndex, promptIndex + 1);
             }
-            // Regenerate the table and update the save button
+            // Save and regenerate
             generate(true);
         },
         
@@ -90,16 +91,17 @@ var AUTHOR_TABLE = {
         deletePrompt: function (event, promptIndex) {
             event.preventDefault();
             event.stopPropagation();
+            var promptList = game.jsondata.promptList;
             // No more current prompt index
             currentPromptIndex = null;
-            json.promptList.splice(promptIndex, 1);
+            promptList.splice(promptIndex, 1);
             // Update any "goto" actions (and see if there were any pointing to the prompt we just deleted).
             var occurrences = decrementGotos(promptIndex);
             if (occurrences > 0) {
                 alert(_("NOTE: There were " + occurrences + " \"goto\" actions that pointed to the prompt that was just deleted.") + "\n" +
                       _("Also, all other \"goto\" actions have been updated to point to the new prompt indexes that resulted from deleting this prompt."));
             }
-            // Regenerate the table and update the save button
+            // Save and regenerate
             generate(true);
         },
         
@@ -107,8 +109,8 @@ var AUTHOR_TABLE = {
          * Handler for the "Title" input.
          */
         updateTitle: function (event, promptIndex) {
-            json.promptList[promptIndex].prompt.title = this.value;
-            // Update the save button
+            game.jsondata.promptList[promptIndex].prompt.title = this.value;
+            // Save the game
             generate();
         },
         
@@ -118,22 +120,23 @@ var AUTHOR_TABLE = {
          * properties in a SerGIS JSON Map Object.
          */
         updateMapStuff: function (event, stuff, promptIndex) {
+            var promptList = game.jsondata.promptList;
             this.style.border = "";
             var value = this.value;
             if (typeof value.trim == "function") {
                 value = value.trim();
             }
             if (!value) {
-                delete json.promptList[promptIndex].prompt.map[stuff];
+                delete promptList[promptIndex].prompt.map[stuff];
             } else {
                 var num = Number(value);
                 if (isNaN(num)) {
                     this.style.border = "1px solid red";
                 } else {
-                    json.promptList[promptIndex].prompt.map[stuff] = num;
+                    promptList[promptIndex].prompt.map[stuff] = num;
                 }
             }
-            // Update the save button
+            // Save the game
             generate();
         },
         
@@ -142,7 +145,7 @@ var AUTHOR_TABLE = {
          */
         editFrontendInfo: function (event, promptIndex) {
             event.preventDefault();
-            AUTHOR_FRONTEND_INFO_EDITOR.editFrontendInfo(promptIndex);
+            AUTHOR.FRONTEND_INFO_EDITOR.editFrontendInfo(promptIndex);
         },
         
         
@@ -153,7 +156,7 @@ var AUTHOR_TABLE = {
          */
         addContent: function (event, promptIndex) {
             event.preventDefault();
-            AUTHOR_EDITOR.editContent(promptIndex, json.promptList[promptIndex].prompt.contents.length, true);
+            AUTHOR.EDITOR.editContent(promptIndex, game.jsondata.promptList[promptIndex].prompt.contents.length, true);
         },
         
         /**
@@ -161,12 +164,13 @@ var AUTHOR_TABLE = {
          */
         moveContentUp: function (event, promptIndex, contentIndex) {
             event.preventDefault();
+            var promptList = game.jsondata.promptList;
             if (contentIndex != 0) {
-                var olditem = json.promptList[promptIndex].prompt.contents[contentIndex - 1];
-                json.promptList[promptIndex].prompt.contents[contentIndex - 1] = json.promptList[promptIndex].prompt.contents[contentIndex];
-                json.promptList[promptIndex].prompt.contents[contentIndex] = olditem;
+                var olditem = promptList[promptIndex].prompt.contents[contentIndex - 1];
+                promptList[promptIndex].prompt.contents[contentIndex - 1] = promptList[promptIndex].prompt.contents[contentIndex];
+                promptList[promptIndex].prompt.contents[contentIndex] = olditem;
             }
-            // Regenerate the table and update the save button
+            // Save and regenerate
             generate(true);
         },
         
@@ -175,12 +179,13 @@ var AUTHOR_TABLE = {
          */
         moveContentDown: function (event, promptIndex, contentIndex) {
             event.preventDefault();
-            if (contentIndex != json.promptList[promptIndex].prompt.contents.length - 1) {
-                var olditem = json.promptList[promptIndex].prompt.contents[contentIndex + 1];
-                json.promptList[promptIndex].prompt.contents[contentIndex + 1] = json.promptList[promptIndex].prompt.contents[contentIndex];
-                json.promptList[promptIndex].prompt.contents[contentIndex] = olditem;
+            var promptList = game.jsondata.promptList;
+            if (contentIndex != promptList[promptIndex].prompt.contents.length - 1) {
+                var olditem = promptList[promptIndex].prompt.contents[contentIndex + 1];
+                promptList[promptIndex].prompt.contents[contentIndex + 1] = promptList[promptIndex].prompt.contents[contentIndex];
+                promptList[promptIndex].prompt.contents[contentIndex] = olditem;
             }
-            // Regenerate the table and update the save button
+            // Save and regenerate
             generate(true);
         },
         
@@ -189,7 +194,7 @@ var AUTHOR_TABLE = {
          */
         editContent: function (event, promptIndex, contentIndex) {
             event.preventDefault();
-            AUTHOR_EDITOR.editContent(promptIndex, contentIndex);
+            AUTHOR.EDITOR.editContent(promptIndex, contentIndex);
         },
         
         /**
@@ -197,8 +202,8 @@ var AUTHOR_TABLE = {
          */
         deleteContent: function (event, promptIndex, contentIndex) {
             event.preventDefault();
-            json.promptList[promptIndex].prompt.contents.splice(contentIndex, 1);
-            // Regenerate the table and update the save button
+            game.jsondata.promptList[promptIndex].prompt.contents.splice(contentIndex, 1);
+            // Save and regenerate
             generate(true);
         },
         
@@ -210,15 +215,15 @@ var AUTHOR_TABLE = {
          */
         addChoice: function (event, promptIndex) {
             event.preventDefault();
-            AUTHOR_EDITOR.editChoice(promptIndex, json.promptList[promptIndex].prompt.choices.length, true);
+            AUTHOR.EDITOR.editChoice(promptIndex, game.jsondata.promptList[promptIndex].prompt.choices.length, true);
         },
         
         /**
          * Handler for the "Randomize Choices" input checkbox.
          */
         updateRandomizeChoices: function (event, promptIndex) {
-            json.promptList[promptIndex].prompt.randomizeChoices = this.checked;
-            // Update the save button
+            game.jsondata.promptList[promptIndex].prompt.randomizeChoices = this.checked;
+            // Save the game
             generate();
         },
         
@@ -227,17 +232,18 @@ var AUTHOR_TABLE = {
          */
         moveChoiceUp: function (event, promptIndex, choiceIndex) {
             event.preventDefault();
+            var promptList = game.jsondata.promptList;
             if (choiceIndex != 0) {
                 // Update "choices"
-                var olditem = json.promptList[promptIndex].prompt.choices[choiceIndex - 1];
-                json.promptList[promptIndex].prompt.choices[choiceIndex - 1] = json.promptList[promptIndex].prompt.choices[choiceIndex];
-                json.promptList[promptIndex].prompt.choices[choiceIndex] = olditem;
+                var olditem = promptList[promptIndex].prompt.choices[choiceIndex - 1];
+                promptList[promptIndex].prompt.choices[choiceIndex - 1] = promptList[promptIndex].prompt.choices[choiceIndex];
+                promptList[promptIndex].prompt.choices[choiceIndex] = olditem;
                 // Update "actionList"
-                olditem = json.promptList[promptIndex].actionList[choiceIndex - 1];
-                json.promptList[promptIndex].actionList[choiceIndex - 1] = json.promptList[promptIndex].actionList[choiceIndex];
-                json.promptList[promptIndex].actionList[choiceIndex] = olditem;
+                olditem = promptList[promptIndex].actionList[choiceIndex - 1];
+                promptList[promptIndex].actionList[choiceIndex - 1] = promptList[promptIndex].actionList[choiceIndex];
+                promptList[promptIndex].actionList[choiceIndex] = olditem;
             }
-            // Regenerate the table and update the save button
+            // Save and regenerate
             generate(true);
         },
         
@@ -246,17 +252,18 @@ var AUTHOR_TABLE = {
          */
         moveChoiceDown: function (event, promptIndex, choiceIndex) {
             event.preventDefault();
-            if (choiceIndex != json.promptList[promptIndex].prompt.choices.length - 1) {
+            var promptList = game.jsondata.promptList;
+            if (choiceIndex != promptList[promptIndex].prompt.choices.length - 1) {
                 // Update "choices"
-                var olditem = json.promptList[promptIndex].prompt.choices[choiceIndex + 1];
-                json.promptList[promptIndex].prompt.choices[choiceIndex + 1] = json.promptList[promptIndex].prompt.choices[choiceIndex];
-                json.promptList[promptIndex].prompt.choices[choiceIndex] = olditem;
+                var olditem = promptList[promptIndex].prompt.choices[choiceIndex + 1];
+                promptList[promptIndex].prompt.choices[choiceIndex + 1] = promptList[promptIndex].prompt.choices[choiceIndex];
+                promptList[promptIndex].prompt.choices[choiceIndex] = olditem;
                 // Update "actionList"
-                olditem = json.promptList[promptIndex].actionList[choiceIndex + 1];
-                json.promptList[promptIndex].actionList[choiceIndex + 1] = json.promptList[promptIndex].actionList[choiceIndex];
-                json.promptList[promptIndex].actionList[choiceIndex] = olditem;
+                olditem = promptList[promptIndex].actionList[choiceIndex + 1];
+                promptList[promptIndex].actionList[choiceIndex + 1] = promptList[promptIndex].actionList[choiceIndex];
+                promptList[promptIndex].actionList[choiceIndex] = olditem;
             }
-            // Regenerate the table and update the save button
+            // Save and regenerate
             generate(true);
         },
         
@@ -265,7 +272,7 @@ var AUTHOR_TABLE = {
          */
         editChoice: function (event, promptIndex, choiceIndex) {
             event.preventDefault();
-            AUTHOR_EDITOR.editChoice(promptIndex, choiceIndex);
+            AUTHOR.EDITOR.editChoice(promptIndex, choiceIndex);
         },
         
         /**
@@ -273,9 +280,10 @@ var AUTHOR_TABLE = {
          */
         deleteChoice: function (event, promptIndex, choiceIndex) {
             event.preventDefault();
-            json.promptList[promptIndex].prompt.choices.splice(choiceIndex, 1);
-            json.promptList[promptIndex].actionList.splice(choiceIndex, 1);
-            // Regenerate the table and update the save button
+            var promptList = game.jsondata.promptList;
+            promptList[promptIndex].prompt.choices.splice(choiceIndex, 1);
+            promptList[promptIndex].actionList.splice(choiceIndex, 1);
+            // Save and regenerate
             generate(true);
         },
         
@@ -283,14 +291,15 @@ var AUTHOR_TABLE = {
          * Handler for the "Point Value" input.
          */
         updatePointValue: function (event, promptIndex, choiceIndex) {
+            var promptList = game.jsondata.promptList;
             var num = Number(this.value);
             if (isNaN(num)) {
                 this.style.border = "1px solid red";
             } else {
                 this.style.border = "";
-                json.promptList[promptIndex].actionList[choiceIndex].pointValue = num;
+                promptList[promptIndex].actionList[choiceIndex].pointValue = num;
             }
-            // Update the save button
+            // Save the game
             generate();
         },
         
@@ -302,7 +311,8 @@ var AUTHOR_TABLE = {
          */
         addAction: function (event, promptIndex, choiceIndex) {
             event.preventDefault();
-            AUTHOR_ACTION_EDITOR.editAction(promptIndex, choiceIndex, json.promptList[promptIndex].actionList[choiceIndex].actions.length, true);
+            var promptList = game.jsondata.promptList;
+            AUTHOR.ACTION_EDITOR.editAction(promptIndex, choiceIndex, promptList[promptIndex].actionList[choiceIndex].actions.length, true);
         },
         
         /**
@@ -310,12 +320,13 @@ var AUTHOR_TABLE = {
          */
         moveActionUp: function (event, promptIndex, choiceIndex, actionIndex) {
             event.preventDefault();
+            var promptList = game.jsondata.promptList;
             if (actionIndex != 0) {
-                var olditem = json.promptList[promptIndex].actionList[choiceIndex].actions[actionIndex - 1];
-                json.promptList[promptIndex].actionList[choiceIndex].actions[actionIndex - 1] = json.promptList[promptIndex].actionList[choiceIndex].actions[actionIndex];
-                json.promptList[promptIndex].actionList[choiceIndex].actions[actionIndex] = olditem;
+                var olditem = promptList[promptIndex].actionList[choiceIndex].actions[actionIndex - 1];
+                promptList[promptIndex].actionList[choiceIndex].actions[actionIndex - 1] = promptList[promptIndex].actionList[choiceIndex].actions[actionIndex];
+                promptList[promptIndex].actionList[choiceIndex].actions[actionIndex] = olditem;
             }
-            // Regenerate the table and update the save button
+            // Save and regenerate
             generate(true);
         },
         
@@ -324,12 +335,13 @@ var AUTHOR_TABLE = {
          */
         moveActionDown: function (event, promptIndex, choiceIndex, actionIndex) {
             event.preventDefault();
-            if (choiceIndex != json.promptList[promptIndex].actionList[choiceIndex].actions.length - 1) {
-                var olditem = json.promptList[promptIndex].actionList[choiceIndex].actions[actionIndex + 1];
-                json.promptList[promptIndex].actionList[choiceIndex].actions[actionIndex + 1] = json.promptList[promptIndex].actionList[choiceIndex].actions[actionIndex];
-                json.promptList[promptIndex].actionList[choiceIndex].actions[actionIndex] = olditem;
+            var promptList = game.jsondata.promptList;
+            if (choiceIndex != promptList[promptIndex].actionList[choiceIndex].actions.length - 1) {
+                var olditem = promptList[promptIndex].actionList[choiceIndex].actions[actionIndex + 1];
+                promptList[promptIndex].actionList[choiceIndex].actions[actionIndex + 1] = promptList[promptIndex].actionList[choiceIndex].actions[actionIndex];
+                promptList[promptIndex].actionList[choiceIndex].actions[actionIndex] = olditem;
             }
-            // Regenerate the table and update the save button
+            // Save and regenerate
             generate(true);
         },
         
@@ -338,7 +350,7 @@ var AUTHOR_TABLE = {
          */
         editAction: function (event, promptIndex, choiceIndex, actionIndex) {
             event.preventDefault();
-            AUTHOR_ACTION_EDITOR.editAction(promptIndex, choiceIndex, actionIndex);
+            AUTHOR.ACTION_EDITOR.editAction(promptIndex, choiceIndex, actionIndex);
         },
         
         /**
@@ -346,8 +358,8 @@ var AUTHOR_TABLE = {
          */
         deleteAction: function (event, promptIndex, choiceIndex, actionIndex) {
             event.preventDefault();
-            json.promptList[promptIndex].actionList[choiceIndex].actions.splice(actionIndex, 1);
-            // Regenerate the table and update the save button
+            game.jsondata.promptList[promptIndex].actionList[choiceIndex].actions.splice(actionIndex, 1);
+            // Save and regenerate
             generate(true);
         },
     };
@@ -356,7 +368,7 @@ var AUTHOR_TABLE = {
     /**
      * Set whether all prompts should be expanded.
      */
-    AUTHOR_TABLE.setExpandAllPrompts = function (yesorno) {
+    AUTHOR.TABLE.setExpandAllPrompts = function (yesorno) {
         expandAllPrompts = yesorno;
         currentPromptIndex = null;
         checkCurrentPrompt();
@@ -376,7 +388,7 @@ var AUTHOR_TABLE = {
      */
     function checkCurrentPrompt() {
         var elems = document.getElementsByClassName("prompt-row-minimal");
-        var expandAllPromptsHere = json.promptList.length <= 1 ? true : expandAllPrompts;
+        var expandAllPromptsHere = game.jsondata.promptList.length <= 1 ? true : expandAllPrompts;
         for (var i = 0; i < elems.length; i++) {
             if (!expandAllPromptsHere && (currentPromptIndex === null || elems[i].getAttribute("data-promptIndex") != currentPromptIndex.toString())) {
                 elems[i].className = removeFromString(elems[i].className, "prompt-row-hidden");
@@ -417,11 +429,11 @@ var AUTHOR_TABLE = {
     /**
      * Make the prompt table.
      */
-    AUTHOR_TABLE.initTable = function () {
+    AUTHOR.TABLE.initTable = function () {
         // Get rid of the old table
         document.getElementById("promptContainer").innerHTML = "";
         // Create the new table; reset the tabindex
-        var table = document.createElement("table");
+        var table = c("table");
         tabindex = 100;
         
         // Make the table header
@@ -438,7 +450,7 @@ var AUTHOR_TABLE = {
         
         // Make the table body
         var tbody = c("tbody");
-        for (i = 0; i < json.promptList.length; i++) {
+        for (i = 0; i < game.jsondata.promptList.length; i++) {
             // Generate each table row
             generateTableRow(tbody, i);
         }
@@ -472,7 +484,7 @@ var AUTHOR_TABLE = {
     function generateTableRow(tbody, promptIndex) {
         var tr, td, div, iconRow;
         var i, id;
-        var prompt = json.promptList[promptIndex].prompt;
+        var prompt = game.jsondata.promptList[promptIndex].prompt;
         var mapstuff = [
             // ["SerGIS JSON Map Object property name", "label"]
             ["latitude", _("Latitude:")],
@@ -515,7 +527,7 @@ var AUTHOR_TABLE = {
         iconbtns.push(iconbtn);
 
         div.appendChild(iconbtn = c("a", {
-            className: "row_title_buttons_down icon side icon_down" + (promptIndex == json.promptList.length - 1 ? " invisible" : ""),
+            className: "row_title_buttons_down icon side icon_down" + (promptIndex == game.jsondata.promptList.length - 1 ? " invisible" : ""),
             href: "#",
             text: " ",
             title: _("Move Prompt Down"),
@@ -599,7 +611,7 @@ var AUTHOR_TABLE = {
             // The actual content
             div.appendChild(c("span", {
                 className: "box wide",
-                html: AUTHOR_JSON.contentTypes[prompt.contents[i].type].toHTML(prompt.contents[i]),
+                html: AUTHOR.JSON.contentTypes[prompt.contents[i].type].toHTML(prompt.contents[i]),
                 title: prompt.contents[i].value
             }));
             td.appendChild(div);
@@ -642,7 +654,7 @@ var AUTHOR_TABLE = {
             tabindex: ++tabindex
         }, tableEvents.moveUp, promptIndex));
         div.appendChild(c("a", {
-            className: "row_title_buttons_down icon side icon_down" + (promptIndex == json.promptList.length - 1 ? " invisible" : ""),
+            className: "row_title_buttons_down icon side icon_down" + (promptIndex == game.jsondata.promptList.length - 1 ? " invisible" : ""),
             href: "#",
             text: " ",
             title: _("Move Prompt Down"),
@@ -772,7 +784,7 @@ var AUTHOR_TABLE = {
             // Show the actual content
             div.appendChild(c("span", {
                 className: "box",
-                html: AUTHOR_JSON.contentTypes[prompt.contents[i].type].toHTML(prompt.contents[i]),
+                html: AUTHOR.JSON.contentTypes[prompt.contents[i].type].toHTML(prompt.contents[i]),
                 title: prompt.contents[i].value
             }));
             td.appendChild(div);
@@ -840,9 +852,9 @@ var AUTHOR_TABLE = {
     function generateTableChoice(tbody, promptIndex, choiceIndex) {
         var tr, td, div, ul, li, iconRow;
         var i, id, dataContent;
-        var prompt = json.promptList[promptIndex].prompt,
+        var prompt = game.jsondata.promptList[promptIndex].prompt,
             choice = prompt.choices[choiceIndex],
-            action = json.promptList[promptIndex].actionList[choiceIndex];
+            action = game.jsondata.promptList[promptIndex].actionList[choiceIndex];
         
         // Make row
         tr = c("tr", {
@@ -900,7 +912,7 @@ var AUTHOR_TABLE = {
         // Make choice content
         div.appendChild(c("span", {
             className: "box",
-            html: AUTHOR_JSON.contentTypes[choice.type].toHTML(choice),
+            html: AUTHOR.JSON.contentTypes[choice.type].toHTML(choice),
             title: choice.value
         }));
         td.appendChild(div);
@@ -996,9 +1008,9 @@ var AUTHOR_TABLE = {
                     }));
                     */
                     if (action.actions[i].frontend) {
-                        dataContent = AUTHOR_JSON.actionsByFrontend[action.actions[i].frontend][action.actions[i].name];
+                        dataContent = AUTHOR.JSON.actionsByFrontend[action.actions[i].frontend][action.actions[i].name];
                     } else {
-                        dataContent = AUTHOR_JSON.actions[action.actions[i].name];
+                        dataContent = AUTHOR.JSON.actions[action.actions[i].name];
                     }
                     div.appendChild(c("span", {
                         className: "row_action_data box",

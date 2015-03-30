@@ -7,9 +7,8 @@
 */
 
 // This file handles adding or editing content or choices through the Content Editor.
-// Globals: AUTHOR_EDITOR
 
-var AUTHOR_EDITOR = {
+AUTHOR.EDITOR = {
     /* editContent */
     /* editChoice */
 };
@@ -55,7 +54,7 @@ var AUTHOR_EDITOR = {
 
     /**
      * Open the editor to edit a content.
-     * @memberof AUTHOR_EDITOR
+     * @memberof AUTHOR.EDITOR
      *
      * @param {number} promptIndex - The prompt index of the prompt containing
      *        the content to edit.
@@ -63,10 +62,10 @@ var AUTHOR_EDITOR = {
      * @param {boolean} isAdding - Whether this contentIndex has just been
      *        added (affects the title of the editor).
      */
-    AUTHOR_EDITOR.editContent = function (promptIndex, contentIndex, isAdding) {
+    AUTHOR.EDITOR.editContent = function (promptIndex, contentIndex, isAdding) {
         editorTitle(isAdding ? "addcontent" : "editcontent");
         
-        editor_state.content_json = json.promptList[promptIndex].prompt.contents[contentIndex] || {};
+        editor_state.content_json = game.jsondata.promptList[promptIndex].prompt.contents[contentIndex] || {};
         editor_state.promptIndex = promptIndex;
         editor_state.contentIndex = contentIndex;
         editor_state.choiceIndex = null;
@@ -77,7 +76,7 @@ var AUTHOR_EDITOR = {
 
     /**
      * Open the editor to edit a choice.
-     * @memberof AUTHOR_EDITOR
+     * @memberof AUTHOR.EDITOR
      *
      * @param {number} promptIndex - The prompt index of the prompt containing
      *        the content to edit.
@@ -85,10 +84,10 @@ var AUTHOR_EDITOR = {
      * @param {boolean} isAdding - Whether this choiceIndex has just been added
      *        (affects the title of the editor).
      */
-    AUTHOR_EDITOR.editChoice = function (promptIndex, choiceIndex, isAdding) {
+    AUTHOR.EDITOR.editChoice = function (promptIndex, choiceIndex, isAdding) {
         editorTitle(isAdding ? "addchoice" : "editchoice");
         
-        editor_state.content_json = json.promptList[promptIndex].prompt.choices[choiceIndex] || {};
+        editor_state.content_json = game.jsondata.promptList[promptIndex].prompt.choices[choiceIndex] || {};
         editor_state.promptIndex = promptIndex;
         editor_state.contentIndex = null;
         editor_state.choiceIndex = choiceIndex;
@@ -103,10 +102,10 @@ var AUTHOR_EDITOR = {
     function saveEditor() {
         if (editor_state.contentIndex !== null) {
             // It's content
-            json.promptList[editor_state.promptIndex].prompt.contents[editor_state.contentIndex] = editor_state.content_json;
+            game.jsondata.promptList[editor_state.promptIndex].prompt.contents[editor_state.contentIndex] = editor_state.content_json;
         } else if (editor_state.choiceIndex !== null) {
             // It's a choice
-            json.promptList[editor_state.promptIndex].prompt.choices[editor_state.choiceIndex] = editor_state.content_json;
+            game.jsondata.promptList[editor_state.promptIndex].prompt.choices[editor_state.choiceIndex] = editor_state.content_json;
         }
         // Close the editor
         closeEditor();
@@ -131,7 +130,7 @@ var AUTHOR_EDITOR = {
         var select = document.getElementById("overlay_editor_contentType");
         
         // Make sure the proper option in `select` is selected
-        if (AUTHOR_JSON.contentTypes.hasOwnProperty(editor_state.content_json.type)) {
+        if (AUTHOR.JSON.contentTypes.hasOwnProperty(editor_state.content_json.type)) {
             document.getElementById("overlay_editor_contentType").value = editor_state.content_json.type;
         } else {
             document.getElementById("overlay_editor_contentType").selectedIndex = 0;
@@ -142,8 +141,8 @@ var AUTHOR_EDITOR = {
         var container = document.getElementById("overlay_editor_contentContainer");
         container.innerHTML = "";
         
-        // Make the fields for this content type (based on AUTHOR_JSON.contentTypes)
-        var fields = AUTHOR_JSON.contentTypes[select.value].fields;
+        // Make the fields for this content type (based on AUTHOR.JSON.contentTypes)
+        var fields = AUTHOR.JSON.contentTypes[select.value].fields;
         var property, name, type, value, data;
         var p, id, inner_container;
         if (!editor_state.content_json._sergis_author_data) editor_state.content_json._sergis_author_data = {};
@@ -157,7 +156,7 @@ var AUTHOR_EDITOR = {
             data = editor_state.content_json._sergis_author_data[property];
             
             // Create the field editor based on its type
-            container.appendChild(AUTHOR_JSON.fieldTypes[type].makeEditor(property, name, value, data, function (property, value) {
+            container.appendChild(AUTHOR.JSON.fieldTypes[type].makeEditor(property, name, value, data, function (property, value) {
                 editor_state.content_json[property] = value;
             }));
         }
@@ -171,19 +170,19 @@ var AUTHOR_EDITOR = {
         var select = document.getElementById("overlay_editor_contentType");
         // Make sure default content type is first
         var defaultContentType;
-        if (AUTHOR_JSON.defaultContentType && AUTHOR_JSON.contentTypes.hasOwnProperty(AUTHOR_JSON.defaultContentType)) {
-            defaultContentType = AUTHOR_JSON.defaultContentType;
+        if (AUTHOR.JSON.defaultContentType && AUTHOR.JSON.contentTypes.hasOwnProperty(AUTHOR.JSON.defaultContentType)) {
+            defaultContentType = AUTHOR.JSON.defaultContentType;
             select.appendChild(c("option", {
                 value: defaultContentType,
-                text: AUTHOR_JSON.contentTypes[defaultContentType].name
+                text: AUTHOR.JSON.contentTypes[defaultContentType].name
             }));
         }
         // Add the rest of the content types
-        for (var type in AUTHOR_JSON.contentTypes) {
-            if (AUTHOR_JSON.contentTypes.hasOwnProperty(type) && type != defaultContentType) {
+        for (var type in AUTHOR.JSON.contentTypes) {
+            if (AUTHOR.JSON.contentTypes.hasOwnProperty(type) && type != defaultContentType) {
                 select.appendChild(c("option", {
                     value: type,
-                    text: AUTHOR_JSON.contentTypes[type].name
+                    text: AUTHOR.JSON.contentTypes[type].name
                 }));
             }
         }

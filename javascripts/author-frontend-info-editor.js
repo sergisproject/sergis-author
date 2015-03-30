@@ -7,9 +7,8 @@
 */
 
 // This file handles the Map Properties (i.e. frontend info) overlay.
-// Globals: AUTHOR_FRONTEND_INFO_EDITOR
 
-var AUTHOR_FRONTEND_INFO_EDITOR = {
+AUTHOR.FRONTEND_INFO_EDITOR = {
     /* editFrontendInfo */
 };
 
@@ -24,7 +23,7 @@ var AUTHOR_FRONTEND_INFO_EDITOR = {
         promptIndex: null
     };
     
-    AUTHOR_FRONTEND_INFO_EDITOR.editFrontendInfo = function (promptIndex) {
+    AUTHOR.FRONTEND_INFO_EDITOR.editFrontendInfo = function (promptIndex) {
         editor_state.promptIndex = promptIndex;
         updateFrontendInfoEditor();
         overlay("overlay_editFrontendInfo");
@@ -36,7 +35,7 @@ var AUTHOR_FRONTEND_INFO_EDITOR = {
     function closeEditor() {
         // Close the editor
         overlay();
-        // Regenerate the table and update the save button
+        // Save and regenerate
         generate(true);
     }
     
@@ -45,17 +44,17 @@ var AUTHOR_FRONTEND_INFO_EDITOR = {
      */
     function resetEditor() {
         // Reset our target frontend info
-        json.promptList[editor_state.promptIndex].prompt.map.frontendInfo = {};
+        game.jsondata.promptList[editor_state.promptIndex].prompt.map.frontendInfo = {};
         checkJSON();
         // Re-open the editor
-        AUTHOR_FRONTEND_INFO_EDITOR.editFrontendInfo(editor_state.promptIndex);
+        AUTHOR.FRONTEND_INFO_EDITOR.editFrontendInfo(editor_state.promptIndex);
     }
     
     /**
      * Make fields for a particular frontend info property.
      *
      * @param {Array|Object} fields - Either an array of SERGIS_JSON_... objects
-     *        or a single one. (See AUTHOR_JSON.js)
+     *        or a single one. (See author-json.js)
      * @param {Element} container - The HTML container element.
      * @param {string} frontendName - The name of the frontend that this
      *        property belongs to.
@@ -64,7 +63,7 @@ var AUTHOR_FRONTEND_INFO_EDITOR = {
     function makeProperty(fields, container, frontendName, frontendInfoName) {
         var isArray = (typeof Array.isArray == "function") ? Array.isArray
                       : function (arr) { return typeof arr.length == "number"; };
-        var frontendBase = json.promptList[editor_state.promptIndex].prompt.map.frontendInfo[frontendName];
+        var frontendBase = game.jsondata.promptList[editor_state.promptIndex].prompt.map.frontendInfo[frontendName];
         
         fields = fields.getFields(frontendBase[frontendInfoName]);
         if (!isArray(fields)) {
@@ -110,14 +109,14 @@ var AUTHOR_FRONTEND_INFO_EDITOR = {
         container.innerHTML = "";
         
         // Make the frontend info fields again
-        for (var frontendName in AUTHOR_JSON.frontendInfo) {
-            if (AUTHOR_JSON.frontendInfo.hasOwnProperty(frontendName)) {
+        for (var frontendName in AUTHOR.JSON.frontendInfo) {
+            if (AUTHOR.JSON.frontendInfo.hasOwnProperty(frontendName)) {
                 container.appendChild(c("h3", {
                     text: frontendName
                 }));
-                for (var frontendInfoName in AUTHOR_JSON.frontendInfo[frontendName]) {
-                    if (AUTHOR_JSON.frontendInfo[frontendName].hasOwnProperty(frontendInfoName)) {
-                        makeProperty(AUTHOR_JSON.frontendInfo[frontendName][frontendInfoName], container,
+                for (var frontendInfoName in AUTHOR.JSON.frontendInfo[frontendName]) {
+                    if (AUTHOR.JSON.frontendInfo[frontendName].hasOwnProperty(frontendInfoName)) {
+                        makeProperty(AUTHOR.JSON.frontendInfo[frontendName][frontendInfoName], container,
                                     frontendName, frontendInfoName);
                     }
                 }

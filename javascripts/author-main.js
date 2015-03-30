@@ -6,27 +6,28 @@
     in the LICENSE.txt file.
 */
 
-// Globals: json, randInt, randID, removeFromString, overlay, c, selectAll, checkJSON, swapGotos, decrementGotos, generate, makeLabel, loadJSON, readJSONFile, askForFile
+// Globals: game, randInt, randID, removeFromString, overlay, getOverlay, c,
+// selectAll, checkJSON, swapGotos, decrementGotos, generate
 
-/**
- * The current state of the SerGIS JSON Game Data that we're working on.
- */
-var json = {
-    // Metadata:
-    id: "",
-    name: "",
-    author: "",
-    generator: "",
-    // "created" and "modified" are stored as Date objects, which are converted to ISO strings by JSON.stringify
-    created: null,
-    modified: null,
-    
-    // Game Data:
-    jumpingBackAllowed: false,
-    onJumpBack: "",
-    jumpingForwardAllowed: false,
-    showActionsInUserOrder: false,
-    promptList: [{}]
+// The current game
+var game = {
+    name: null,
+    jsondata: {
+        /*
+        // Metadata:
+        generator: "",
+        // "created" and "modified" are stored as Date objects, which are converted to ISO strings by JSON.stringify
+        created: null,
+        modified: null,
+
+        // Game Data:
+        jumpingBackAllowed: false,
+        onJumpBack: "",
+        jumpingForwardAllowed: false,
+        showActionsInUserOrder: false,
+        promptList: [{}]
+        */
+    }
 };
 
 /**
@@ -93,6 +94,20 @@ function overlay(overlayID) {
     if (overlayShown == -1) className += " hidden";
     document.getElementById("overlay").className = className;
     if (overlayShown > -1) overlays[overlayShown].scrollTop = 0;
+}
+
+/**
+ * Get the currently shown overlay.
+ *
+ * @return {?string} The ID of the currently visible overlay.
+ */
+function getOverlay() {
+    var overlayID = null;
+    var overlays = document.getElementsByClassName("overlay_inner");
+    for (var i = 0; i < overlays.length; i++) {
+        if (overlays[i].style.display != "none") overlayID = overlays[i].getAttribute("id");
+    }
+    return overlayID;
 }
 
 /**
@@ -175,14 +190,7 @@ function selectAll(elem) {
  */
 function checkJSON() {
     var i, item, j, k;
-    
-    // Check "id"
-    if (!json.id) json.id = randID();
-    
-    // Check "name"
-    if (!json.name) {
-        document.getElementById("general_name").value = json.name = _("SerGIS Data");
-    }
+    var json = game.jsondata;
     
     // Check "generator"
     json.generator = "SerGIS Prompt Author v" + SERGIS_PROMPT_AUTHOR_VERSION;
@@ -202,7 +210,8 @@ function checkJSON() {
         onJumpBackValues.push(options[i].getAttribute("value"));
     }
     if (onJumpBackValues.indexOf(json.onJumpBack) == -1) {
-        json.onJumpBack = "";
+        // A sensible default
+        json.onJumpBack = "reset";
     }
     
     // Make sure promptList is an array
@@ -246,8 +255,8 @@ function checkJSON() {
         }
         
         // Check "prompt.map.frontendInfo.*"
-        for (j in AUTHOR_JSON.frontendInfo) {
-            if (AUTHOR_JSON.frontendInfo.hasOwnProperty(j)) {
+        for (j in AUTHOR.JSON.frontendInfo) {
+            if (AUTHOR.JSON.frontendInfo.hasOwnProperty(j)) {
                 if (!item.prompt.map.frontendInfo[j]) {
                     item.prompt.map.frontendInfo[j] = {};
                 }
@@ -265,8 +274,8 @@ function checkJSON() {
             }
             
             // Check "prompt.contents[j].type"
-            if (!item.prompt.contents[j].type || !AUTHOR_JSON.contentTypes.hasOwnProperty(item.prompt.contents[j].type)) {
-                item.prompt.contents[j].type = AUTHOR_JSON.defaultContentType;
+            if (!item.prompt.contents[j].type || !AUTHOR.JSON.contentTypes.hasOwnProperty(item.prompt.contents[j].type)) {
+                item.prompt.contents[j].type = AUTHOR.JSON.defaultContentType;
             }
         }
         
@@ -281,8 +290,8 @@ function checkJSON() {
             }
             
             // Check "prompt.choices[j].type"
-            if (!item.prompt.choices[j].type || !AUTHOR_JSON.contentTypes.hasOwnProperty(item.prompt.choices[j].type)) {
-                item.prompt.choices[j].type = AUTHOR_JSON.defaultContentType;
+            if (!item.prompt.choices[j].type || !AUTHOR.JSON.contentTypes.hasOwnProperty(item.prompt.choices[j].type)) {
+                item.prompt.choices[j].type = AUTHOR.JSON.defaultContentType;
             }
         }
         
@@ -327,8 +336,9 @@ function checkJSON() {
  */
 function swapGotos(goto1, goto2) {
     var i, j, k, actionList, actions, action;
-    for (i = 0; i < json.promptList.length; i++) {
-        actionList = json.promptList[i].actionList;
+    var promptList = game.jsondata.promptList;
+    for (i = 0; i < promptList.length; i++) {
+        actionList = promptList[i].actionList;
         for (j = 0; j < actionList.length; j++) {
             actions = actionList[j].actions;
             for (k = 0; k < actions.length; k++) {
@@ -356,9 +366,10 @@ function swapGotos(goto1, goto2) {
  */
 function decrementGotos(leastIndex) {
     var i, j, k, actionList, actions, action;
+    var promptList = game.jsondata.promptList;
     var occurrences = 0;
-    for (i = 0; i < json.promptList.length; i++) {
-        actionList = json.promptList[i].actionList;
+    for (i = 0; i < promptList.length; i++) {
+        actionList = promptList[i].actionList;
         for (j = 0; j < actionList.length; j++) {
             actions = actionList[j].actions;
             for (k = 0; k < actions.length; k++) {
@@ -377,158 +388,44 @@ function decrementGotos(leastIndex) {
 }
 
 /**
- * Check the JSON data, then update the save button and (possibly) update the
+ * Check the JSON data, then update the export button and (possibly) update the
  * table.
  *
  * @param {boolean} [updateTable] - Whether to update the table.
- * @param {boolean} [dontSave] - Whether to skip saving as a recent file
- *                  (i.e. if there's no actual data yet).
  */
-function generate(updateTable, dontSave) {
+function generate(updateTable) {
     // Make sure our data is good
     checkJSON();
     
-    // Stringify stuff
-    var jsonString = JSON.stringify(json, function (key, value) {
-        return key == "id" ? undefined : value;
-    });
-    var jsonPrettyString = JSON.stringify(json, function (key, value) {
-        return key == "id" ? undefined : value;
-    }, 2);
-    
-    // Update our save button
+    // Update our export button
     if (typeof btoa == "function") {
-        var a = document.getElementById("downloads_save");
-        a.setAttribute("download", makeLabel() + ".json");
-        a.setAttribute("href", "data:application/json;base64," + btoa(jsonPrettyString));
+        var a = document.getElementById("toolbar_export");
+        a.setAttribute("download", AUTHOR.GAMES.getLabel() + ".json");
+        a.setAttribute("href", AUTHOR.GAMES.getDataURI());
     }
     
-    // Update "Preview Game" link
-    if (AUTHOR_CONFIG.clientPreviewURL) {
-        document.getElementById("downloads_preview").style.display = "block";
-        document.getElementById("downloads_preview").setAttribute("href",
-            AUTHOR_CONFIG.clientPreviewURL + "#jsongamedata::" + encodeURIComponent(jsonString));
+    // Update "Preview Game" link (if applicable)
+    if (AUTHOR.CONFIG.clientPreviewURL) {
+        document.getElementById("toolbar_preview").style.display = "block";
+        document.getElementById("toolbar_preview").setAttribute("href",
+            AUTHOR.CONFIG.clientPreviewURL + "#jsongamedata::" + encodeURIComponent(AUTHOR.GAMES.getJSON()));
     }
     
-    // Update "Publish Game" form
-    if (AUTHOR_CONFIG.serverPublishURL) {
-        document.getElementById("publish-form-input").value = jsonString;
-    }
-    
-    // Save as a recent file
-    if (!dontSave) AUTHOR_RECENT.saveRecentFile();
+    // Save with the backend
+    AUTHOR.GAMES.saveGame().then(function () {
+        console.log("Saved game: " + game.name);
+    }).catch(function (err) {
+        console.error(err);
+        alert(_("Error saving game: ") + err.name + "\n" + err.message);
+    });
     
     // And, update the table (if needed)
-    if (updateTable) AUTHOR_TABLE.initTable();
+    if (updateTable) {
+        AUTHOR.TABLE.initTable();
+    }
 }
 
-/**
- * Make a label for some JSON data.
- *
- * @param {object} [data] - The JSON data to use (if not the global `json`).
- *
- * @return {string} The label for the JSON data.
- */
-function makeLabel(data) {
-    if (!data) data = json;
-    var label = "";
-    
-    if (data.name) {
-        label += data.name + " - ";
-    }
-    if (data.author) {
-        label += data.name + " - ";
-    }
-    if (!data.name && !data.author) {
-        label += data.id;
-    }
-    
-    // Make decently not ugly date
-    var modified = new Date(data.modified),
-        today = new Date();
-    if (modified.getFullYear() != today.getFullYear()) {
-        label += icu.getDateFormat("SHORT").format(json.modified)
-    } else if (modified.getMonth() != today.getMonth() || modified.getDate() != today.getDate()) {
-        label += icu.getDateFormat("SHORT_NOYEAR").format(modified);
-    } else {
-        label += modified.getHours() + ":" + ("0" + modified.getMinutes()).substr(-2);
-    }
-    
-    return label;
-}
-
-/**
- * Update the page based on new JSON data.
- */
-function loadJSON() {
-    // Hide instructions and "Loaded from"
-    document.getElementById("instructions").style.display = "none";
-    document.getElementById("loadedFrom").style.display = "none";
-    
-    // Check the JSON
-    checkJSON();
-    
-    // Set the values for the General Properties
-    document.getElementById("general_name").value = json.name || "";
-    document.getElementById("general_author").value = json.author || "";
-    document.getElementById("general_jumpingBackAllowed").checked = !!json.jumpingBackAllowed;
-    document.getElementById("general_onJumpBack").value = json.onJumpBack;
-    document.getElementById("general_jumpingForwardAllowed").checked = !!json.jumpingForwardAllowed;
-    document.getElementById("general_showActionsInUserOrder").checked = !!json.showActionsInUserOrder;
-    
-    // Regenerate the table and update the save button
-    generate(true);
-    
-    // Scroll up to the top of the page
-    window.scrollTo(0, 0);
-}
-
-/**
- * Read a JSON file.
- *
- * @param {File} file - The file to attempt to read.
- */
-function readJSONFile(file) {
-    var reader = new FileReader();
-    reader.onload = function () {
-        if (reader.result) {
-            var result;
-            try {
-                result = JSON.parse(reader.result);
-            } catch (err) {}
-            if (result) {
-                // Create filename
-                var filename = file.name || "";
-                if (filename.substring(filename.length - 5) == ".json") {
-                    filename = filename.substring(0, filename.length - 5);
-                }
-                
-                // Store the new JSON
-                json = result;
-                // Make sure it has a name
-                if (!json.name && filename) json.name = filename;
-                // Load the new JSON
-                loadJSON();
-                
-                // Show "Loaded from filename.json"
-                if (filename) {
-                    document.getElementById("loadedFrom_filename").textContent = filename + ".json";
-                    document.getElementById("loadedFrom").style.display = "block";
-                }
-            } else {
-                alert(_("Error reading file!\nDetails: Could not parse JSON."));
-            }
-        } else {
-            alert(_("Error reading file!\nDetails: File is empty or unreadable."));
-        }
-    };
-    reader.onerror = function () {
-        alert(_("Error reading file!\nDetails: " + reader.error));
-    };
-    reader.readAsText(file);
-}
-
-(function () {
+(function () {    
     /**
      * Initialize everything.
      */
@@ -537,126 +434,82 @@ function readJSONFile(file) {
         document.getElementById("version_inner").appendChild(document.createTextNode("" + SERGIS_PROMPT_AUTHOR_VERSION));
         document.getElementById("version_outer").style.display = "inline";
         
-        // "Open" button and "askForFile" (if FileReader is supported)
-        if (typeof FileReader != "undefined") {
-            // Set up askForFile function
-            window.askForFile = function (onfile) {
-                var fileinput = c("input", {
-                    type: "file"
-                }, function (event) {
-                    if (event.target.files && event.target.files.length > 0 && typeof onfile == "function") {
-                        onfile(event.target.files[0]);
-                    }
-                });
-                document.getElementById("fileinputs").appendChild(fileinput);
-                fileinput.click();
-            };
-            
-            // Things releated to the "Open" button
-            document.getElementById("instructions_open").style.display = "block";
-            document.getElementById("downloads_open").style.display = "block";
-            document.getElementById("downloads_open").addEventListener("click", function (event) {
-                event.preventDefault();
-                askForFile(function (file) {
-                    var ext = file.name.substring(file.name.lastIndexOf(".") + 1).toLowerCase();
-                    if (ext != "json") {
-                        alert(_("Invalid file!\nPlease select a *.json file."));
-                    } else {
-                        readJSONFile(file);
-                    }
-                });
-            }, false);
-            
-        }
-        
         // "View JSON" button
-        document.getElementById("downloads_view").addEventListener("click", function (event) {
+        document.getElementById("viewjson").addEventListener("click", function (event) {
             event.preventDefault();
             document.getElementById("overlay_viewjson_content").innerHTML = "";
-            document.getElementById("overlay_viewjson_content").appendChild(document.createTextNode(JSON.stringify(json, null, 2)));
+            document.getElementById("overlay_viewjson_content").appendChild(document.createTextNode(AUTHOR.GAMES.getJSON(2)));
             overlay("overlay_viewjson");
         }, false);
         
-        // "Save" button (if base64 and data URIs are supported)
+        // "Export" button (if base64 and data URIs are supported)
         /* Yes, you can shoot me later for the use of browser detection, but IE
          * is the only major browser that *still* doesn't fully support "data:"
          * URIs.
          */
         if (typeof btoa == "function" && navigator.userAgent.indexOf("Trident/") == -1) {
-            document.getElementById("instructions_save").style.display = "block";
-            document.getElementById("downloads_save").style.display = "block";
+            document.getElementById("toolbar_export").style.display = "block";
             // Message if <a download="..."> isn't supported
             if (typeof document.createElement("a").download == "undefined") {
-                document.getElementById("downloads_save").addEventListener("click", function (event) {
-                    alert(_("Right-click this button, select \"Save Link As\" or \"Save Target As\", and name the file something like \"name.json\""));
+                document.getElementById("toolbar_export").addEventListener("click", function (event) {
                     event.preventDefault();
+                    alert(_("Right-click this button, select \"Save Link As\" or \"Save Target As\", and name the file something like \"name.json\""));
                 }, false);
             }
         }
         
         // "Publish" button
-        if (AUTHOR_CONFIG.serverPublishURL) {
-            document.getElementById("downloads_publish").style.display = "block";
-            document.getElementById("publish-form").setAttribute("action", AUTHOR_CONFIG.serverPublishURL);
-            document.getElementById("downloads_publish").addEventListener("click", function (event) {
+        if (typeof AUTHOR.BACKEND.publishGame == "function") {
+            document.getElementById("toolbar_publish").style.display = "block";
+            document.getElementById("toolbar_publish").addEventListener("click", function (event) {
                 event.preventDefault();
-                document.getElementById("publish-form").submit();
+                alert("publishing...");
+                return;
+                AUTHOR.BACKEND.publishGame("game name").then(function (iframeUrl) {
+                    
+                });
             }, false);
         }
         
         // "Add Prompt" button
         document.getElementById("addPrompt").addEventListener("click", function (event) {
             event.preventDefault();
-            json.promptList.push({});
-            // Regenerate the table and update the save button
+            game.jsondata.promptList.push({});
+            // Save and regenerate
             generate(true);
         }, false);
         
         // "Expand All Prompts" checkbox
         document.getElementById("expandAllPrompts").addEventListener("change", function (event) {
-            AUTHOR_TABLE.setExpandAllPrompts(this.checked);
+            AUTHOR.TABLE.setExpandAllPrompts(this.checked);
         }, false);
         document.getElementById("expandAllPrompts").checked = false;
         
-        // "Prompt Set Name" textbox
-        document.getElementById("general_name").addEventListener("change", function (event) {
-            json.name = this.value;
-            // Update the save button
-            generate();
-        }, false);
-        
-        // "Prompt Set Author" textbox
-        document.getElementById("general_author").addEventListener("change", function (event) {
-            json.author = this.value;
-            // Update the save button
-            generate();
-        }, false);
-        
         // "Jumping Back Allowed" checkbox
         document.getElementById("general_jumpingBackAllowed").addEventListener("change", function (event) {
-            json.jumpingBackAllowed = this.checked;
-            // Update the save button
+            game.jsondata.jumpingBackAllowed = this.checked;
+            // Save the game and update the Export button
             generate();
         }, false);
         
         // "On Jump Back" select
         document.getElementById("general_onJumpBack").addEventListener("change", function (event) {
-            json.onJumpBack = this.value;
-            // Update the save button
+            game.jsondata.onJumpBack = this.value;
+            // Save the game and update the Export button
             generate();
         }, false);
         
         // "Jumping Forward Allowed" checkbox
         document.getElementById("general_jumpingForwardAllowed").addEventListener("change", function (event) {
-            json.jumpingForwardAllowed = this.checked;
-            // Update the save button
+            game.jsondata.jumpingForwardAllowed = this.checked;
+            // Save the game and update the Export button
             generate();
         }, false);
         
         // "Show Actions In User Order" checkbox
         document.getElementById("general_showActionsInUserOrder").addEventListener("change", function (event) {
-            json.showActionsInUserOrder = this.checked;
-            // Update the save button
+            game.jsondata.showActionsInUserOrder = this.checked;
+            // Save the game and update the Export button
             generate();
         }, false);
         
@@ -674,12 +527,6 @@ function readJSONFile(file) {
             event.preventDefault();
             overlay();
         }, false);
-        
-        // Make our JSON defaults and generate the default table
-        generate(true, true);
-        
-        // Get rid of loading sign
-        overlay();
     }
 
     window.addEventListener("load", init, false);

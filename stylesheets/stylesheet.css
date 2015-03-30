@@ -231,6 +231,40 @@ tr.prompt-row-hidden {
   display: none;
 }
 
+div.tabs {
+  border-bottom: 1px solid;
+  padding: 0;
+  text-align: center;
+}
+
+div.tabs a {
+  color: inherit;
+  cursor: pointer;
+  text-decoration: inherit;
+  border: 1px solid;
+  border-bottom: none;
+  padding: 4px;
+  border-radius: 8px 8px 0 0;
+  position: relative;
+  margin-left: 4px;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+div.tabs a.selected, div.tabs a:hover {
+  background: linear-gradient(#FFFFFF, #F2F2F2);
+}
+
+div.tabs a:not(.selected):hover {
+  top: -1px;
+}
+
+.tabcontent {
+  padding: 12px 16px;
+  border: 1px solid;
+  border-top: none;
+}
+
 /*******************************************************************************
 Theme Styles
 *******************************************************************************/
@@ -503,7 +537,7 @@ Full-Width Styles
   text-shadow: #111 0px 0px 10px;
 }
 
-#downloads {
+#toolbar {
   position: absolute;
   /* width: 210px; */
   z-index: 10;
@@ -512,7 +546,7 @@ Full-Width Styles
   height: 70px;
 }
 
-#downloads > a {
+#toolbar > a {
   display: block;
   float: right;
   width: 90px;
@@ -524,55 +558,56 @@ Full-Width Styles
   /*margin-left: 10px;*/
 }
 
-#downloads > div {
+#toolbar > div {
   float: right;
   margin-top: 55px;
   margin-right: 10px;
 }
 
-#downloads > div > span:not(:last-child)::after {
+#toolbar > div > span:not(:last-child)::after {
   content: '\2022';
   margin-left: 5px;
 }
 
 /* SPRITE FILE POSITIONS FOR ICONS */
-#downloads_open {
+#toolbar_open {
   background-position: 0 0;
+  margin-right: 15px;
 }
 
-#downloads_open:hover {
+#toolbar_open:hover {
   background-position: 0 100%;
 }
 
-#downloads_save {
+#toolbar_export {
   background-position: 25% 0;
 }
 
-#downloads_save:hover {
+#toolbar_export:hover {
   background-position: 25% 100%;
 }
 
-#downloads_view {
+#toolbar_view {
   background-position: 50% 0;
 }
 
-#downloads_view:hover {
+#toolbar_view:hover {
   background-position: 50% 100%;
 }
 
-#downloads_preview {
+#toolbar_preview {
   background-position: 75% 0;
 }
 
-#downloads_preview:hover {
+#toolbar_preview:hover {
   background-position: 75% 100%;
 }
 
-#downloads_publish {
+#toolbar_publish {
   background-position: 100% 0;
 }
 
-#downloads_publish:hover {
+#toolbar_publish:hover {
   background-position: 100% 100%;
 }
 
@@ -632,7 +667,7 @@ Full-Width Styles
   max-width: 1200px;
   background-color: #f2f2f2;
   margin: 0 auto;
-  padding: 10px;
+  padding: 20px;
   border-radius: 8px;
   border: 1px solid rgb(33,33,33);
   max-height: 100%;
@@ -664,6 +699,10 @@ Full-Width Styles
 }
 */
 
+.overlay_buttons {
+  text-align: center;
+}
+
 /*******************************************************************************
 Small Device Styles
 *******************************************************************************/
@@ -681,7 +720,7 @@ table button, table label, table input, table select, table .minirow, table .row
     font-size:14px;
   }
 
-  #downloads {
+  #toolbar {
     /*display: none;*/
     bottom: -40px;
   }

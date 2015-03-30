@@ -7,13 +7,13 @@
 */
 
 // This file contains all the details about the SerGIS JSON Game Data format.
-// Globals: AUTHOR_JSON, AUTHOR_JSON_MAX_FILE_SIZE, AUTHOR_JSON_MAX_FILE_SIZE_HUMAN_READABLE
+// Globals: AUTHOR_JSON_MAX_FILE_SIZE, AUTHOR_JSON_MAX_FILE_SIZE_HUMAN_READABLE
 
 // Max file size, in bytes
 var AUTHOR_JSON_MAX_FILE_SIZE = 1024 * 1024; // 1 MB
 var AUTHOR_JSON_MAX_FILE_SIZE_HUMAN_READABLE = "1 MB";
 
-var AUTHOR_JSON = {
+AUTHOR.JSON = {
     /**
      * Reference for the different types that the SerGIS JSON Content Object
      * fields can be.
@@ -187,14 +187,21 @@ var AUTHOR_JSON = {
                         text: _("Browse for file...")
                     }, function (event) {
                         event.preventDefault();
-                        askForFile(function (file) {
+                        var file;
+                        askForFile().then(function (_file) {
+                            file = _file;
                             if (file.size > AUTHOR_JSON_MAX_FILE_SIZE) {
                                 // AHH! Huge file!
-                                if (!confirm(_("The file that you have chosen is larger than {0}, which is the recommended maximum file size. It is recommended that you upload the file elsewhere and just link to it here.", AUTHOR_JSON_MAX_FILE_SIZE_HUMAN_READABLE) + "\n\n" + _("Would you like to add the file anyway? (This may cause unexpected issues.)"))) {
-                                    // Nope
-                                    return;
-                                }
+                                return askForConfirmation(
+                                    _("The file that you have chosen is larger than {0}, which is the recommended maximum file size. It is recommended that you upload the file elsewhere and just link to it here.", AUTHOR_JSON_MAX_FILE_SIZE_HUMAN_READABLE) +
+                                    "\n\n" +
+                                    _("Would you like to add the file anyway? (This may cause unexpected issues.)"),
+                                true);
                             }
+                            // The file wasn't too big
+                            return true;
+                        }).then(function (shouldContinue) {
+                            if (!shouldContinue) return;
                             var reader = new FileReader();
                             reader.onload = function () {
                                 if (reader.result) {
@@ -206,11 +213,12 @@ var AUTHOR_JSON = {
                                     // Store file value
                                     onchange(property, reader.result);
                                 } else {
-                                    alert(_("Error reading file!\nDetails: File is empty or unreadable."));
+                                    alert(_("Error reading file! File is empty or unreadable."));
                                 }
                             };
                             reader.onerror = function () {
-                                alert(_("Error reading file!\nDetails: " + reader.error));
+                                console.error(reader.error);
+                                alert(_("Error reading file: ") + reader.error.name + "\n" + reader.error.message);
                             };
                             reader.readAsDataURL(file);
                         });
@@ -321,14 +329,14 @@ var AUTHOR_JSON = {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// And, the rest is all for defining the remaining properties of AUTHOR_JSON.
+// And, the rest is all for defining the remaining properties of AUTHOR.JSON.
 (function () {
     /*
     What follows here is a lot of constructors for SERGIS_JSON_... objects.
     These represent data fields for actions and frontend info.
     The usage of these constructors and classes can be seen below, where
-    "AUTHOR_JSON.actions", "AUTHOR_JSON.actionsByFrontend", and
-    "AUTHOR_JSON.frontendInfo" are defined.
+    "AUTHOR.JSON.actions", "AUTHOR.JSON.actionsByFrontend", and
+    "AUTHOR.JSON.frontendInfo" are defined.
     */
     
     /**
@@ -652,8 +660,8 @@ var AUTHOR_JSON = {
         this.label = label;
         this.description = description;
         this.json = (typeof json == "object" && json) ? json : {};
-        if (!this.json.type || !AUTHOR_JSON.contentTypes.hasOwnProperty(this.json.type)) {
-            this.json.type = AUTHOR_JSON.defaultContentType;
+        if (!this.json.type || !AUTHOR.JSON.contentTypes.hasOwnProperty(this.json.type)) {
+            this.json.type = AUTHOR.JSON.defaultContentType;
         }
         if (typeof this.json.value != "string") this.json.value = "";
     }
@@ -679,10 +687,10 @@ var AUTHOR_JSON = {
             editor_div.innerHTML = "";
             
             // Get info on "value" field (which is the only one that we care about here)
-            var field = AUTHOR_JSON.contentTypes[that.json.type].fields[0];
+            var field = AUTHOR.JSON.contentTypes[that.json.type].fields[0];
             var name = field[1], type = field[2], value = that.json.value || field[3];
             
-            editor_div.appendChild(AUTHOR_JSON.fieldTypes[type].makeEditor(null, name, value, that.json._sergis_author_data, function (property, value) {
+            editor_div.appendChild(AUTHOR.JSON.fieldTypes[type].makeEditor(null, name, value, that.json._sergis_author_data, function (property, value) {
                 that.json.value = value;
                 onchange();
             }));
@@ -705,20 +713,20 @@ var AUTHOR_JSON = {
         });
         // Make sure default content type is first
         var defaultContentType;
-        if (AUTHOR_JSON.defaultContentType && AUTHOR_JSON.contentTypes.hasOwnProperty(defaultContentType)) {
-            defaultContentType = AUTHOR_JSON.defaultContentType;
+        if (AUTHOR.JSON.defaultContentType && AUTHOR.JSON.contentTypes.hasOwnProperty(defaultContentType)) {
+            defaultContentType = AUTHOR.JSON.defaultContentType;
             select.appendChild(c("option", {
                 value: defaultContentType,
-                text: AUTHOR_JSON.contentTypes[defaultContentType].name,
+                text: AUTHOR.JSON.contentTypes[defaultContentType].name,
                 selected: this.json.type == defaultContentType ? "selected" : undefined
             }));
         }
         // Make the rest of the content types
-        for (var type in AUTHOR_JSON.contentTypes) {
-            if (AUTHOR_JSON.contentTypes.hasOwnProperty(type) && type != defaultContentType) {
+        for (var type in AUTHOR.JSON.contentTypes) {
+            if (AUTHOR.JSON.contentTypes.hasOwnProperty(type) && type != defaultContentType) {
                 select.appendChild(c("option", {
                     value: type,
-                    text: AUTHOR_JSON.contentTypes[type].name,
+                    text: AUTHOR.JSON.contentTypes[type].name,
                     selected: this.json.type == type ? "selected" : undefined
                 }));
             }
@@ -1112,7 +1120,7 @@ var AUTHOR_JSON = {
     
     
     
-    // Initialize the rest of AUTHOR_JSON
+    // Initialize the rest of AUTHOR.JSON
     
     /**
      * The Gameplay Actions in SerGIS (not frontend-specific).
@@ -1126,7 +1134,7 @@ var AUTHOR_JSON = {
      *   "toHTML": a function that takes an action of that type and returns an
      *     HTML representation of the object.
      */
-    AUTHOR_JSON.actions = {
+    AUTHOR.JSON.actions = {
         explain: {
             name: _("Explanation"),
             description: _("Show an explanation to the user to offer feedback on their choice or give them more information."),
@@ -1158,7 +1166,7 @@ var AUTHOR_JSON = {
                     if (data[i]) {
                         span.appendChild(c("br"));
                         span.appendChild(c("span", {
-                            html: AUTHOR_JSON.contentTypes[data[i].type || AUTHOR_JSON.defaultContentType].toHTML(data[i])
+                            html: AUTHOR.JSON.contentTypes[data[i].type || AUTHOR.JSON.defaultContentType].toHTML(data[i])
                         }));
                     }
                 }
@@ -1210,16 +1218,16 @@ var AUTHOR_JSON = {
     /**
      * Human-readable names for the frontends.
      */
-    AUTHOR_JSON.frontendNames = {
+    AUTHOR.JSON.frontendNames = {
         arcgis: "ArcGIS"
     };
     
     /**
      * The Map Actions in SerGIS (frontend-specific).
      * Each property is an object that represents a frontend. The object
-     * follows the same format as AUTHOR_JSON.actions.
+     * follows the same format as AUTHOR.JSON.actions.
      */
-    AUTHOR_JSON.actionsByFrontend = {
+    AUTHOR.JSON.actionsByFrontend = {
         /**
          * @see https://github.com/sergisproject/sergis-client/blob/master/lib/frontends/arcgis.js
          */
@@ -1458,7 +1466,7 @@ var AUTHOR_JSON = {
      *       "toHTML": a function that is passed a value and returns an HTML
      *         representation of the frontend.
      */
-    AUTHOR_JSON.frontendInfo = {
+    AUTHOR.JSON.frontendInfo = {
         arcgis: {
             basemap: {
                 getFields: function (data) {
