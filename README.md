@@ -1,12 +1,12 @@
 # SerGIS Prompt Author
 
-The SerGIS Prompt Author is a web-based program to create [SerGIS JSON Game Data files](http://sergisproject.github.io/docs/json.html) for [the SerGIS Project](http://sergisproject.github.io/).
+The SerGIS Prompt Author is a web-based program to create [SerGIS JSON Game Data files](http://sergisproject.github.io/legacy-docs/json.html) for [the SerGIS Project](http://sergisproject.github.io/).
 
-Current version: 0.9
+Current version: 1.0
 
 ## Using SerGIS Prompt Author
 
-The SerGIS Prompt Author is hosted at this URL: http://sergisproject.github.io/sergis-author/
+The SerGIS Prompt Author is hosted at this URL: http://sergisproject.github.io/sergis-legacy-author/
 
 Alternatively, you can clone this repository and open `index.html`.
 
@@ -26,9 +26,6 @@ Other:
 - Tutorial and help to show basic usage
 - Click/dblclick on content/actions/whatever to edit them
 - YouTube: take entire URL rather than video ID
-- For preview, submit a POST to the server with the JSON (instead of in the URL),
-  and then the server just throws it in a JS variable that the local.js backend
-  can find.
 - Replace "Prompt Index" with just "Prompt", which consists of a 1-based prompt number and its title.
 - arcgis:clearGraphics doesn't show up the same as the others in the "Actions" column
 - Add ability to buffer geodata in layers
