@@ -88,13 +88,11 @@ AUTHOR.BACKEND = {
     };
     
     AUTHOR.BACKEND.checkGameName = function (gameName) {
-        // Make sure gameName is something before we check it
-        if (!gameName) return Promise.resolve(-1);
+        // Make sure gameName is valid before we check its existance
+        var gameNameRegex = /^[A-Za-z0-9~$"':;,.\-_]+$/;
+        if (!gameName || !gameNameRegex.test(gameName)) return Promise.resolve(-1);
         return localforage.getItem("gameList").then(function (gameList) {
             if (!gameList) gameList = {};
-            // General regex for game names
-            var gameNameRegex = /^[A-Za-z0-9~$"':;,.\-_]+$/;
-            if (!gameNameRegex.test(gameName)) return -1;
             return gameList.hasOwnProperty(gameName) ? 0 : 1;
         });
     };

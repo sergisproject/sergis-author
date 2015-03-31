@@ -14,19 +14,19 @@ AUTHOR.BACKEND = {
 
 (function () {
     var socket;
-    var token;
     
     // Just direct all the normal functions to the server
     var backendFunctions = ["getGameList", "loadGame", "saveGame", "renameGame", "removeGame", "checkGameName", "previewGame", "publishGame"];
     backendFunctions.forEach(function (func) {
+        // Make AUTHOR.BACKEND.function wyatt says hi
         AUTHOR.BACKEND[func] = function () {
             var args = Array.prototype.slice.call(arguments);
             return new Promise(function (resolve, reject) {
                 if (!socket) {
                     reject("No connection to server.");
                 } else {
-                    socket.emit(func, token, args, function (isResolved, data) {
-                        (isResolved ? resolve : reject)(data);
+                    socket.emit(func, args, function (isResolved, value) {
+                        (isResolved ? resolve : reject)(value);
                     });
                 }
             });
@@ -48,18 +48,9 @@ AUTHOR.BACKEND = {
             socket.on("connect", function () {
                 console.log("Connected to socket server");
                 var session = document.getElementById("author_backend_script").getAttribute("data-session");
-                if (!session) {
-                    reject();
-                    return;
-                }
-
-                socket.emit("init", session, function (_token) {
-                    if (!_token) {
-                        reject();
-                    } else {
-                        token = _token;
-                        resolve();
-                    }
+                // Emit the "init" event to make sure the socket connection is good
+                socket.emit("init", session, function (isResolved, value) {
+                    (isResolved ? resolve : reject)(value);
                 });
             });
 
