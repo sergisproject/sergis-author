@@ -144,10 +144,7 @@ AUTHOR.GAMES = {
                 // Show the instructions
                 document.getElementById("instructions").style.display = "block";
             }
-        }).catch(function (err) {
-            console.error(err);
-            alert(_("Error checking game name: ") + err.name + "\n" + err.message);
-        });
+        }).catch(makeCatch(_("Error checking game name")));
     }
     
     /**
@@ -166,10 +163,7 @@ AUTHOR.GAMES = {
             overlay();
             // The user is experienced; hide the instructions
             document.getElementById("instructions").style.display = "none";
-        }).catch(function (err) {
-            console.error(err);
-            alert(_("Error loading game {0}: ", gameName) + err.name + "\n" + err.message);
-        });
+        }).catch(makeCatch(_("Error loading game {0}", gameName)));
     }
     
     /**
@@ -212,10 +206,7 @@ AUTHOR.GAMES = {
                         switchTab("create");
                         overlay("overlay_games");
                     }
-                }).catch(function (err) {
-                    console.error(err);
-                    alert(_("Error reading file: ") + err.name + "\n" + err.message);
-                });
+                }).catch(makeCatch(_("Error reading file")));
             }
         });
     }
@@ -237,10 +228,7 @@ AUTHOR.GAMES = {
         }).then(function () {
             // Show the Create/Open overlay again
             overlay("overlay_games");
-        }).catch(function (err) {
-            console.error(err);
-            alert(_("Error renaming game: ") + err.name + "\n" + err.message);
-        });
+        }).catch(makeCatch(_("Error renaming game")));
     }
     
     /**
@@ -262,10 +250,7 @@ AUTHOR.GAMES = {
                     overlay("overlay_games");
                 });
             }
-        }).catch(function (err) {
-            console.error(err);
-            alert(_("Error removing game: ") + err.name + "\n" + err.message);
-        });
+        }).catch(makeCatch(_("Error removing game")));
     }
     
     /**
@@ -464,10 +449,7 @@ AUTHOR.GAMES = {
                 document.getElementById("overlay_games_buttons").style.display = "block";
                 // Show the Create/Open overlay
                 overlay("overlay_games");
-            }).catch(function (err) {
-                console.error(err);
-                alert(_("Error loading game list: ") + err.name + "\n" + err.message);
-            });
+            }).catch(makeCatch(_("Error loading game list")));
         }, false);
         
         // Load the backend
@@ -478,10 +460,7 @@ AUTHOR.GAMES = {
             // Everything's all set up!
             // Switch from loading sign to Create/Open Game overlay
             overlay("overlay_games");
-        }).catch(function (err) {
-            console.error(err);
-            alert(_("Error loading game list: ") + err.name + "\n" + err.message);
-        });
+        }).catch(makeCatch(_("Error loading game list")));
     }
     
     window.addEventListener("load", initGames, false);

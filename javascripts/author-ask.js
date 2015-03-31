@@ -6,10 +6,10 @@
     in the LICENSE.txt file.
 */
 
-// Globals: ask, askForConfirmation, askForFile (if supported)
+// Globals: ask, askForOK, askForConfirmation, askForFile (if supported)
 
 (function () {
-    var askHandler, askForConfirmationHander;
+    var askHandler, askForOKHandler, askForConfirmationHander;
     
     /**
      * Prompt the user for something.
@@ -17,8 +17,8 @@
      * @param {string} promptText - The text to prompt the user with.
      * @param {string} [defaultValue=""] - The default value for the prompt.
      *
-     * @return {Promise.<?string>} The text that the user entered, or null if the
-     *         user hit Cancel.
+     * @return {Promise.<?string>} The text that the user entered, or null if
+     *         the user hit Cancel.
      */
     window.ask = function (promptText, defaultValue) {
         return new Promise(function (resolve, reject) {
@@ -43,6 +43,35 @@
             overlay("overlay_prompt");
             // Highlight the input box
             document.getElementById("overlay_prompt_input").focus();
+        });
+    };
+    
+    /**
+     * Show an alert to the user.
+     *
+     * @param {string} promptText - The text to show to the user.
+     *
+     * @return {Promise} Resolved when the user clicks "OK".
+     */
+    window.askForOK = function (promptText) {
+        return new Promise(function (resolve, reject) {
+            var previousOverlay = getOverlay();
+            // Set the prompt text
+            var texts = promptText.split("\n");
+            document.getElementById("overlay_alert_text").innerHTML = "";
+            texts.forEach(function (text, index) {
+                if (index > 0) document.getElementById("overlay_alert_text").appendChild(c("br"));
+                document.getElementById("overlay_alert_text").appendChild(document.createTextNode(text));
+            });
+            // Set up the handler for the user's choice
+            askForOKHander = function () {
+                overlay(previousOverlay || undefined);
+                resolve();
+            };
+            // Show the overlay
+            overlay("overlay_alert");
+            // Focus the "OK" button
+            document.getElementById("overlay_alert_ok").focus();
         });
     };
     
@@ -120,6 +149,13 @@
             event.preventDefault();
             if (typeof askHandler == "function") askHandler(null);
             askHandler = null;
+        }, false);
+        
+        // Set up button for alert ("askForOK")
+        document.getElementById("overlay_alert_ok").addEventListener("click", function (event) {
+            event.preventDefault();
+            if (typeof askForOKHander == "function") askForOKHander();
+            askForOKHander = null;
         }, false);
         
         // Set up buttons for confirm ("askForConfirmation")

@@ -6,10 +6,10 @@
     in the LICENSE.txt file.
 */
 
-// Globals: game, randInt, randID, removeFromString, overlay, getOverlay, c,
-// selectAll, checkJSON, swapGotos, decrementGotos, generate
+// Globals: game, makeCatch, randInt, randID, removeFromString, overlay, getOverlay,
+// c, openPage, selectAll, checkJSON, swapGotos, decrementGotos, generate
 
-// Make sure console... exists
+// Make sure console.{log,error} exists
 if (!console) console = {};
 if (!console.log) console.log = function () {};
 if (!console.error) console.error = console.log;
@@ -41,6 +41,22 @@ var game = {
         */
     }
 };
+
+/**
+ * Make a catcher that can catch errors from Promises.
+ *
+ * @param {String} message - What the Promise was trying to do.
+ */
+function makeCatch(message) {
+    return function (err) {
+        if (!err) {
+            alert(message);
+        } else {
+            console.error(err);
+            alert(message + ": " + err.name + "\n" + err.message);
+        }
+    };
+}
 
 /**
  * Make a quick and dirty random integer.
@@ -173,6 +189,42 @@ function c(elem, attributes, event /*, [parameter, [parameter, [...]]] */) {
     
     // Return the created element
     return elem;
+}
+
+/**
+ * Open a page.
+ * @see http://sergisproject.github.io/legacy-docs/author.html
+ *
+ * @param {Object} pageData - For the properties that this object takes, see
+ *        the link above.
+ * @param {string} [target=""] - The target (browsing context) to open the
+ *        request in.
+ */
+function openPage(pageData, target) {
+    // Make a new form to submit
+    var form = c("form", {
+        target: target || "",
+        action: pageData.url,
+        method: pageData.method || "GET",
+        enctype: pageData.enctype ||
+            (!pageData.method || pageData.method.toLowerCase() == "get" ? "" : "application/x-www-form-urlencoded")
+    });
+    // Add the form to the page
+    document.getElementById("openPageForms").appendChild(form);
+    // Add any input elements
+    if (pageData.data) {
+        for (var paramName in pageData.data) {
+            if (pageData.data.hasOwnProperty(paramName)) {
+                form.appendChild(c("input", {
+                    type: "hidden",
+                    name: paramName,
+                    value: pageData.data[paramName]
+                }));
+            }
+        }
+    }
+    // Submit the form
+    form.submit();
 }
 
 /**
@@ -417,8 +469,9 @@ function generate(updateTable, newCurrentPromptIndex) {
         a.setAttribute("href", AUTHOR.GAMES.getDataURI());
     }
     
-    // Update "Preview Game" link (if applicable)
-    if (AUTHOR.CONFIG.clientPreviewURL) {
+    // Update "Preview Game" link
+    // (if we have a clientPreviewURL but not a previewGame function on the backend)
+    if (AUTHOR.CONFIG.clientPreviewURL && typeof AUTHOR.BACKEND.previewGame != "function") {
         document.getElementById("toolbar_preview").style.display = "block";
         document.getElementById("toolbar_preview").setAttribute("href",
             AUTHOR.CONFIG.clientPreviewURL + "#jsongamedata::" + encodeURIComponent(AUTHOR.GAMES.getJSON()));
@@ -427,10 +480,7 @@ function generate(updateTable, newCurrentPromptIndex) {
     // Save with the backend
     AUTHOR.GAMES.saveGame().then(function () {
         console.log("Saved game: " + game.name);
-    }).catch(function (err) {
-        console.error(err);
-        alert(_("Error saving game: ") + err.name + "\n" + err.message);
-    });
+    }).catch(makeCatch(_("Error saving game")));
     
     // And, update the table (if needed)
     if (updateTable) {
@@ -471,18 +521,54 @@ function generate(updateTable, newCurrentPromptIndex) {
             }
         }
         
+        // "Preview" button
+        if (AUTHOR.CONFIG.clientPreviewURL || typeof AUTHOR.BACKEND.previewGame == "function") {
+            // Show the button
+            document.getElementById("toolbar_preview").style.display = "block";
+            // If the backend has `previewGame`, set that up
+            if (typeof AUTHOR.BACKEND.previewGame == "function") {
+                document.getElementById("toolbar_preview").addEventListener("click", function (event) {
+                    event.preventDefault();
+                    overlay("overlay_loading");
+                    var doPreview = function () {
+                        AUTHOR.BACKEND.previewGame(game.name).then(function (pageData) {
+                            overlay();
+                            openPage(pageData, "_blank");
+                        }).catch(makeCatch(_("Error getting preview page")));
+                    };
+                    // Show alert regarding popups (if necessary)
+                    if (document.cookie.indexOf("PREVIEW_POPUP_ALERT_SHOWN=yep") == -1) {
+                        askForOK(_("To view the preview, you must allow popups from this site.") + "\n" + _("If your browser blocks the preview popup, configure it to always allow popups from this site and click \"Preview\" again.")).then(function () {
+                            // They clicked OK; store this
+                            document.cookie = "PREVIEW_POPUP_ALERT_SHOWN=yep";
+                            doPreview();
+                        }).catch(makeCatch(_("Error asking for confirmation (lolz)")));
+                    } else {
+                        // We already showed them the alert
+                        doPreview();
+                    }
+                }, false);
+            }
+        }
+        
         // "Publish" button
         if (typeof AUTHOR.BACKEND.publishGame == "function") {
             document.getElementById("toolbar_publish").style.display = "block";
             document.getElementById("toolbar_publish").addEventListener("click", function (event) {
                 event.preventDefault();
-                alert("publishing...");
-                return;
-                AUTHOR.BACKEND.publishGame("game name").then(function (iframeUrl) {
-                    
-                });
+                overlay("overlay_loading");
+                AUTHOR.BACKEND.publishGame(game.name).then(function (pageData) {
+                    overlay("overlay_publish");
+                    openPage(pageData, "overlay_publish_iframe");
+                }).catch(makeCatch(_("Error getting publish page")));
             }, false);
         }
+        
+        // Close button in Publish overlay
+        document.getElementById("overlay_publish_close").addEventListener("click", function (event) {
+            event.preventDefault();
+            overlay();
+        }, false);
         
         // "Add Prompt" button
         document.getElementById("addPrompt").addEventListener("click", function (event) {

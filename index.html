@@ -93,6 +93,12 @@
       </form>
     </div>
     
+    <!-- Alert overlay -->
+    <div id="overlay_alert" class="overlay_inner" style="display: none;">
+      <p id="overlay_alert_text" style="text-align: center;"></p>
+      <p class="overlay_buttons"><button id="overlay_alert_ok" class="main-button">OK</button></p>
+    </div>
+    
     <!-- Confirm overlay -->
     <div id="overlay_confirm" class="overlay_inner" style="display: none;">
       <p id="overlay_confirm_text" style="text-align: center;"></p>
@@ -180,11 +186,19 @@
 
       <p class="overlay_buttons"><button id="overlay_actionEditor_cancel" class="sub-button">Cancel</button><button id="overlay_actionEditor_save" class="main-button">Save</button></p>
     </div>
+    
+    <!-- Publish overlay -->
+    <div id="overlay_publish" class="overlay_inner" style="display: none;">
+      <h2>Publish Game</h2>
+      <iframe name="overlay_publish_iframe" style="width: 100%; height: 300px; border-style: none; background: transparent;"></iframe>
+      <p class="overlay_buttons"><button id="overlay_publish_close">Close</button></p>
+    </div>
   <!-- </td></tr></tbody></table> -->
 </div>
 
 <div style="display: none;">
   <div id="fileinputs"></div>
+  <div id="openPageForms"></div>
   <form id="publish-form" method="POST" target="_blank" enctype="multipart/form-data">
     <textarea id="publish-form-input" name="jsondata"></textarea>
   </form>
