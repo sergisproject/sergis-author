@@ -377,7 +377,6 @@ pre, code, span.box {
   color: #222;
   background-color: #fff;
 
-  width: 100%;
   font-size: 14px;
 
   border-radius: 2px;
@@ -385,6 +384,10 @@ pre, code, span.box {
   -webkit-border-radius: 2px;
 
   box-shadow: 0 0 10px rgba(0,0,0,.1);
+}
+
+pre, span.box {
+  width: 100%;
 }
 
 pre, code {
