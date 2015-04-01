@@ -23,10 +23,14 @@ AUTHOR.BACKEND = {
             var args = Array.prototype.slice.call(arguments);
             return new Promise(function (resolve, reject) {
                 if (!socket) {
-                    reject("No connection to server.");
+                    reject(new Error(_("No connection to server.")));
                 } else {
                     socket.emit(func, args, function (isResolved, value) {
-                        (isResolved ? resolve : reject)(value);
+                        if (isResolved) {
+                            resolve(value);
+                        } else {
+                            reject(new Error(value || _("Server Error")));
+                        }
                     });
                 }
             });
@@ -50,7 +54,11 @@ AUTHOR.BACKEND = {
                 var session = document.getElementById("author_backend_script").getAttribute("data-session");
                 // Emit the "init" event to make sure the socket connection is good
                 socket.emit("init", session, function (isResolved, value) {
-                    (isResolved ? resolve : reject)(value);
+                    if (isResolved) {
+                        resolve(value);
+                    } else {
+                        reject(new Error(value || _("Server Error")));
+                    }
                 });
             });
 
