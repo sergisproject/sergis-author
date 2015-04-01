@@ -6,8 +6,9 @@
     in the LICENSE.txt file.
 */
 
-// Globals: game, makeCatch, randInt, randID, removeFromString, overlay, getOverlay,
-// c, openPage, selectAll, checkJSON, swapGotos, decrementGotos, generate
+// Globals: exportEnabled, game, makeCatch, randInt, randID, removeFromString,
+// overlay, getOverlay, c, openPage, selectAll,
+// checkJSON, swapGotos, decrementGotos, generate
 
 // Make sure console.{log,error} exists
 if (!console) console = {};
@@ -20,6 +21,14 @@ if (!window.location.origin) {
         window.location.hostname +
         (window.location.port ? ":" + window.location.port: "");
 }
+
+/**
+ * Whether the "Export" button should be enabled (if base64 and data URIs are
+ * supported).
+ * Yes, you can shoot me later for the use of browser detection, but IE is the
+ * only major browser that *still* doesn't fully support "data:" URIs.
+ */
+var exportEnabled = (typeof btoa == "function" && navigator.userAgent.indexOf("Trident/") == -1);
 
 // The current game
 var game = {
@@ -224,7 +233,10 @@ function openPage(pageData, target) {
         }
     }
     // Submit the form
-    form.submit();
+    // (wrapped in a try since some browsers throw when popups are blocked)
+    try {
+        form.submit();
+    } catch (err) {}
 }
 
 /**
@@ -463,7 +475,7 @@ function generate(updateTable, newCurrentPromptIndex) {
     checkJSON();
     
     // Update our export button
-    if (typeof btoa == "function") {
+    if (exportEnabled) {
         var a = document.getElementById("toolbar_export");
         a.setAttribute("download", AUTHOR.GAMES.getLabel() + ".json");
         a.setAttribute("href", AUTHOR.GAMES.getDataURI());
@@ -506,11 +518,7 @@ function generate(updateTable, newCurrentPromptIndex) {
         }, false);
         
         // "Export" button (if base64 and data URIs are supported)
-        /* Yes, you can shoot me later for the use of browser detection, but IE
-         * is the only major browser that *still* doesn't fully support "data:"
-         * URIs.
-         */
-        if (typeof btoa == "function" && navigator.userAgent.indexOf("Trident/") == -1) {
+        if (exportEnabled) {
             document.getElementById("toolbar_export").style.display = "block";
             // Message if <a download="..."> isn't supported
             if (typeof document.createElement("a").download == "undefined") {

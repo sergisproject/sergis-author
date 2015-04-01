@@ -16,6 +16,7 @@ AUTHOR.GAMES = {
 };
 
 (function () {
+    /** The tabs in overlay_games */
     var TAB_NAMES = ["create", "open", "import"];
     
     AUTHOR.GAMES.getJSON = function (spacing) {
@@ -25,7 +26,11 @@ AUTHOR.GAMES = {
     };
     
     AUTHOR.GAMES.getDataURI = function (spacing) {
-        return "data:application/json;base64," + btoa(AUTHOR.GAMES.getJSON(spacing))
+        // Get the JSON and escape odd characters that throw off btoa
+        var download = AUTHOR.GAMES.getJSON(spacing).replace(/[\u007f-\uffff]/g, function (char) {
+            return "\\u" + ("0000" + char.charCodeAt(0).toString(16)).slice(-4);
+        });
+        return "data:application/json;base64," + btoa(download);
     };
     
     /**
