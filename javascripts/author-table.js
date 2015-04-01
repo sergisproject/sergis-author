@@ -989,42 +989,16 @@ AUTHOR.TABLE = {
 
                 div.appendChild(iconRow);
                 
-                if (action.actions[i].data.length == 0) {
-                    if (action.actions[i].frontend) {
-                        div.appendChild(c("span", {
-                            className: "row_action_frontend",
-                            text: action.actions[i].frontend + ": ",
-                            title: _("Action Frontend")
-                        }));
-                    }
-                    div.appendChild(c("b", {
-                        className: "row_action_name",
-                        text: action.actions[i].name,
-                        title: _("Action Name")
-                    }));
+                if (action.actions[i].frontend) {
+                    dataContent = AUTHOR.JSON.actionsByFrontend[action.actions[i].frontend][action.actions[i].name];
                 } else {
-                    /*
-                    div.appendChild(c("span", {
-                        className: "row_action_data_barrier",
-                        text: ": "
-                    }));
-                    div.appendChild(c("code", {
-                        className: "row_action_data short",
-                        text: JSON.stringify(action.actions[i].data),
-                        title: JSON.stringify(action.actions[i].data)
-                    }));
-                    */
-                    if (action.actions[i].frontend) {
-                        dataContent = AUTHOR.JSON.actionsByFrontend[action.actions[i].frontend][action.actions[i].name];
-                    } else {
-                        dataContent = AUTHOR.JSON.actions[action.actions[i].name];
-                    }
-                    div.appendChild(c("span", {
-                        className: "row_action_data box",
-                        html: dataContent.toHTML(action.actions[i].data),
-                        title: JSON.stringify(action.actions[i].data)
-                    }));
+                    dataContent = AUTHOR.JSON.actions[action.actions[i].name];
                 }
+                div.appendChild(c("span", {
+                    className: "row_action_data box",
+                    html: dataContent.toHTML(action.actions[i].data),
+                    title: JSON.stringify(action.actions[i].data)
+                }));
                 td.appendChild(div);
             }
         } else {

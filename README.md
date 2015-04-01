@@ -27,7 +27,6 @@ Other:
 - Click/dblclick on content/actions/whatever to edit them
 - YouTube: take entire URL rather than video ID
 - Replace "Prompt Index" with just "Prompt", which consists of a 1-based prompt number and its title.
-- arcgis:clearGraphics doesn't show up the same as the others in the "Actions" column
 - Add ability to buffer geodata in layers
 - Ability to "sketch" a feature on a map (i.e. if we want to draw something; instead of entering points, allow drawing it on a map)
 
