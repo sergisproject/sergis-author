@@ -14,6 +14,12 @@
 
 <body>
 
+<!-- "Full" Body Content -->
+<div id="full_content_wrap" class="outer" style="display: none;">
+  <div id="full_content"></div>
+</div>
+
+<!-- Header and Toolbar -->
 <div id="header_wrap" class="outer">
   <header class="inner">
     <h1 id="project_title">SerGIS Prompt Author</h1>
@@ -27,6 +33,7 @@
   </header>
 </div>
 
+<!-- Main Body Content -->
 <div id="main_content_wrap" class="outer">
   <section id="main_content" class="inner">
     <div id="instructions" style="display: none;">
@@ -67,6 +74,7 @@
   </section>
 </div>
 
+<!-- Footer Content -->
 <div id="footer_wrap" class="outer">
   <footer class="inner">
     <p>SerGIS Prompt Author<span id="version_outer" style="display: none;"> version <span id="version_inner"></span></span></p>
@@ -75,6 +83,7 @@
   </footer>
 </div>
 
+<!-- Overlays/dialogs -->
 <div id="overlay" class="overlay_outer">
   <!-- <table><tbody><tr><td> -->
     <!-- Loading overlay -->
@@ -206,7 +215,9 @@
   </form>
 </div>
 
-<!-- Translate ("_") API -->
+
+
+<!-- Translation ("_") API -->
 <script type="text/javascript" src="http://www.localeplanet.com/api/auto/icu.js"></script>
 <script type="text/javascript" src="http://www.localeplanet.com/api/translate.js"></script>
 
@@ -239,19 +250,23 @@ AUTHOR.CONFIG = {
 };
 </script>
 
-<script type="text/javascript" src="javascripts/author-main.js" data-set-attribute="src author-main.js"></script>
-<script type="text/javascript" src="javascripts/author-ask.js" data-set-attribute="src author-ask.js"></script>
+<!-- Concatenated and minified scripts (if available) -->
+<script id="author_backend_script" type="text/javascript" data-set-attribute="src author-js-src; data-socket-io-origin socket-io-origin; data-socket-io-prefix socket-io-prefix; data-session session"></script>
 
-<script type="text/javascript" src="javascripts/author-json.js" data-set-attribute="src author-json.js"></script>
-<script type="text/javascript" src="javascripts/author-games.js" data-set-attribute="src author-games.js"></script>
-<script type="text/javascript" src="javascripts/author-table.js" data-set-attribute="src author-table.js"></script>
+<!-- All the individual scripts, if we don't have a concatenated and minified version -->
+<script type="text/javascript" src="javascripts/author-main.js" data-set-if="no-minified"></script>
+<script type="text/javascript" src="javascripts/author-ask.js" data-set-if="no-minified"></script>
 
-<script type="text/javascript" src="javascripts/author-editor.js" data-set-attribute="src author-editor.js"></script>
-<script type="text/javascript" src="javascripts/author-action-editor.js" data-set-attribute="src author-action-editor.js"></script>
-<script type="text/javascript" src="javascripts/author-frontend-info-editor.js" data-set-attribute="src author-frontend-info-editor.js"></script>
+<script type="text/javascript" src="javascripts/author-json.js" data-set-if="no-minified"></script>
+<script type="text/javascript" src="javascripts/author-games.js" data-set-if="no-minified"></script>
+<script type="text/javascript" src="javascripts/author-table.js" data-set-if="no-minified"></script>
+
+<script type="text/javascript" src="javascripts/author-editor.js" data-set-if="no-minified"></script>
+<script type="text/javascript" src="javascripts/author-action-editor.js" data-set-if="no-minified"></script>
+<script type="text/javascript" src="javascripts/author-frontend-info-editor.js" data-set-if="no-minified"></script>
 
 <!-- SerGIS Prompt Author backend -->
-<script id="author_backend_script" type="text/javascript" src="javascripts/author-backend_local.js" data-set-attribute="src author-backend-src; data-socket-io-origin socket-io-origin; data-socket-io-prefix socket-io-prefix; data-session session"></script>
+<script type="text/javascript" src="javascripts/author-backend_local.js" data-set-if="no-minified"></script>
 
 <!--
 Files with onload handlers:
