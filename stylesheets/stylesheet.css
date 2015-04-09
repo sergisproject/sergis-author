@@ -8,6 +8,10 @@ by Jason Costello, @jsncostello
 @import url(normalize.css);
 @import url(pygment_trac.css);
 
+/*
+ * SMALL ICONS
+ */
+
 a.icon {
   width: 20px;
   height: 20px;
@@ -83,6 +87,10 @@ a.icon_down.side {
 }
 
 /*
+ * PROMPT TABLE ROW FORMATTING
+ */
+
+/*
 .row_content_text, .row_action_div {
   text-indent: -36px;
 }
@@ -114,6 +122,10 @@ a.icon_down.side {
   margin-top: 10px;
   margin-left: 27px;
 }
+
+/*
+ * MISCELLANEOUS PROMPT TABLE FORMATTING
+ */
 
 code, span.box {
   display: inline-block;
@@ -153,6 +165,10 @@ code.short {
      like the way it looks with the blank space. */
 }
 
+/*
+ * OVERLAY BUTTONS
+ */
+
 .sub-button, .main-button {
   margin-right: 20px;
 }
@@ -181,7 +197,10 @@ code.short {
   font-style: italic;
 }
 
-/* .inputcontainer is used to make a text input take up the rest of the width:
+/*
+ * INPUT CONTAINER STUFF
+ *
+ * .inputcontainer is used to make a text input take up the rest of the width:
  * <div class="inputcontainer"><label></label><span><input></span></div>
  * <div class="inputcontainer"><span class="label"></span><span><input></span></div>
  */
@@ -210,6 +229,10 @@ code.short {
   width: 100%
 }
 
+/*
+ * "MINIMAL" ROWS IN PROMPT TABLE
+ */
+
 tr.prompt-row-minimal {
   background-color: rgb(110, 110, 110);
   color: white;
@@ -230,6 +253,10 @@ tr.prompt-row-minimal.origcolors:hover {
 tr.prompt-row-hidden {
   display: none;
 }
+
+/*
+ * TABS IN OVERLAYS
+ */
 
 div.tabs {
   border-bottom: 1px solid;
@@ -622,6 +649,21 @@ Full-Width Styles
 
 #main_content {
   padding-top: 40px;
+}
+
+#full_content_wrap {
+  background: #f2f2f2;
+  border-top: 1px solid #111;
+  border-bottom: 1px solid #111;
+}
+
+#full_content {
+  width: 100%;
+  position: absolute;
+  top: 63px;
+  left: 0;
+  bottom: 0;
+  background: inherit;
 }
 
 #footer_wrap {
