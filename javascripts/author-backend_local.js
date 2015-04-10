@@ -9,7 +9,7 @@
 // This file is a SerGIS Author backend. It handles storage locally in the browser.
 
 AUTHOR.BACKEND = {
-    /* See http://sergisproject.github.io/legacy-docs/author.html */
+    /* See http://sergisproject.github.io/docs/author.html */
 };
 
 (function () {

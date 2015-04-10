@@ -202,7 +202,7 @@ function c(elem, attributes, event /*, [parameter, [parameter, [...]]] */) {
 
 /**
  * Open a page.
- * @see http://sergisproject.github.io/legacy-docs/author.html
+ * @see http://sergisproject.github.io/docs/author.html
  *
  * @param {Object} pageData - For the properties that this object takes, see
  *        the link above.
