@@ -1196,8 +1196,9 @@ AUTHOR.JSON = {
                 }));
                 return span.innerHTML;
             }
-        },
+        }
         
+        /*
         logout: {
             name: _("Log Out"),
             description: _("End the user's game session and log them out."),
@@ -1213,6 +1214,7 @@ AUTHOR.JSON = {
                 }).innerHTML;
             }
         }
+        */
     };
     
     /**
