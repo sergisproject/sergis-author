@@ -27,8 +27,27 @@ Other:
 - Click/dblclick on content/actions/whatever to edit them
 - YouTube: take entire URL rather than video ID
 - Replace "Prompt Index" with just "Prompt", which consists of a 1-based prompt number and its title.
+- Make `overlay()` (i.e. no parameters to overlay) revert to the last open overlay, instead of none (unless it was previously none).
+  - Maybe add parameter to force none, or vice versa, i.e. if we just pass `true`, then go back to the previous prompt.
+
+New Stuff:
+
+- Remove "goto" from the actions that you can do, and add a new dropdown under each choice called "Next Prompt" (which includes an option "end game", that could just add a "endGame" action instead of a "goto" action; and we could add "endGame" to the available actions, and maybe get rid of "logOut").
+- Add support for conditional `goto`s
+  - Have a function in the author to convert a string like `(varName >= 10 && var2 is empty) or var3 equals 0 || (varName is 12 and var5 is less than 18)` into a tree of SerGIS JSON Condition objects
+- Checkbox above latitude/longitude/zoom labeled something like "Same as previous prompt", which results in no value being set for `prompt.map` (so sergis-client just uses the value(s) from the previous prompt).
+- Add ability to show/hide the map on a per-prompt basis (will also require something new in the JSON Game Data format, and sergis-client)
+- Make new thingie "Advanced Properties" that allows you to change jumping around stuff, AND change the new `layouts` stuff, and possibly also a color scheme.
 - Add ability to buffer geodata in layers
 - Ability to "sketch" a feature on a map (i.e. if we want to draw something; instead of entering points, allow drawing it on a map)
+
+New "Graph View":
+
+- An alternative to the current "table view"
+- Prompts are shown as a directed "graph", where the nodes are the prompts (each is shown with its title and basic content, and the choices)
+- Each prompt choice is connected via an arrow to another prompt, indicating where it goes to next
+- Make generic function to generate the full table row(s) for a prompt, so we can use it in "table view", and also put it in an overlay to edit prompt details when in "graph view"
+  - We would need a param for whether to include the "Next Prompt" select dropdown (in table view)
 
 ## License
 
