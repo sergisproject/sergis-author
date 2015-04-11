@@ -996,7 +996,8 @@ AUTHOR.TABLE = {
                 }
                 div.appendChild(c("span", {
                     className: "row_action_data box",
-                    html: dataContent.toHTML(action.actions[i].data),
+                    html: dataContent ? dataContent.toHTML(action.actions[i].data) : undefined,
+                    text: dataContent ? undefined : action.actions[i].name,
                     title: JSON.stringify(action.actions[i].data)
                 }));
                 td.appendChild(div);
