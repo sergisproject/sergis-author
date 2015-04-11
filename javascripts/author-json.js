@@ -1174,6 +1174,22 @@ AUTHOR.JSON = {
             }
         },
         
+        endGame: {
+            name: _("End Game"),
+            description: _("End the user's game and take them to the Game Over screen."),
+            
+            getFields: function (data) {
+                // No parameters to this one
+                return [];
+            },
+            
+            toHTML: function (data) {
+                return c("span", {
+                    text: this.name
+                }).innerHTML;
+            }
+        },
+        
         "goto": {
             name: _("Go To Prompt Index"),
             description: _("Go to a different prompt instead of the next one in the sequence."),
@@ -1197,24 +1213,6 @@ AUTHOR.JSON = {
                 return span.innerHTML;
             }
         }
-        
-        /*
-        logout: {
-            name: _("Log Out"),
-            description: _("End the user's game session and log them out."),
-            
-            getFields: function (data) {
-                // No parameters to this one
-                return [];
-            },
-            
-            toHTML: function (data) {
-                return c("span", {
-                    text: this.name
-                }).innerHTML;
-            }
-        }
-        */
     };
     
     /**

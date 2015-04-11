@@ -32,7 +32,7 @@ Other:
 
 New Stuff:
 
-- Remove "goto" from the actions that you can do, and add a new dropdown under each choice called "Next Prompt" (which includes an option "end game", that could just add a "endGame" action instead of a "goto" action; and we could add "endGame" to the available actions, and maybe get rid of "logOut").
+- Remove "goto" from the actions that you can do, and add a new dropdown under each choice called "Next Prompt" (which includes an option "end game", that could just add a "endGame" action instead of a "goto" action).
 - Add support for conditional `goto`s
   - Have a function in the author to convert a string like `(varName >= 10 && var2 is empty) or var3 equals 0 || (varName is 12 and var5 is less than 18)` into a tree of SerGIS JSON Condition objects
 - Checkbox above latitude/longitude/zoom labeled something like "Same as previous prompt", which results in no value being set for `prompt.map` (so sergis-client just uses the value(s) from the previous prompt).
