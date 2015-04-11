@@ -48,6 +48,12 @@ New "Graph View":
 - Each prompt choice is connected via an arrow to another prompt, indicating where it goes to next
 - Make generic function to generate the full table row(s) for a prompt, so we can use it in "table view", and also put it in an overlay to edit prompt details when in "graph view"
   - We would need a param for whether to include the "Next Prompt" select dropdown (in table view)
+- Ways to implement the actual view of the graph:
+  - d3js:
+    - http://d3js.org/
+    - http://bl.ocks.org/rkirsling/5001347
+  - http://sigmajs.org/
+  - 
 
 ## License
 
