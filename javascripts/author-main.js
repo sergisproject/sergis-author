@@ -547,8 +547,8 @@ function generate(updateTable, newCurrentPromptIndex) {
                     // Show alert regarding popups (if necessary)
                     if (document.cookie.indexOf("PREVIEW_POPUP_ALERT_SHOWN=yep") == -1) {
                         askForOK(_("To view the preview, you must allow popups from this site.") + "\n" + _("If your browser blocks the preview popup, configure it to always allow popups from this site and click \"Preview\" again.")).then(function () {
-                            // They clicked OK; store this
-                            document.cookie = "PREVIEW_POPUP_ALERT_SHOWN=yep";
+                            // They clicked OK; store this (lolz cookies)
+                            document.cookie = "PREVIEW_POPUP_ALERT_SHOWN=yep;expires=Fri, 31 Dec 9999 23:59:59 GMT";
                             doPreview();
                         }).catch(makeCatch(_("Error asking for confirmation (lolz)")));
                     } else {
