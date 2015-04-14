@@ -29,6 +29,8 @@ Other:
 - Replace "Prompt Index" with just "Prompt", which consists of a 1-based prompt number and its title.
 - Make `overlay()` (i.e. no parameters to overlay) revert to the last open overlay, instead of none (unless it was previously none).
   - Maybe add parameter to force none, or vice versa, i.e. if we just pass `true`, then go back to the previous prompt.
+- With socket to server, when someone sends in a saveGame, see if that game is open anywhere else and send them an update (if multiple people are working on the game at once).
+- Link from the author back to the main site
 
 New Stuff:
 
