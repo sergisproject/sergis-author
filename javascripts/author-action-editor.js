@@ -122,7 +122,6 @@ AUTHOR.ACTION_EDITOR = {
             select.value = JSON.stringify({name: editor_state.action_json.name, frontend: editor_state.action_json.frontend});
         } else {
             select.selectedIndex = 0;
-            var data = JSON.parse(select.value);
             editor_state.action_json.name = data.name;
             editor_state.action_json.frontend = data.frontend;
             editor_state.action_json.data = [];

@@ -106,7 +106,7 @@ AUTHOR.GAMES = {
                 if (status == -1) {
                     // Game name is invalid
                     return askForGameName(promptText, gameName, _("Invalid game name."));
-                } else if (status == 0) {
+                } else if (status === 0) {
                     // Game name is taken
                     return askForGameName(promptText, gameName, _("Game name is already taken."));
                 } else {

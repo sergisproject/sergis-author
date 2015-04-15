@@ -173,7 +173,7 @@ AUTHOR.JSON = {
                     event.preventDefault();
                     // Clear stored file value
                     data.filename = undefined;
-                    onchange(property, input.value = "")
+                    onchange(property, input.value = "");
                     // Reset looks
                     this.style.display = "none";
                     input.disabled = false;
@@ -1508,7 +1508,7 @@ AUTHOR.JSON = {
                 toHTML: function (data) {
                     var span = c("span", {
                         text: data.map(function (item) {
-                            return item && item.name
+                            return item && item.name;
                         }).join(", ")
                     });
                     return span.innerHTML;

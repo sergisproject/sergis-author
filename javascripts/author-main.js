@@ -11,7 +11,7 @@
 // checkJSON, swapGotos, decrementGotos, generate
 
 // Make sure console.{log,error} exists
-if (!console) console = {};
+if (typeof console == "undefined") console = {};
 if (!console.log) console.log = function () {};
 if (!console.error) console.error = console.log;
 
