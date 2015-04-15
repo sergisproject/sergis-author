@@ -5,8 +5,13 @@
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
-<meta name="description" content="Slate is a responsive theme for GitHub Pages">
-<link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css" data-set-attribute="href stylesheet.css">
+
+<!-- {{#if stylesheetPath}}{{{endComment}}}
+<link rel="stylesheet" type="text/css" media="screen" href="{{stylesheetPath}}">
+{{{startComment}}}{{else}} -->
+<link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+<!-- {{/if}} -->
+
 <!-- VERSION NUMBER -->
 <script>var SERGIS_PROMPT_AUTHOR_VERSION = "1.0";</script>
 <title>SerGIS Prompt Author</title>
@@ -218,19 +223,6 @@
 <script type="text/javascript" src="http://www.localeplanet.com/api/auto/icu.js"></script>
 <script type="text/javascript" src="http://www.localeplanet.com/api/translate.js"></script>
 
-<!-- Promise polyfill -->
-<script type="text/javascript" src="javascripts/es6-promise-2.0.0.min.js" data-set-attribute="src es6-promise-2.0.0.min.js"></script>
-<script type="text/javascript">
-// Use Promise polyfill if needed
-if (typeof Promise == "undefined") Promise = ES6Promise.Promise;
-</script>
-
-<!-- LocalForage -->
-<script type="text/javascript" src="javascripts/localforage.nopromises.min.js" data-set-attribute="src localforage.nopromises.min.js"></script>
-
-<!-- socket.io API (if applicable) -->
-<script type="text/javascript" data-set-attribute="src socket-io-script-src"></script>
-
 <!-- SerGIS Prompt Author config -->
 <script type="text/javascript">
 var AUTHOR = {};
@@ -247,23 +239,32 @@ AUTHOR.CONFIG = {
 };
 </script>
 
-<!-- Concatenated and minified scripts (if available) -->
-<script id="author_backend_script" type="text/javascript" data-set-attribute="src author-js-src; data-socket-io-origin socket-io-origin; data-socket-io-prefix socket-io-prefix; data-session session"></script>
+<!-- The following mess is in case we are running from sergis-server.
+{{#if author_js_src}}{{{endComment}}}
+<script type="text/javascript" src="{{socket_io_script_src}}"></script>
+<script id="author_backend_script" type="text/javascript" src="{{author_js_src}}" data-socket-io-origin="{{socket_io_origin}}" data-socket-io-prefix="{{socket_io_prefix}}" data-session="{{session}}"></script>
+{{{startComment}}}{{else}} -->
 
-<!-- All the individual scripts, if we don't have a concatenated and minified version -->
-<script type="text/javascript" src="javascripts/author-main.js" data-set-if="no-minified"></script>
-<script type="text/javascript" src="javascripts/author-ask.js" data-set-if="no-minified"></script>
+<!-- Promise polyfill -->
+<script type="text/javascript" src="javascripts/es6-promise-2.0.0.min.js"></script>
+<script type="text/javascript" src="javascripts/author-checkpromise.js"></script>
 
-<script type="text/javascript" src="javascripts/author-json.js" data-set-if="no-minified"></script>
-<script type="text/javascript" src="javascripts/author-games.js" data-set-if="no-minified"></script>
-<script type="text/javascript" src="javascripts/author-table.js" data-set-if="no-minified"></script>
+<!-- LocalForage -->
+<script type="text/javascript" src="javascripts/localforage.nopromises.min.js"></script>
 
-<script type="text/javascript" src="javascripts/author-editor.js" data-set-if="no-minified"></script>
-<script type="text/javascript" src="javascripts/author-action-editor.js" data-set-if="no-minified"></script>
-<script type="text/javascript" src="javascripts/author-frontend-info-editor.js" data-set-if="no-minified"></script>
+<script type="text/javascript" src="javascripts/author-main.js"></script>
+<script type="text/javascript" src="javascripts/author-ask.js"></script>
+
+<script type="text/javascript" src="javascripts/author-json.js"></script>
+<script type="text/javascript" src="javascripts/author-games.js"></script>
+<script type="text/javascript" src="javascripts/author-table.js"></script>
+
+<script type="text/javascript" src="javascripts/author-editor.js"></script>
+<script type="text/javascript" src="javascripts/author-action-editor.js"></script>
+<script type="text/javascript" src="javascripts/author-frontend-info-editor.js"></script>
 
 <!-- SerGIS Prompt Author backend -->
-<script type="text/javascript" src="javascripts/author-backend_local.js" data-set-if="no-minified"></script>
+<script type="text/javascript" src="javascripts/author-backend_local.js"></script>
 
 <!--
 Files with onload handlers:
@@ -275,6 +276,8 @@ Files with onload handlers:
     author-action-editor.js
     author-frontend-info-editor.js
 -->
+
+<!-- {{/if}} -->
 
 </body>
 </html>
