@@ -113,23 +113,27 @@ AUTHOR.ACTION_EDITOR = {
      */
     function updateActionEditor() {
         var select = document.getElementById("overlay_actionEditor_name");
+        var data;
         
         // Make sure the proper option in `select` is selected
         if (AUTHOR.JSON.actions.hasOwnProperty(editor_state.action_json.name)) {
-            select.value = JSON.stringify({name: editor_state.action_json.name, frontend: null});
+            // Set `data` and the selected item in `select`
+            select.value = JSON.stringify(data = {name: editor_state.action_json.name, frontend: null});
         } else if (editor_state.action_json.frontend && AUTHOR.JSON.actionsByFrontend.hasOwnProperty(editor_state.action_json.frontend) &&
                    AUTHOR.JSON.actionsByFrontend[editor_state.action_json.frontend].hasOwnProperty(editor_state.action_json.name)) {
-            select.value = JSON.stringify({name: editor_state.action_json.name, frontend: editor_state.action_json.frontend});
+            // Set `data` and the selected item in `select`
+            select.value = JSON.stringify(data = {name: editor_state.action_json.name, frontend: editor_state.action_json.frontend});
         } else {
             select.selectedIndex = 0;
+            // Set `data` based on the selected item in `select`
+            data = JSON.parse(select.value);
             editor_state.action_json.name = data.name;
             editor_state.action_json.frontend = data.frontend;
             editor_state.action_json.data = [];
         }
         
         // Get the action data description
-        var data = JSON.parse(select.value),
-            actionsDataList;
+        var actionsDataList;
         if (data.frontend) {
             actionsDataList = AUTHOR.JSON.actionsByFrontend[data.frontend];
         } else {
