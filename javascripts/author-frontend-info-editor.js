@@ -75,7 +75,7 @@ AUTHOR.FRONTEND_INFO_EDITOR = {
         } else {
             // Let's assume that it's an array
             if (!frontendBase[frontendInfoName]) frontendBase[frontendInfoName] = [];
-            if (frontendBase[frontendInfoName].length == 0) frontendBase[frontendInfoName].push(null);
+            if (frontendBase[frontendInfoName].length === 0) frontendBase[frontendInfoName].push(null);
             
             for (var i = 0; i < fields.length; i++) {
                 if (fields[i] == "repeat") continue;

@@ -51,7 +51,7 @@ AUTHOR.GAMES = {
         if (label) label += " - ";
         label += representDate(new Date(data.modified));
         return label;
-    },
+    };
 
     /**
      * Create or save the current game.
@@ -133,7 +133,7 @@ AUTHOR.GAMES = {
                 // Game name is invalid
                 document.getElementById("overlay_games_create_invalid").style.display = "block";
                 overlay("overlay_games");
-            } else if (status == 0) {
+            } else if (status === 0) {
                 // Game name is taken
                 document.getElementById("overlay_games_create_taken").style.display = "block";
                 overlay("overlay_games");

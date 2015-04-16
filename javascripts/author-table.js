@@ -50,7 +50,7 @@ AUTHOR.TABLE = {
             event.preventDefault();
             event.stopPropagation();
             var promptList = game.jsondata.promptList;
-            if (promptIndex != 0) {
+            if (promptIndex !== 0) {
                 // No more current prompt index
                 currentPromptIndex = null;
                 // Swap with the previous one
@@ -165,7 +165,7 @@ AUTHOR.TABLE = {
         moveContentUp: function (event, promptIndex, contentIndex) {
             event.preventDefault();
             var promptList = game.jsondata.promptList;
-            if (contentIndex != 0) {
+            if (contentIndex !== 0) {
                 var olditem = promptList[promptIndex].prompt.contents[contentIndex - 1];
                 promptList[promptIndex].prompt.contents[contentIndex - 1] = promptList[promptIndex].prompt.contents[contentIndex];
                 promptList[promptIndex].prompt.contents[contentIndex] = olditem;
@@ -233,7 +233,7 @@ AUTHOR.TABLE = {
         moveChoiceUp: function (event, promptIndex, choiceIndex) {
             event.preventDefault();
             var promptList = game.jsondata.promptList;
-            if (choiceIndex != 0) {
+            if (choiceIndex !== 0) {
                 // Update "choices"
                 var olditem = promptList[promptIndex].prompt.choices[choiceIndex - 1];
                 promptList[promptIndex].prompt.choices[choiceIndex - 1] = promptList[promptIndex].prompt.choices[choiceIndex];
@@ -321,7 +321,7 @@ AUTHOR.TABLE = {
         moveActionUp: function (event, promptIndex, choiceIndex, actionIndex) {
             event.preventDefault();
             var promptList = game.jsondata.promptList;
-            if (actionIndex != 0) {
+            if (actionIndex !== 0) {
                 var olditem = promptList[promptIndex].actionList[choiceIndex].actions[actionIndex - 1];
                 promptList[promptIndex].actionList[choiceIndex].actions[actionIndex - 1] = promptList[promptIndex].actionList[choiceIndex].actions[actionIndex];
                 promptList[promptIndex].actionList[choiceIndex].actions[actionIndex] = olditem;
@@ -490,6 +490,7 @@ AUTHOR.TABLE = {
      */
     function generateTableRow(tbody, promptIndex) {
         var tr, td, div, iconRow;
+        var table_inner, tbody_inner, tr_inner, td_inner;
         var i, id;
         var prompt = game.jsondata.promptList[promptIndex].prompt;
         var mapstuff = [
@@ -525,7 +526,7 @@ AUTHOR.TABLE = {
 
         // Make "Move Prompt Up/Down" buttons
         div.appendChild(iconbtn = c("a", {
-            className: "row_title_buttons_up icon side icon_up" + (promptIndex == 0 ? " invisible" : ""),
+            className: "row_title_buttons_up icon side icon_up" + (promptIndex === 0 ? " invisible" : ""),
             href: "#",
             text: " ",
             title: _("Move Prompt Up"),
@@ -583,9 +584,8 @@ AUTHOR.TABLE = {
         ///////////////////////////////////////////////////////////////////////
         // Make map column
         // Make inner table to hold the `mapstuff`
-        var table_inner = c("table", {className: "noborder"}),
-            tbody_inner = c("tbody"),
-            tr_inner, td_inner;
+        table_inner = c("table", {className: "noborder"});
+        tbody_inner = c("tbody");
         // Add basic map properties (`mapstuff`)
         for (i = 0; i < mapstuff.length; i++) {
             tr_inner = c("tr");
@@ -654,7 +654,7 @@ AUTHOR.TABLE = {
         
         // Make "Move Prompt Up/Down" buttons
         div.appendChild(c("a", {
-            className: "row_title_buttons_up icon side icon_up" + (promptIndex == 0 ? " invisible" : ""),
+            className: "row_title_buttons_up icon side icon_up" + (promptIndex === 0 ? " invisible" : ""),
             href: "#",
             text: " ",
             title: _("Move Prompt Up"),
@@ -699,9 +699,8 @@ AUTHOR.TABLE = {
         ///////////////////////////////////////////////////////////////////////
         // Make map column
         // Make inner table to hold the `mapstuff`
-        var table_inner = c("table", {className: "noborder"}),
-            tbody_inner = c("tbody"),
-            tr_inner, td_inner;
+        table_inner = c("table", {className: "noborder"});
+        tbody_inner = c("tbody");
         for (i = 0; i < mapstuff.length; i++) {
             tr_inner = c("tr");
             id = "row_map_" + mapstuff[i][0] + "_" + randID();
@@ -756,7 +755,7 @@ AUTHOR.TABLE = {
             });
             // Make "Move Content Up/Down" buttons
             iconRow.appendChild(c("a", {
-                className: "row_content_up icon icon_up" + (i == 0 ? " invisible" : ""),
+                className: "row_content_up icon icon_up" + (i === 0 ? " invisible" : ""),
                 href: "#",
                 text: " ",
                 title: _("Move Content Up"),
@@ -884,7 +883,7 @@ AUTHOR.TABLE = {
         
         // Make "Move Choice Up/Down" buttons
         iconRow.appendChild(c("a", {
-            className: "row_choice_up icon icon_up" + (choiceIndex == 0 ? " invisible" : ""),
+            className: "row_choice_up icon icon_up" + (choiceIndex === 0 ? " invisible" : ""),
             href: "#",
             text: " ",
             title: _("Move Choice Up"),
@@ -957,7 +956,7 @@ AUTHOR.TABLE = {
                 
                 // Make "Move Action Up/Down" buttons
                 iconRow.appendChild(c("a", {
-                    className: "row_action_up icon icon_up" + (i == 0 ? " invisible" : ""),
+                    className: "row_action_up icon icon_up" + (i === 0 ? " invisible" : ""),
                     href: "#",
                     text: " ",
                     title: _("Move Action Up"),
@@ -1054,16 +1053,13 @@ AUTHOR.TABLE = {
             }
             
             // Find the amount that the window is scrolled
-            var scrollY = supportPageOffset
-                ? window.pageYOffset
-                : isCSS1Compat
-                    ? document.documentElement.scrollTop
-                    : document.body.scrollTop;
+            var scrollY = supportPageOffset ? window.pageYOffset :
+                isCSS1Compat ? document.documentElement.scrollTop : document.body.scrollTop;
             
             // Find out how far the table is from the top of the page
             var elem = tbl;
             var offsetY = elem.offsetTop;
-            while (elem = elem.offsetParent) {
+            while ((elem = elem.offsetParent)) {
                 offsetY += elem.offsetTop || 0;
             }
             

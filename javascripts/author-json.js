@@ -1282,9 +1282,8 @@ AUTHOR.JSON = {
                     for (var i = 0; i < data.length; i++) {
                         span.appendChild(c("br"));
                         span.appendChild(c("span", {
-                            text: data[i].name + (data[i].group
-                                                  ? " (" + data[i].group + ")"
-                                                  : "") +
+                            text: data[i].name +
+                                  (data[i].group ? " (" + data[i].group + ")" : "") +
                                   ": " + data[i].urls.join(", ")
                         }));
                     }
