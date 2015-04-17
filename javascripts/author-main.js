@@ -505,6 +505,19 @@ function generate(updateTable, newCurrentPromptIndex) {
      * Initialize everything.
      */
     function init() {
+        // Links in header
+        if (AUTHOR.CONFIG.links && AUTHOR.CONFIG.links.length) {
+            var links = AUTHOR.CONFIG.links,
+                linkbar = document.getElementById("links");
+            for (var i = 0; i < links.length; i++) {
+                linkbar.appendChild(c("a", {
+                    text: links[i].name,
+                    href: links[i].href
+                }));
+            }
+            linkbar.style.display = "block";
+        }
+        
         // Version number in footer
         document.getElementById("version_inner").appendChild(document.createTextNode("" + SERGIS_PROMPT_AUTHOR_VERSION));
         document.getElementById("version_outer").style.display = "inline";

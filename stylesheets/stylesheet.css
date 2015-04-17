@@ -567,16 +567,27 @@ Full-Width Styles
   text-shadow: #111 0px 0px 10px;
 }
 
-#toolbar {
+.toolbar, .linkbar {
   position: absolute;
-  /* width: 210px; */
   z-index: 10;
-  bottom: -20px;
+}
+
+.linkbar {
+  left: 0;
+  padding: 10px;
+}
+
+.linkbar > a {
+  margin-right: 20px;
+}
+
+.toolbar {
   right: 0;
+  bottom: -20px;
   height: 70px;
 }
 
-#toolbar > a {
+.toolbar > a {
   display: block;
   float: right;
   width: 90px;
@@ -588,13 +599,13 @@ Full-Width Styles
   /*margin-left: 10px;*/
 }
 
-#toolbar > div {
+.toolbar > div {
   float: right;
   margin-top: 55px;
   margin-right: 10px;
 }
 
-#toolbar > div > span:not(:last-child)::after {
+.toolbar > div > span:not(:last-child)::after {
   content: '\2022';
   margin-left: 5px;
 }
@@ -765,7 +776,7 @@ table button, table label, table input, table select, table .minirow, table .row
     font-size:14px;
   }
 
-  #toolbar {
+  .toolbar {
     /*display: none;*/
     bottom: -40px;
   }

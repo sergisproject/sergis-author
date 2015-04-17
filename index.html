@@ -28,13 +28,14 @@
 <div id="header_wrap" class="outer">
   <header class="inner">
     <h1 id="project_title">SerGIS Prompt Author</h1>
-    <section id="toolbar">
+    <section class="toolbar">
       <!-- Icons made by <a href="http://www.freepik.com">Freepik</a> from <a href="http://www.flaticon.com">www.flaticon.com</a> are licensed under <a href="http://creativecommons.org/licenses/by/3.0/">Creative Commons BY 3.0</a>. -->
       <a id="toolbar_publish" href="#" title="Publish Game on SerGIS Server" tabindex="6" style="display: none;">Publish</a>
       <a id="toolbar_preview" href="#" target="_blank" title="Preview SerGIS Game" tabindex="5" style="display: none;">Preview</a>
       <a id="toolbar_export" href="#" title="Download JSON Game Data File" tabindex="4" style="display: none;">Export</a>
       <a id="toolbar_open" href="#" title="Create, Open, or Import Game" tabindex="3">Create/Open</a>
     </section>
+    <section id="links" class="linkbar" style="display: none;"></section>
   </header>
 </div>
 
@@ -235,7 +236,29 @@ AUTHOR.CONFIG = {
      * If neither "previewGame" in the backend nor this is not provided, then
      * the "Preview Game" button is not available.
      */
-    clientPreviewURL: "http://geoapps64.main.ad.rit.edu/serious_game_spatial_thinking/web_game/"
+    clientPreviewURL: "http://geoapps64.main.ad.rit.edu/serious_game_spatial_thinking/web_game/",
+
+    /**
+     * Links to show up in the link bar. Each link has the following properties:
+     *   - `name` (string): The name of the link, shown to the user.
+     *   - `href` (string): The href of the link.
+     *
+     * The mess in the comments is in case we are running from sergis-server.
+     */
+    /* {{#if author_links}}{{{endJSComment}}}
+    links: {{{author_links}}}
+    {{{startJSComment}}}{{else}} */
+    links: [
+        {
+            name: "SerGIS Author",
+            href: "http://sergisproject.github.io/sergis-author/"
+        },
+        {
+            name: "Author",
+            href: "http://sergisproject.github.io/sergis-author/"
+        }
+    ]
+    /* {{/if}} */
 };
 </script>
 
