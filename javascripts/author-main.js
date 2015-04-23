@@ -172,12 +172,18 @@ function c(elem, attributes, event /*, [parameter, [parameter, [...]]] */) {
     
     // Apply any attributes
     if (attributes) {
+        var stuff, i;
         for (var prop in attributes) {
             if (attributes.hasOwnProperty(prop) && typeof attributes[prop] != "undefined") {
                 if (prop == "class" || prop == "className") {
                     elem.className = attributes[prop];
                 } else if (prop == "textContent" || prop == "text") {
-                    elem.appendChild(document.createTextNode(attributes[prop]));
+                    stuff = ("" + attributes[prop]).split("\n");
+                    elem.appendChild(document.createTextNode(stuff.shift()));
+                    for (i = 0; i < stuff.length; i++) {
+                        elem.appendChild(document.createElement("br"));
+                        elem.appendChild(document.createTextNode(stuff[i]));
+                    }
                 } else if (prop == "html" || prop == "innerHTML") {
                     elem.innerHTML = attributes[prop];
                 } else {
