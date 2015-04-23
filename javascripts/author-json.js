@@ -413,6 +413,35 @@ AUTHOR.JSON = {
     }
     
     /**
+     * Make a checkbox and label.
+     */
+    function makeCheckBox(label, description, checked, onchange,
+                          divClassName, labelClassName) {
+        var div = c("div", {className: divClassName || undefined}),
+            id = "id_" + randID();
+
+        div.appendChild(c("input", {
+            id: id,
+            type: "checkbox",
+            checked: checked ? "checked" : undefined
+        }, onchange));
+        div.appendChild(c("label", {
+            "for": id,
+            text: " " + label,
+            className: labelClassName || undefined
+        }));
+        
+        if (description) {
+            div.appendChild(c("div", {
+                className: "action-description",
+                text: description
+            }));
+        }
+        
+        return div;
+    }
+    
+    /**
      * Make a string dropdown field (i.e. a select element).
      *
      * @param {string} label - The label for the dropdown.
@@ -600,6 +629,7 @@ AUTHOR.JSON = {
         if (typeof this.json.type != "string") this.json.type = "";
         if (!this.json.urls || !this.json.urls.length) this.json.urls = [];
         if (typeof this.json.opacity != "number") this.json.opacity = 1;
+        if (typeof this.json.hasLegend != "boolean") this.json.hasLegend = false;
     }
     
     SERGIS_JSON_Layer.prototype.getJSONValue = function () {
@@ -647,25 +677,13 @@ AUTHOR.JSON = {
         }, false, undefined, "action-subitem"));
         
         // Toggleable
-        id = "id_" + randID();
-        inner_div = c("div", {className: "action-subitem"});
-        inner_div.appendChild(c("input", {
-            id: id,
-            type: "checkbox",
-            checked: this.json.toggleable ? "checked" : undefined
-        }, function (event) {
+        div.appendChild(makeCheckBox(_("Toggleable"),
+                                     _("Whether the user is able to show or hide this layer. If the layer is toggleable, it is hidden by default."),
+                                     this.json.toggleable,
+                                     function (event) {
             that.json.toggleable = this.checked;
             onchange();
-        }));
-        inner_div.appendChild(c("label", {
-            "for": id,
-            text: " " + _("Toggleable")
-        }));
-        inner_div.appendChild(c("div", {
-            className: "action-description",
-            text: _("Whether the user is able to show or hide this layer. If the layer is toggleable, it is hidden by default.")
-        }));
-        div.appendChild(inner_div);
+        }, "action-subitem"));
         
         // Type
         var types = [
@@ -724,6 +742,15 @@ AUTHOR.JSON = {
             }
         }));
         div.appendChild(inner_div);
+        
+        // Has Legend
+        div.appendChild(makeCheckBox(_("Has Legend"),
+                                     _("Whether the ArcGIS Server Map Service has a legend published with it."),
+                                     this.json.hasLegend,
+                                     function (event) {
+            that.json.hasLegend = this.checked;
+            onchange();
+        }, "action-subitem"));
         
         return div;
     };
