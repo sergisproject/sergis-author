@@ -366,6 +366,100 @@ AUTHOR.JSON = {
     
     
     /**
+     * Make a string text field (i.e. an inputcontainer).
+     *
+     * @param {string} label - The label for the text field.
+     * @param {string} [description] - A longer description for the text field.
+     * @param {string} [value] - The current value of the text field.
+     * @param {Function} onchange - A function to call with the input's `change`
+     *        event.
+     * @param {boolean} [required] - Whether the text field is required.
+     * @param {string} [pattern] - A regular expression that the text field
+     *        contents must match.
+     * @param {string} [divClassName] - A CSS class for the container DIV.
+     * @param {string} [labelClassName] - A CSS class for the label.
+     */
+    function makeStringField(label, description, value, onchange, required, pattern,
+                             divClassName, labelClassName) {
+        var id = "id_" + randID();
+        var bigdiv = c("div", {className: divClassName || undefined});
+        
+        var div = c("div", {className: "inputcontainer"});
+        div.appendChild(c("label", {
+            "for": id,
+            text: label + ": ",
+            className: labelClassName || undefined
+        }));
+        
+        var span = c("span");
+        span.appendChild(c("input", {
+            id: id,
+            value: value || "",
+            required: required ? "required" : undefined,
+            pattern: pattern || undefined
+        }, onchange));
+        div.appendChild(span);
+        
+        bigdiv.appendChild(div);
+        
+        if (description) {
+            bigdiv.appendChild(c("div", {
+                className: "action-description",
+                text: description
+            }));
+        }
+        
+        return bigdiv;
+    }
+    
+    /**
+     * Make a string dropdown field (i.e. a select element).
+     *
+     * @param {string} label - The label for the dropdown.
+     * @param {string} [description] - A longer description for the dropdown.
+     * @param {Array} items - The items in the dropdown. Each item should be an
+     *        object with a "label" property.
+     * @param {number} [index] - The selected index in the items array.
+     * @param {Function} onchange - A function to call with the select's
+     *        `change` event. (Use `this.selectedIndex` in this function to get
+     *        the currently selected item as an index in the `items` array.)
+     * @param {string} [divClassName] - A CSS class for the container DIV.
+     * @param {string} [labelClassName] - A CSS class for the label.
+     */
+    function makeDropDown(label, description, items, index, onchange,
+                          divClassName, labelClassName) {
+        var div = c("div", {className: divClassName || undefined}),
+            id = "id_" + randID();
+        
+        div.appendChild(c("label", {
+            "for": id,
+            text: label + ": ",
+            className: labelClassName || undefined
+        }));
+        var select = c("select", {
+            id: id
+        }, onchange);
+        for (var i = 0; i < items.length; i++) {
+            select.appendChild(c("option", {
+                value: i,
+                text: items[i].label,
+                selected: index === i ? "selected" : undefined
+            }));
+        }
+        div.appendChild(select);
+        
+        if (description) {
+            div.appendChild(c("div", {
+                className: "action-description",
+                text: description
+            }));
+        }
+        
+        return div;
+    }
+    
+    
+    /**
      * A string for some action's data.
      * @constructor
      */
@@ -385,37 +479,11 @@ AUTHOR.JSON = {
         // Propogate initial changes
         onchange();
         
-        var that = this,
-            bigdiv = c("div", {className: "action-item"}),
-            div = c("div", {className: "inputcontainer"}),
-            id = "id_" + randID();
-        
-        div.appendChild(c("label", {
-            "for": id,
-            text: this.label + ": ",
-            className: "action-label"
-        }));
-        var span = c("span");
-        span.appendChild(c("input", {
-            id: id,
-            value: this.string,
-            required: this.required ? "required" : undefined,
-            pattern: this.pattern || undefined
-        }, function (event) {
+        var that = this;
+        return makeStringField(this.label, this.description, this.string, function (event) {
             that.string = this.value;
             onchange();
-        }));
-        div.appendChild(span);
-        bigdiv.appendChild(div);
-        
-        if (this.description) {
-            bigdiv.appendChild(c("div", {
-                className: "action-description",
-                text: this.description
-            }));
-        }
-        
-        return bigdiv;
+        }, this.required, this.pattern, "action-item", "action-label");
     };
     
     
@@ -507,38 +575,11 @@ AUTHOR.JSON = {
         // Propogate initial changes
         onchange();
         
-        var that = this,
-            div = c("div", {className: "action-item"}),
-            id = "id_" + randID();
-        
-        div.appendChild(c("label", {
-            "for": id,
-            text: this.label + ": ",
-            className: "action-label"
-        }));
-        var select = c("select", {
-            id: id
-        }, function (event) {
+        var that = this;
+        return makeDropDown(this.label, this.description, this.items, this.index, function (event) {
             that.index = this.selectedIndex;
             onchange();
-        });
-        for (var i = 0; i < this.items.length; i++) {
-            select.appendChild(c("option", {
-                value: i,
-                text: this.items[i].label,
-                selected: this.index == i ? "selected" : undefined
-            }));
-        }
-        div.appendChild(select);
-        
-        if (this.description) {
-            div.appendChild(c("div", {
-                className: "action-description",
-                text: this.description
-            }));
-        }
-        
-        return div;
+        }, "action-item", "action-label");
     };
     
     
@@ -547,12 +588,16 @@ AUTHOR.JSON = {
      * @see https://github.com/sergisproject/sergis-client/blob/master/lib/frontends/arcgis.js
      * @constructor
      */
-    function SERGIS_JSON_Layer(label, description, json) {
+    function SERGIS_JSON_Layer(label, description, json, defaultToggleable, groupExtraDescription) {
         this.label = label;
         this.description = description;
+        this.groupExtraDescription = groupExtraDescription;
+        
         this.json = (typeof json == "object" && json) ? json : {};
         if (typeof this.json.name != "string") this.json.name = "";
         if (typeof this.json.group != "string") this.json.group = "";
+        if (typeof this.json.toggleable != "boolean") this.json.toggleable = !!defaultToggleable;
+        if (typeof this.json.type != "string") this.json.type = "";
         if (!this.json.urls || !this.json.urls.length) this.json.urls = [];
         if (typeof this.json.opacity != "number") this.json.opacity = 1;
     }
@@ -567,7 +612,7 @@ AUTHOR.JSON = {
         
         var that = this,
             div = c("div", {className: "action-item"}),
-            id, inner_div, inner_bigdiv, inner_span;
+            id, inner_div;
         
         inner_div = c("div");
         inner_div.appendChild(c("label", {
@@ -583,43 +628,75 @@ AUTHOR.JSON = {
             }));
         }
         
-        // Each item is an array: [label, description, value, required, change event handler]
-        var textfields = [
-            [_("Name"), _("The name of the layer (must be unique)."), this.json.name || "", true, function (event) {
-                that.json.name = this.value;
-                onchange();
-            }],
-            [_("Group (optional)"), _("A group name that this layer is part of (used in the \"hideLayers\" action)."), this.json.group || "", false, function (event) {
-                that.json.group = this.value;
-                onchange();
-            }],
-            [_("URL"), _("The URL to this layer on an ArcGIS Server."), this.json.urls[0] || "", true, function (event) {
-                that.json.urls[0] = this.value;
-                onchange();
-            }]
+        // Name
+        div.appendChild(makeStringField(_("Name"),
+                                        _("The name of the layer (must be unique)."),
+                                        this.json.name || "",
+                                        function (event) {
+            that.json.name = this.value;
+            onchange();
+        }, true, undefined, "action-subitem"));
+        
+        // Group
+        div.appendChild(makeStringField(_("Group (optional)"),
+                                        _("A group name that this layer is part of. If this layer is toggleable and there are other toggleable layers with the same group, the user can only select one at once.") + (this.groupExtraDescription ? "\n" + this.groupExtraDescription : ""),
+                                        this.json.group || "",
+                                        function (event) {
+            that.json.group = this.value;
+            onchange();
+        }, false, undefined, "action-subitem"));
+        
+        // Toggleable
+        id = "id_" + randID();
+        inner_div = c("div", {className: "action-subitem"});
+        inner_div.appendChild(c("input", {
+            id: id,
+            type: "checkbox",
+            checked: this.json.toggleable ? "checked" : undefined
+        }, function (event) {
+            that.json.toggleable = this.checked;
+            onchange();
+        }));
+        inner_div.appendChild(c("label", {
+            "for": id,
+            text: " " + _("Toggleable")
+        }));
+        inner_div.appendChild(c("div", {
+            className: "action-description",
+            text: _("Whether the user is able to show or hide this layer. If the layer is toggleable, it is hidden by default.")
+        }));
+        div.appendChild(inner_div);
+        
+        // Type
+        var types = [
+            {label: _("Dynamic Map Service"), value: "dynamic"},
+            {label: _("Tiled Map Service"), value: "tiled"},
+            {label: _("Image Service"), value: "image"},
+            {label: _("Feature Layer"), value: "feature"}
         ];
-        for (var i = 0; i < textfields.length; i++) {
-            id = "id_" + randID();
-            inner_bigdiv = c("div", {className: "action-subitem"});
-            inner_div = c("div", {className: "inputcontainer"});
-            inner_div.appendChild(c("label", {
-                "for": id,
-                text: textfields[i][0] + ": "
-            }));
-            inner_span = c("span");
-            inner_span.appendChild(c("input", {
-                id: id,
-                value: textfields[i][2],
-                required: textfields[i][3] ? "required" : undefined
-            }, textfields[i][4]));
-            inner_div.appendChild(inner_span);
-            inner_bigdiv.appendChild(inner_div);
-            inner_bigdiv.appendChild(c("div", {
-                className: "action-description",
-                text: textfields[i][1]
-            }));
-            div.appendChild(inner_bigdiv);
+        var defaultTypeIndex = 0;
+        for (var i = 0; i < types.length; i++) {
+            if (this.json.type == types[i].value) {
+                defaultTypeIndex = i;
+                break;
+            }
         }
+        div.appendChild(makeDropDown(_("Type"),
+                                     _("The type of the map service on an ArcGIS Server."),
+                                     types,
+                                     defaultTypeIndex,
+                                     function (event) {
+            that.json.type = types[this.selectedIndex].value;
+            onchange();
+        }, "action-subitem"));
+        
+        // URL
+        div.appendChild(makeStringField(_("URL"),
+                                        _("The REST URL to this layer on an ArcGIS Server."),
+                                        this.json.urls[0] || "",
+                                        function (event) {
+            that.json.urls[0] = this.value;
+        }, true, undefined, "action-subitem"));
         
         // Opacity
         id = "id_" + randID();
@@ -681,13 +758,35 @@ AUTHOR.JSON = {
         
         if (!that.json._sergis_author_data) that.json._sergis_author_data = {};
         
+        // Make the item list for the content type dropdown
+        var items = [], selectedIndex = 0;
+        // Make sure default content type is first
+        var defaultContentType;
+        if (AUTHOR.JSON.defaultContentType && AUTHOR.JSON.contentTypes.hasOwnProperty(defaultContentType)) {
+            defaultContentType = AUTHOR.JSON.defaultContentType;
+            items.push({
+                label: AUTHOR.JSON.contentTypes[defaultContentType].name,
+                value: defaultContentType
+            });
+        }
+        // Make the rest of the content types
+        for (var type in AUTHOR.JSON.contentTypes) {
+            if (AUTHOR.JSON.contentTypes.hasOwnProperty(type) && type != defaultContentType) {
+                items.push({
+                    label: AUTHOR.JSON.contentTypes[type].name,
+                    value: type
+                });
+                if (this.json.type == type) selectedIndex = items.length - 1;
+            }
+        }
+        
         // Function to make the editor for the current content type
         function makeEditor() {
             // Clear out the old editor
             editor_div.innerHTML = "";
             
             // Get info on "value" field (which is the only one that we care about here)
-            var field = AUTHOR.JSON.contentTypes[that.json.type].fields[0];
+            var field = AUTHOR.JSON.contentTypes[that.json.type || defaultContentType].fields[0];
             var name = field[1], type = field[2], value = that.json.value || field[3];
             
             editor_div.appendChild(AUTHOR.JSON.fieldTypes[type].makeEditor(null, name, value, that.json._sergis_author_data, function (property, value) {
@@ -695,14 +794,9 @@ AUTHOR.JSON = {
                 onchange();
             }));
         }
-        
-        div.appendChild(c("label", {
-            text: this.label + ": ",
-            className: "action-label"
-        }));
-        
-        var select = c("select", {}, function (event) {
-            that.json.type = this.value;
+        // Make the content type dropdown
+        bigdiv.appendChild(makeDropDown(this.label, null, items, selectedIndex, function (event) {
+            that.json.type = items[this.selectedIndex].value;
             // Clear data
             that.json.value = "";
             that.json._sergis_author_data = {};
@@ -710,29 +804,7 @@ AUTHOR.JSON = {
             makeEditor();
             // Propogate changes to whoever's storing them
             onchange();
-        });
-        // Make sure default content type is first
-        var defaultContentType;
-        if (AUTHOR.JSON.defaultContentType && AUTHOR.JSON.contentTypes.hasOwnProperty(defaultContentType)) {
-            defaultContentType = AUTHOR.JSON.defaultContentType;
-            select.appendChild(c("option", {
-                value: defaultContentType,
-                text: AUTHOR.JSON.contentTypes[defaultContentType].name,
-                selected: this.json.type == defaultContentType ? "selected" : undefined
-            }));
-        }
-        // Make the rest of the content types
-        for (var type in AUTHOR.JSON.contentTypes) {
-            if (AUTHOR.JSON.contentTypes.hasOwnProperty(type) && type != defaultContentType) {
-                select.appendChild(c("option", {
-                    value: type,
-                    text: AUTHOR.JSON.contentTypes[type].name,
-                    selected: this.json.type == type ? "selected" : undefined
-                }));
-            }
-        }
-        div.appendChild(select);
-        bigdiv.appendChild(div);
+        }, undefined, "action-label"));
         
         // Append the div that holds the editor
         bigdiv.appendChild(editor_div);
@@ -1148,7 +1220,7 @@ AUTHOR.JSON = {
 
                 // They're all SERGIS_JSON_Content objects
                 for (var i = 0; i < data.length; i++) {
-                    params.push(new SERGIS_JSON_Content(_("Explanation"), _("This explanation will be shown to the user."), data[i]));
+                    params.push(new SERGIS_JSON_Content(_("Explanation"), null, data[i]));
                 }
 
                 // We can repeat the last type
@@ -1264,7 +1336,8 @@ AUTHOR.JSON = {
 
                     // They're all SERGIS_JSON_Layer objects
                     for (var i = 0; i < data.length; i++) {
-                        params.push(new SERGIS_JSON_Layer(_("Layer"), null, data[i]));
+                        params.push(new SERGIS_JSON_Layer(_("Layer"), null, data[i], false,
+                                                          _("This can also be used later in the \"hideLayers\" action to hide the layer.")));
                     }
 
                     // We can repeat the last type
@@ -1497,7 +1570,7 @@ AUTHOR.JSON = {
 
                     var params = [];
                     for (var i = 0; i < data.length; i++) {
-                        params.push(new SERGIS_JSON_Layer(_("Layer"), _("A map layer that the user can choose to enable while looking at the map."), data[i]));
+                        params.push(new SERGIS_JSON_Layer(_("Layer"), _("A map layer that the user can choose to enable while looking at the map."), data[i], true));
                     }
                     // We can repeat these
                     params.push("repeat");

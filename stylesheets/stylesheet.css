@@ -195,6 +195,7 @@ code.short {
 .action-description {
   font-size: 90%;
   font-style: italic;
+  padding-left: 15px;
 }
 
 /*
