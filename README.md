@@ -41,6 +41,7 @@ New Stuff:
 - Make new thingie "Advanced Properties" that allows you to change jumping around stuff, AND change the new `layouts` stuff, and possibly also a color scheme.
 - Add ability to buffer geodata in layers
 - Ability to "sketch" a feature on a map (i.e. if we want to draw something; instead of entering points, allow drawing it on a map)
+- Support new frontendInfo stuff ("basemap" array, "layers" stuff, etc.) and new removeLayers action
 
 New "Graph View":
 
