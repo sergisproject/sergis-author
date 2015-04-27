@@ -62,18 +62,21 @@ AUTHOR.JSON = {
                 onchange(property, value);
                 
                 var p = c("p"),
+                    input,
                     id = "id_" + randID();
                 p.appendChild(c("label", {
                     "for": id,
                     text: name + " "
                 }));
-                p.appendChild(c("input", {
+                input = c("input", {
                     id: id,
                     type: "number",
                     value: value.toString()
-                }, function (event) {
-                    onchange(property, Number(this.value));
-                }));
+                });
+                addNumericChangeHandler(input, function (event, value) {
+                    onchange(property, value || 0);
+                });
+                p.appendChild(input);
                 return p;
             }
         },
@@ -541,6 +544,7 @@ AUTHOR.JSON = {
         
         var that = this,
             div = c("div", {className: "action-item"}),
+            input,
             id = "id_" + randID();
         
         div.appendChild(c("label", {
@@ -548,7 +552,7 @@ AUTHOR.JSON = {
             text: this.label + ": ",
             className: "action-label"
         }));
-        div.appendChild(c("input", {
+        input = c("input", {
             id: id,
             type: "number",
             min: this.min || undefined,
@@ -556,16 +560,12 @@ AUTHOR.JSON = {
             step: this.step || undefined,
             value: this.number,
             required: "required"
-        }, function (event) {
-            var num = Number(this.value);
-            if (isNaN(num)) {
-                this.style.border = "1px solid red";
-            } else {
-                this.style.border = "";
-                that.number = num;
-                onchange();
-            }
-        }));
+        });
+        addNumericChangeHandler(input, function (event, value) {
+            that.number = value || Math.max(this.min || -Infinity, 0);
+            onchange();
+        }, this.min || undefined, this.max || undefined);
+        div.appendChild(input);
         
         if (this.description) {
             div.appendChild(c("div", {
@@ -642,7 +642,7 @@ AUTHOR.JSON = {
         
         var that = this,
             div = c("div", {className: "action-item"}),
-            id, inner_div;
+            id, inner_div, input;
         
         inner_div = c("div");
         inner_div.appendChild(c("label", {
@@ -723,7 +723,7 @@ AUTHOR.JSON = {
             "for": id,
             text: _("Opacity") + ": "
         }));
-        inner_div.appendChild(c("input", {
+        input = c("input", {
             id: id,
             type: "number",
             min: 0,
@@ -731,16 +731,12 @@ AUTHOR.JSON = {
             step: 0.01,
             value: this.json.opacity,
             required: "required"
-        }, function (event) {
-            var num = Number(this.value);
-            if (isNaN(num) || num < 0 || num > 1) {
-                this.style.border = "1px solid red";
-            } else {
-                this.style.border = "";
-                that.json.opacity = num;
-                onchange();
-            }
-        }));
+        });
+        addNumericChangeHandler(input, function (event, value) {
+            that.json.opacity = value === null ? 1 : value;
+            onchange();
+        }, 0, 1);
+        inner_div.appendChild(input);
         div.appendChild(inner_div);
         
         // Has Legend
@@ -893,7 +889,7 @@ AUTHOR.JSON = {
                 className: "noborder"
             });
             inner_table.style.margin = "0";
-            var inner_tr, inner_td, id;
+            var inner_tr, inner_td, input, id;
             
             // Latitude
             inner_tr = c("tr");
@@ -905,21 +901,17 @@ AUTHOR.JSON = {
             }));
             inner_tr.appendChild(inner_td);
             inner_td = c("td");
-            inner_td.appendChild(c("input", {
+            input = c("input", {
                 type: "number",
                 step: 0.001,
                 value: that.json[i].latitude || 0,
                 required: "required"
-            }, function (event) {
-                var num = Number(this.value);
-                if (isNaN(num)) {
-                    this.style.border = "1px solid red";
-                } else {
-                    this.style.border = "";
-                    that.json[i].latitude = num;
-                    onchange();
-                }
-            }));
+            });
+            addNumericChangeHandler(input, function (event, value) {
+                that.json[i].latitude = value || 0;
+                onchange();
+            });
+            inner_td.appendChild(input);
             inner_tr.appendChild(inner_td);
             inner_table.appendChild(inner_tr);
             
@@ -933,21 +925,17 @@ AUTHOR.JSON = {
             }));
             inner_tr.appendChild(inner_td);
             inner_td = c("td");
-            inner_td.appendChild(c("input", {
+            input = c("input", {
                 type: "number",
                 step: 0.001,
                 value: that.json[i].longitude || 0,
                 required: "required"
-            }, function (event) {
-                var num = Number(this.value);
-                if (isNaN(num)) {
-                    this.style.border = "1px solid red";
-                } else {
-                    this.style.border = "";
-                    that.json[i].longitude = num;
-                    onchange();
-                }
-            }));
+            });
+            addNumericChangeHandler(input, function (event, value) {
+                that.json[i].longitude = value || 0;
+                onchange();
+            });
+            inner_td.appendChild(input);
             inner_tr.appendChild(inner_td);
             inner_table.appendChild(inner_tr);
             
@@ -1158,15 +1146,19 @@ AUTHOR.JSON = {
             td = c("td");
             if (this.possibilities[prop] == "number") {
                 // It must be a positive number
-                td.appendChild(c("input", {
+                input = c("input", {
                     id: id,
                     type: "number",
                     value: this.json[prop],
                     min: 1
-                }, function (event, that, prop) {
-                    that.json[prop] = Number(this.value);
-                    onchange();
-                }, this, prop));
+                });
+                addNumericChangeHandler(input, (function (that, prop) {
+                    return function (event, value) {
+                        that.json[prop] = value || 1;
+                        onchange();
+                    };
+                })(this, prop), 1);
+                td.appendChild(input);
             } else if (this.possibilities[prop] == "color") {
                 // It must be a color
                 input = c("input", {

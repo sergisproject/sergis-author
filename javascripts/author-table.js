@@ -119,22 +119,12 @@ AUTHOR.TABLE = {
          * Handler for any of the inputs in the "Map" column that correspond to
          * properties in a SerGIS JSON Map Object.
          */
-        updateMapStuff: function (event, stuff, promptIndex) {
+        updateMapStuff: function (event, value, stuff, promptIndex) {
             var promptList = game.jsondata.promptList;
-            this.style.border = "";
-            var value = this.value;
-            if (typeof value.trim == "function") {
-                value = value.trim();
-            }
-            if (!value) {
+            if (value === null) {
                 delete promptList[promptIndex].prompt.map[stuff];
             } else {
-                var num = Number(value);
-                if (isNaN(num)) {
-                    this.style.border = "1px solid red";
-                } else {
-                    promptList[promptIndex].prompt.map[stuff] = num;
-                }
+                promptList[promptIndex].prompt.map[stuff] = value;
             }
             // Save the game
             generate();
@@ -290,15 +280,9 @@ AUTHOR.TABLE = {
         /**
          * Handler for the "Point Value" input.
          */
-        updatePointValue: function (event, promptIndex, choiceIndex) {
+        updatePointValue: function (event, value, promptIndex, choiceIndex) {
             var promptList = game.jsondata.promptList;
-            var num = Number(this.value);
-            if (isNaN(num)) {
-                this.style.border = "1px solid red";
-            } else {
-                this.style.border = "";
-                promptList[promptIndex].actionList[choiceIndex].pointValue = num;
-            }
+            promptList[promptIndex].actionList[choiceIndex].pointValue = value || 0;
             // Save the game
             generate();
         },
@@ -490,7 +474,7 @@ AUTHOR.TABLE = {
      */
     function generateTableRow(tbody, promptIndex) {
         var tr, td, div, iconRow;
-        var table_inner, tbody_inner, tr_inner, td_inner;
+        var table_inner, tbody_inner, tr_inner, td_inner, input;
         var i, id;
         var prompt = game.jsondata.promptList[promptIndex].prompt;
         var mapstuff = [
@@ -711,14 +695,20 @@ AUTHOR.TABLE = {
             }));
             tr_inner.appendChild(td_inner);
             td_inner = c("td");
-            td_inner.appendChild(c("input", {
+            input = c("input", {
                 className: "row_map_" + mapstuff[i][0],
                 id: id,
                 size: "4",
                 type: "number",
                 tabindex: ++tabindex,
                 value: prompt.map[mapstuff[i][0]]
-            }, tableEvents.updateMapStuff, mapstuff[i][0], promptIndex));
+            });
+            addNumericChangeHandler(input, (function (stuff, promptIndex) {
+                return function (event, value) {
+                    tableEvents.updateMapStuff(event, value, stuff, promptIndex);
+                };
+            })(mapstuff[i][0], promptIndex));
+            td_inner.appendChild(input);
             tr_inner.appendChild(td_inner);
             tbody_inner.appendChild(tr_inner);
         }
@@ -856,7 +846,7 @@ AUTHOR.TABLE = {
      *        current prompt that we're adding to the table.
      */
     function generateTableChoice(tbody, promptIndex, choiceIndex) {
-        var tr, td, div, ul, li, iconRow;
+        var tr, td, div, input, ul, li, iconRow;
         var i, id, dataContent;
         var prompt = game.jsondata.promptList[promptIndex].prompt,
             choice = prompt.choices[choiceIndex],
@@ -931,11 +921,15 @@ AUTHOR.TABLE = {
             "for": id,
             text: _("Point Value:") + " "
         }));
-        div.appendChild(c("input", {
+        input = c("input", {
             type: "number",
             value: action.pointValue,
             tabindex: ++tabindex
-        }, tableEvents.updatePointValue, promptIndex, choiceIndex));
+        });
+        addNumericChangeHandler(input, function (event, value) {
+            tableEvents.updatePointValue(event, value, promptIndex, choiceIndex);
+        });
+        div.appendChild(input);
         td.appendChild(div);
         tr.appendChild(td);
         

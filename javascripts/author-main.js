@@ -207,6 +207,47 @@ function c(elem, attributes, event /*, [parameter, [parameter, [...]]] */) {
 }
 
 /**
+ * Add a "change" event handler to a "number" input element that will only be
+ * called after some basic numeric validation is performed.
+ *
+ * @param {Element} elem - The DOM input element to attach to.
+ * @param {Function} handler - The onchange handler. Called with `event` (the
+ *        DOM event object) and `value` (the numeric value, or `null` if the
+ *        input element is empty). This function is not called if the user
+ *        entered something that is not numeric.
+ * @param {number} [min] - The minimum numeric value (optional).
+ * @param {number} [max] - The maximum numeric value (optional).
+ */
+function addNumericChangeHandler(elem, handler, min, max) {
+    if (!min) min = -Infinity;
+    if (!max) max = Infinity;
+    elem.addEventListener("change", function (event) {
+        this.style.border = "";
+        var value = this.value;
+        if (typeof value.trim == "function") {
+            value = value.trim();
+        }
+        if (typeof this.checkValidity == "function") {
+            if (this.checkValidity() === false) {
+                this.style.border = "1px solid red";
+                return;
+            }
+        }
+        
+        if (!value) {
+            handler(event, null);
+        } else {
+            var num = Number(value);
+            if (isNaN(num) || num < min || num > max) {
+                this.style.border = "1px solid red";
+            } else {
+                handler(event, num);
+            }
+        }
+    }, false);
+}
+
+/**
  * Open a page.
  * @see http://sergisproject.github.io/docs/author.html
  *
@@ -572,26 +613,16 @@ function updateAdvancedProperties() {
         props = ["defaultSidebarWidthRatio", "defaultPopupMaxWidthRatio"];
         for (i = 0; i < props.length; i++) {
             (function (layoutProp) {
-                document.getElementById("overlay_advancedProperties_layout_" + layoutProp).addEventListener("change", function (event) {
-                    this.style.border = "";
-                    var value = this.value;
-                    if (typeof value.trim == "function") {
-                        value = value.trim();
-                    }
-                    if (!value) {
+                addNumericChangeHandler(document.getElementById("overlay_advancedProperties_layout_" + layoutProp), function (event, value) {
+                    if (value === null) {
                         // Set it to 0 so it will plug in the default
                         game.jsondata.layout[layoutProp] = 0;
                     } else {
-                        var num = Number(value);
-                        if (isNaN(num)) {
-                            this.style.border = "1px solid red";
-                        } else {
-                            game.jsondata.layout[layoutProp] = num;
-                        }
+                        game.jsondata.layout[layoutProp] = value;
                     }
                     // Save the game and update the Export button
                     generate();
-                }, false);
+                }, 0, 1);
             })(props[i]);
         }
         
