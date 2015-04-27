@@ -565,6 +565,9 @@ function generate(updateTable, newCurrentPromptIndex) {
 function updateAdvancedProperties() {
     var json = game.jsondata;
     
+    document.getElementById("overlay_advancedProperties_alwaysReinitializeMap").checked =
+        !!json.alwaysReinitializeMap;
+    
     // Layout stuff
     document.getElementById("overlay_advancedProperties_layout_disableSidebarResizing").checked =
         !!json.layout.disableSidebarResizing;
@@ -625,6 +628,13 @@ function updateAdvancedProperties() {
                 }, 0, 1);
             })(props[i]);
         }
+        
+        // "Always Reinitialize Map" checkbox
+        document.getElementById("overlay_advancedProperties_alwaysReinitializeMap").addEventListener("change", function (event) {
+            game.jsondata.alwaysReinitializeMap = this.checked;
+            // Save the game, update the table, and update the Export button
+            generate(true);
+        }, false);
         
         // "Jumping Back Allowed" checkbox
         document.getElementById("overlay_advancedProperties_general_jumpingBackAllowed").addEventListener("change", function (event) {

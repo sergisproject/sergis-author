@@ -131,6 +131,15 @@ AUTHOR.TABLE = {
         },
         
         /**
+         * Handler for the map reinitialization dropdown.
+         */
+        updateMapReinitialization: function (event, promptIndex) {
+            game.jsondata.promptList[promptIndex].map.reinitialize = this.value;
+            // Save the game
+            generate();
+        },
+        
+        /**
          * Handler for the "Edit Map Properties" button.
          */
         editFrontendInfo: function (event, promptIndex) {
@@ -718,6 +727,35 @@ AUTHOR.TABLE = {
             rowspan: prompt.choices.length + 1
         });
         td.appendChild(table_inner);
+        
+        // Make reinitialization dropdown, if applicable
+        if (!game.jsondata.alwaysReinitializeMap) {
+            input = c("select", {
+                tabindex: ++tabindex,
+                title: _("Resetting the map removes all user drawings and other drawn objects on the map.")
+            }, tableEvents.updateMapReinitialization, promptIndex);
+            input.style.marginBottom = "20px";
+            input.appendChild(c("option", {
+                value: "",
+                text: _("Don't reset map"),
+                selected: (prompt.map.reinitialize != "before" && prompt.map.reinitialize != "after") ? "selected" : undefined
+            }));
+            input.appendChild(c("option", {
+                value: "before",
+                text: _("Reset before prompt"),
+                title: _("Reset the map before showing this prompt"),
+                selected: prompt.map.reinitialize == "before" ? "selected" : undefined
+            }));
+            input.appendChild(c("option", {
+                value: "after",
+                text: _("Reset after prompt"),
+                title: _("Reset the map after showing this prompt, before showing the next one"),
+                selected: prompt.map.reinitialize == "after" ? "selected" : undefined
+            }));
+            div = c("div");
+            div.appendChild(input);
+            td.appendChild(div);
+        }
         
         // Make "Edit Map Properties" button
         td.appendChild(c("button", {
