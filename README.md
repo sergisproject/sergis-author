@@ -14,11 +14,14 @@ Alternatively, you can clone this repository and open `index.html`.
 
 Action Editor:
 
-- Issue with "Add More..." for actions and then not being able to delete them
-  - "Adding more for add action doesn't work if I hit add after already entering one"
-
+- Ability to delete action parts that we added using "Add More..."
 - When creating a buffer action, make sure that the "objectName" that we're buffering has been created!
   - If it hasn't, then the SerGIS Client spews up a "Error: Invalid objectName!" alert
+- When drawing on the map, make sure that the "objectName" is unique!
+- When showing layers, make sure that the layer name is unique
+- When hiding layers, make sure that the layer group exists
+- For either thing involving layers, MAKE SURE that the user provides... 1) a name, and 2) a REST URL
+  (otherwise, the SerGIS Client will fail silently)
 
 
 Other:
