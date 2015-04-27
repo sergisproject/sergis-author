@@ -30,6 +30,7 @@
     <h1 id="project_title">SerGIS Prompt Author</h1>
     <section class="toolbar">
       <!-- Icons made by <a href="http://www.freepik.com">Freepik</a> from <a href="http://www.flaticon.com">www.flaticon.com</a> are licensed under <a href="http://creativecommons.org/licenses/by/3.0/">Creative Commons BY 3.0</a>. -->
+      <a id="toolbar_view" href="#" title="Edit Advanced Game Properties" tabindex="7">Advanced</a>
       <a id="toolbar_publish" href="#" title="Publish Game on SerGIS Server" tabindex="6" style="display: none;">Publish</a>
       <a id="toolbar_preview" href="#" target="_blank" title="Preview SerGIS Game" tabindex="5" style="display: none;">Preview</a>
       <a id="toolbar_export" href="#" title="Download JSON Game Data File" tabindex="4" style="display: none;">Export</a>
@@ -48,33 +49,7 @@
       <p>Once you have finished your game, click "Publish" to publish it on the SerGIS Server.</p>
     </div>
 
-    <h2>General Properties</h2>
-    <table class="noborder">
-      <tbody>
-        <tr>
-          <td><input type="checkbox" id="general_jumpingBackAllowed" tabindex="12"></td>
-          <td><label for="general_jumpingBackAllowed">Jumping Back Allowed</label></td>
-        </tr>
-        <tr>
-          <td>&nbsp;</td>
-          <td><label for="general_onJumpBack">When a user jumps back: </label><select id="general_onJumpBack" tabindex="13">
-            <option value="reset" title="Disregard all the choices that the user has made" selected>Disregard choices</option>
-            <option value="" title="Remember the user’s choices and show the corresponding Map Actions on the map">Remember choices and show actions</option>
-            <option value="hide" title="Remember the user’s choices, but don’t show any Map Actions on the map">Remember choices but hide actions</option>
-          </select><label> for prompts after the one that the user is jumping back to.</label></td>
-        </tr>
-        <tr>
-          <td><input type="checkbox" id="general_jumpingForwardAllowed" tabindex="14"></td>
-          <td><label for="general_jumpingForwardAllowed">Jumping Forward Allowed</label></td>
-        </tr>
-        <tr>
-          <td><input type="checkbox" id="general_showActionsInUserOrder" tabindex="15"></td>
-          <td><label for="general_showActionsInUserOrder">Show Actions In User Order</label></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h2>Prompts</h2>
+    <h2>Game Prompts</h2>
     <div id="promptContainer"></div>
     <p><button id="addPrompt" class="main-button">Add Prompt</button> <input id="expandAllPrompts" type="checkbox"><label for="expandAllPrompts"> Expand All Prompts</label></p>
   </section>
@@ -167,6 +142,66 @@
       <p id="overlay_viewjson_selectall" style="display: none;"><a id="overlay_viewjson_selectall_link" href="#">Select All</a></p>
       <pre id="overlay_viewjson_content"></pre>
       <p class="overlay_buttons"><button id="overlay_viewjson_close">Close</button></p>
+    </div>
+
+    <!-- Advanced Properties overlay -->
+    <div id="overlay_advancedProperties" class="overlay_inner" style="display: none;">
+      <h2>Advanced Properties</h2>
+      <h3>Game Layout</h3>
+      <table class="noborder">
+        <tbody>
+          <tr>
+            <td><input type="checkbox" id="overlay_advancedProperties_layout_disableSidebarResizing"></td>
+            <td><label for="overlay_advancedProperties_layout_disableSidebarResizing" title="Whether horizontal resizing of the prompt sidebar should be disabled">Disable Sidebar Resizing</label></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" id="overlay_advancedProperties_layout_disableTranslucentSidebar"></td>
+            <td><label for="overlay_advancedProperties_layout_disableTranslucentSidebar" title="Whether the translucent prompt sidebar, with the map behind it, should be opaque instead, with the map only extending to its border and not behind it">Disable Translucent Sidebar</label></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" id="overlay_advancedProperties_layout_showPromptNumber"></td>
+            <td><label for="overlay_advancedProperties_layout_showPromptNumber" title="Whether to show &quot;Prompt ___ of ___&quot; at the bottom of the prompt sidebar. (If any kind of jumping is enabled below, then this is always shown regardless of this setting.)">Show Prompt Number</label></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" id="overlay_advancedProperties_layout_hidePromptTitle"></td>
+            <td><label for="overlay_advancedProperties_layout_hidePromptTitle" title="Whether to hide the prompt title at the top of the prompt sidebar">Hide Prompt Title</label></td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <p><label for="overlay_advancedProperties_layout_defaultSidebarWidthRatio" title="A number between 0 and 1 indicating the default % of the horizontal screen real estate that should be taken up by the prompt sidebar">Default Sidebar Width Ratio: </label><input id="overlay_advancedProperties_layout_defaultSidebarWidthRatio" type="number" min="0" max="1" step="0.01"></p>
+      
+      <p><label for="overlay_advancedProperties_layout_defaultPopupMaxWidthRatio" title="A number between 0 and 1 indicating the % of the map's width that is allowed to be taken up by the popup.">Popup Max Width Ratio: </label><input id="overlay_advancedProperties_layout_defaultPopupMaxWidthRatio" type="number" min="0" max="1" step="0.01"></p>
+      
+      <h3>Prompt Jumping</h3>
+      <p>"Jumping" refers to skipping around prompts in any order.<br>
+          "Jumping back" refers to skipping backwards to previous prompts (including a "Back" button).<br>
+          "Jumping forward" refers to skipping forwards (including a "Skip" button).</p>
+      <table class="noborder">
+        <tbody>
+          <tr>
+            <td><input type="checkbox" id="overlay_advancedProperties_general_jumpingBackAllowed"></td>
+            <td><label for="overlay_advancedProperties_general_jumpingBackAllowed">Jumping Back Allowed</label></td>
+          </tr>
+          <tr>
+            <td>&nbsp;</td>
+            <td><label for="overlay_advancedProperties_general_onJumpBack">When a user jumps back: </label><select id="overlay_advancedProperties_general_onJumpBack">
+              <option value="reset" title="Disregard all the choices that the user has made" selected>Disregard choices</option>
+              <option value="" title="Remember the user’s choices and show the corresponding Map Actions on the map">Remember choices and show actions</option>
+              <option value="hide" title="Remember the user’s choices, but don’t show any Map Actions on the map">Remember choices but hide actions</option>
+            </select><label> for prompts after the one that the user is jumping back to.</label></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" id="overlay_advancedProperties_general_jumpingForwardAllowed"></td>
+            <td><label for="overlay_advancedProperties_general_jumpingForwardAllowed">Jumping Forward Allowed</label></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" id="overlay_advancedProperties_general_showActionsInUserOrder"></td>
+            <td><label for="overlay_advancedProperties_general_showActionsInUserOrder">Show Actions In User Order</label></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="overlay_buttons"><button id="overlay_advancedProperties_close">Close</button></p>
     </div>
 
     <!-- Edit Map Properties overlay -->

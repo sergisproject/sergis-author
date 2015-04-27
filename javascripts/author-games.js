@@ -333,12 +333,9 @@ AUTHOR.GAMES = {
         // Check the JSON
         checkJSON();
 
-        // Set the values for the General Properties
+        // Set the values for the Advanced Properties
         var json = game.jsondata;
-        document.getElementById("general_jumpingBackAllowed").checked = !!json.jumpingBackAllowed;
-        document.getElementById("general_onJumpBack").value = json.onJumpBack;
-        document.getElementById("general_jumpingForwardAllowed").checked = !!json.jumpingForwardAllowed;
-        document.getElementById("general_showActionsInUserOrder").checked = !!json.showActionsInUserOrder;
+        updateAdvancedProperties();
 
         // Regenerate the table and update the Export button
         generate(true);

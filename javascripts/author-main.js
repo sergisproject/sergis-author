@@ -8,7 +8,7 @@
 
 // Globals: exportEnabled, game, makeCatch, randInt, randID, removeFromString,
 // overlay, getOverlay, c, openPage, selectAll,
-// checkJSON, swapGotos, decrementGotos, generate
+// checkJSON, swapGotos, decrementGotos, generate, updateAdvancedProperties
 
 // Make sure console.{log,error} exists
 if (typeof console == "undefined") console = {};
@@ -285,9 +285,20 @@ function checkJSON() {
     // Check "modified"
     json.modified = new Date();
     
+    // Check "layout"
+    if (typeof json.layout != "object" || !json.layout) {
+        json.layout = {};
+    }
+    if (!json.layout.defaultSidebarWidthRatio) {
+        json.layout.defaultSidebarWidthRatio = 0.3;
+    }
+    if (!json.layout.defaultPopupMaxWidthRatio) {
+        json.layout.defaultPopupMaxWidthRatio = 0.5;
+    }
+    
     // Check "onJumpBack"
     var onJumpBackValues = [],
-        options = document.getElementById("general_onJumpBack").getElementsByTagName("option");
+        options = document.getElementById("overlay_advancedProperties_general_onJumpBack").getElementsByTagName("option");
     for (i = 0; i < options.length; i++) {
         onJumpBackValues.push(options[i].getAttribute("value"));
     }
@@ -506,7 +517,113 @@ function generate(updateTable, newCurrentPromptIndex) {
     }
 }
 
+/**
+ * Update all the items in the "Advanced Properties" overlay based on new JSON
+ * data.
+ */
+function updateAdvancedProperties() {
+    var json = game.jsondata;
+    
+    // Layout stuff
+    document.getElementById("overlay_advancedProperties_layout_disableSidebarResizing").checked =
+        !!json.layout.disableSidebarResizing;
+    document.getElementById("overlay_advancedProperties_layout_disableTranslucentSidebar").checked =
+        !!json.layout.disableTranslucentSidebar;
+    document.getElementById("overlay_advancedProperties_layout_showPromptNumber").checked =
+        !!json.layout.showPromptNumber;
+    document.getElementById("overlay_advancedProperties_layout_hidePromptTitle").checked =
+        !!json.layout.hidePromptTitle;
+    document.getElementById("overlay_advancedProperties_layout_defaultSidebarWidthRatio").value =
+        "" + json.layout.defaultSidebarWidthRatio;
+    document.getElementById("overlay_advancedProperties_layout_defaultPopupMaxWidthRatio").value =
+        "" + json.layout.defaultPopupMaxWidthRatio;
+    
+    // Jumping stuff
+    document.getElementById("overlay_advancedProperties_general_jumpingBackAllowed").checked =
+        !!json.jumpingBackAllowed;
+    document.getElementById("overlay_advancedProperties_general_onJumpBack").value =
+        json.onJumpBack;
+    document.getElementById("overlay_advancedProperties_general_jumpingForwardAllowed").checked =
+        !!json.jumpingForwardAllowed;
+    document.getElementById("overlay_advancedProperties_general_showActionsInUserOrder").checked =
+        !!json.showActionsInUserOrder;
+}
+
 (function () {    
+    /**
+     * Initialize the "Advanced Properties" overlay.
+     */
+    function initAdvancedProperties() {
+        var props, i;
+        
+        // The checkboxes for some layout properties
+        props = ["disableSidebarResizing", "disableTranslucentSidebar", "showPromptNumber", "hidePromptTitle"];
+        for (i = 0; i < props.length; i++) {
+            (function (layoutProp) {
+                document.getElementById("overlay_advancedProperties_layout_" + layoutProp).addEventListener("change", function (event) {
+                    game.jsondata.layout[layoutProp] = this.checked;
+                    // Save the game and update the Export button
+                    generate();
+                }, false);
+            })(props[i]);
+        }
+        
+        // The number inputs for some layout properties
+        props = ["defaultSidebarWidthRatio", "defaultPopupMaxWidthRatio"];
+        for (i = 0; i < props.length; i++) {
+            (function (layoutProp) {
+                document.getElementById("overlay_advancedProperties_layout_" + layoutProp).addEventListener("change", function (event) {
+                    this.style.border = "";
+                    var value = this.value;
+                    if (typeof value.trim == "function") {
+                        value = value.trim();
+                    }
+                    if (!value) {
+                        // Set it to 0 so it will plug in the default
+                        game.jsondata.layout[layoutProp] = 0;
+                    } else {
+                        var num = Number(value);
+                        if (isNaN(num)) {
+                            this.style.border = "1px solid red";
+                        } else {
+                            game.jsondata.layout[layoutProp] = num;
+                        }
+                    }
+                    // Save the game and update the Export button
+                    generate();
+                }, false);
+            })(props[i]);
+        }
+        
+        // "Jumping Back Allowed" checkbox
+        document.getElementById("overlay_advancedProperties_general_jumpingBackAllowed").addEventListener("change", function (event) {
+            game.jsondata.jumpingBackAllowed = this.checked;
+            // Save the game and update the Export button
+            generate();
+        }, false);
+        
+        // "On Jump Back" select
+        document.getElementById("overlay_advancedProperties_general_onJumpBack").addEventListener("change", function (event) {
+            game.jsondata.onJumpBack = this.value;
+            // Save the game and update the Export button
+            generate();
+        }, false);
+        
+        // "Jumping Forward Allowed" checkbox
+        document.getElementById("overlay_advancedProperties_general_jumpingForwardAllowed").addEventListener("change", function (event) {
+            game.jsondata.jumpingForwardAllowed = this.checked;
+            // Save the game and update the Export button
+            generate();
+        }, false);
+        
+        // "Show Actions In User Order" checkbox
+        document.getElementById("overlay_advancedProperties_general_showActionsInUserOrder").addEventListener("change", function (event) {
+            game.jsondata.showActionsInUserOrder = this.checked;
+            // Save the game and update the Export button
+            generate();
+        }, false);
+    }
+    
     /**
      * Initialize everything.
      */
@@ -597,47 +714,20 @@ function generate(updateTable, newCurrentPromptIndex) {
             overlay();
         }, false);
         
-        // "Add Prompt" button
-        document.getElementById("addPrompt").addEventListener("click", function (event) {
+        // "Advanced" button
+        document.getElementById("toolbar_view").addEventListener("click", function (event) {
             event.preventDefault();
-            var newPromptIndex = game.jsondata.promptList.push({}) - 1;
-            // Save and regenerate
-            generate(true, newPromptIndex);
+            overlay("overlay_advancedProperties");
         }, false);
         
-        // "Expand All Prompts" checkbox
-        document.getElementById("expandAllPrompts").addEventListener("change", function (event) {
-            AUTHOR.TABLE.setExpandAllPrompts(this.checked);
-        }, false);
-        document.getElementById("expandAllPrompts").checked = false;
-        
-        // "Jumping Back Allowed" checkbox
-        document.getElementById("general_jumpingBackAllowed").addEventListener("change", function (event) {
-            game.jsondata.jumpingBackAllowed = this.checked;
-            // Save the game and update the Export button
-            generate();
+        // Close button in Advanced overlay
+        document.getElementById("overlay_advancedProperties_close").addEventListener("click", function (event) {
+            event.preventDefault();
+            overlay();
         }, false);
         
-        // "On Jump Back" select
-        document.getElementById("general_onJumpBack").addEventListener("change", function (event) {
-            game.jsondata.onJumpBack = this.value;
-            // Save the game and update the Export button
-            generate();
-        }, false);
-        
-        // "Jumping Forward Allowed" checkbox
-        document.getElementById("general_jumpingForwardAllowed").addEventListener("change", function (event) {
-            game.jsondata.jumpingForwardAllowed = this.checked;
-            // Save the game and update the Export button
-            generate();
-        }, false);
-        
-        // "Show Actions In User Order" checkbox
-        document.getElementById("general_showActionsInUserOrder").addEventListener("change", function (event) {
-            game.jsondata.showActionsInUserOrder = this.checked;
-            // Save the game and update the Export button
-            generate();
-        }, false);
+        // Advanced Properties overlay
+        initAdvancedProperties();
         
         // "View JSON" overlay:
         // "Select All" button
@@ -652,6 +742,21 @@ function generate(updateTable, newCurrentPromptIndex) {
         document.getElementById("overlay_viewjson_close").addEventListener("click", function (event) {
             event.preventDefault();
             overlay();
+        }, false);
+        
+        
+        // "Expand All Prompts" checkbox
+        document.getElementById("expandAllPrompts").addEventListener("change", function (event) {
+            AUTHOR.TABLE.setExpandAllPrompts(this.checked);
+        }, false);
+        document.getElementById("expandAllPrompts").checked = false;
+        
+        // "Add Prompt" button
+        document.getElementById("addPrompt").addEventListener("click", function (event) {
+            event.preventDefault();
+            var newPromptIndex = game.jsondata.promptList.push({}) - 1;
+            // Save and regenerate
+            generate(true, newPromptIndex);
         }, false);
     }
 
