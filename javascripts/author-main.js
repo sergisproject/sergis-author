@@ -420,8 +420,8 @@ function checkJSON() {
             }
             
             // Check "prompt.contents[j].type"
-            if (!item.prompt.contents[j].type || !AUTHOR.JSON.contentTypes.hasOwnProperty(item.prompt.contents[j].type)) {
-                item.prompt.contents[j].type = AUTHOR.JSON.defaultContentType;
+            if (!item.prompt.contents[j].type || !AUTHOR.JSON_CONTENT.contentTypes.hasOwnProperty(item.prompt.contents[j].type)) {
+                item.prompt.contents[j].type = AUTHOR.JSON_CONTENT.DEFAULT_CONTENT_TYPE;
             }
         }
         
@@ -436,8 +436,8 @@ function checkJSON() {
             }
             
             // Check "prompt.choices[j].type"
-            if (!item.prompt.choices[j].type || !AUTHOR.JSON.contentTypes.hasOwnProperty(item.prompt.choices[j].type)) {
-                item.prompt.choices[j].type = AUTHOR.JSON.defaultContentType;
+            if (!item.prompt.choices[j].type || !AUTHOR.JSON_CONTENT.contentTypes.hasOwnProperty(item.prompt.choices[j].type)) {
+                item.prompt.choices[j].type = AUTHOR.JSON_CONTENT.DEFAULT_CONTENT_TYPE;
             }
         }
         

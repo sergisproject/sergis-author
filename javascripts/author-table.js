@@ -611,7 +611,7 @@ AUTHOR.TABLE = {
             // The actual content
             div.appendChild(c("span", {
                 className: "box wide",
-                html: AUTHOR.JSON.contentTypes[prompt.contents[i].type].toHTML(prompt.contents[i]),
+                html: AUTHOR.JSON_CONTENT.contentTypes[prompt.contents[i].type].toHTML(prompt.contents[i]),
                 title: prompt.contents[i].value
             }));
             td.appendChild(div);
@@ -818,7 +818,7 @@ AUTHOR.TABLE = {
             // Show the actual content
             div.appendChild(c("span", {
                 className: "box",
-                html: AUTHOR.JSON.contentTypes[prompt.contents[i].type].toHTML(prompt.contents[i]),
+                html: AUTHOR.JSON_CONTENT.contentTypes[prompt.contents[i].type].toHTML(prompt.contents[i]),
                 title: prompt.contents[i].value
             }));
             td.appendChild(div);
@@ -946,7 +946,7 @@ AUTHOR.TABLE = {
         // Make choice content
         div.appendChild(c("span", {
             className: "box",
-            html: AUTHOR.JSON.contentTypes[choice.type].toHTML(choice),
+            html: AUTHOR.JSON_CONTENT.contentTypes[choice.type].toHTML(choice),
             title: choice.value
         }));
         td.appendChild(div);

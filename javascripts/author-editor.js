@@ -130,7 +130,7 @@ AUTHOR.EDITOR = {
         var select = document.getElementById("overlay_editor_contentType");
         
         // Make sure the proper option in `select` is selected
-        if (AUTHOR.JSON.contentTypes.hasOwnProperty(editor_state.content_json.type)) {
+        if (AUTHOR.JSON_CONTENT.contentTypes.hasOwnProperty(editor_state.content_json.type)) {
             document.getElementById("overlay_editor_contentType").value = editor_state.content_json.type;
         } else {
             document.getElementById("overlay_editor_contentType").selectedIndex = 0;
@@ -141,8 +141,8 @@ AUTHOR.EDITOR = {
         var container = document.getElementById("overlay_editor_contentContainer");
         container.innerHTML = "";
         
-        // Make the fields for this content type (based on AUTHOR.JSON.contentTypes)
-        var fields = AUTHOR.JSON.contentTypes[select.value].fields;
+        // Make the fields for this content type (based on AUTHOR.JSON_CONTENT.contentTypes)
+        var fields = AUTHOR.JSON_CONTENT.contentTypes[select.value].fields;
         var property, name, type, value, data;
         var p, id, inner_container;
         if (!editor_state.content_json._sergis_author_data) editor_state.content_json._sergis_author_data = {};
@@ -156,7 +156,7 @@ AUTHOR.EDITOR = {
             data = editor_state.content_json._sergis_author_data[property];
             
             // Create the field editor based on its type
-            container.appendChild(AUTHOR.JSON.fieldTypes[type].makeEditor(property, name, value, data, function (property, value) {
+            container.appendChild(AUTHOR.JSON_CONTENT.fieldTypes[type].makeEditor(property, name, value, data, function (property, value) {
                 editor_state.content_json[property] = value;
             }));
         }
@@ -170,19 +170,19 @@ AUTHOR.EDITOR = {
         var select = document.getElementById("overlay_editor_contentType");
         // Make sure default content type is first
         var defaultContentType;
-        if (AUTHOR.JSON.defaultContentType && AUTHOR.JSON.contentTypes.hasOwnProperty(AUTHOR.JSON.defaultContentType)) {
-            defaultContentType = AUTHOR.JSON.defaultContentType;
+        if (AUTHOR.JSON_CONTENT.DEFAULT_CONTENT_TYPE && AUTHOR.JSON_CONTENT.contentTypes.hasOwnProperty(AUTHOR.JSON_CONTENT.DEFAULT_CONTENT_TYPE)) {
+            defaultContentType = AUTHOR.JSON_CONTENT.DEFAULT_CONTENT_TYPE;
             select.appendChild(c("option", {
                 value: defaultContentType,
-                text: AUTHOR.JSON.contentTypes[defaultContentType].name
+                text: AUTHOR.JSON_CONTENT.contentTypes[defaultContentType].name
             }));
         }
         // Add the rest of the content types
-        for (var type in AUTHOR.JSON.contentTypes) {
-            if (AUTHOR.JSON.contentTypes.hasOwnProperty(type) && type != defaultContentType) {
+        for (var type in AUTHOR.JSON_CONTENT.contentTypes) {
+            if (AUTHOR.JSON_CONTENT.contentTypes.hasOwnProperty(type) && type != defaultContentType) {
                 select.appendChild(c("option", {
                     value: type,
-                    text: AUTHOR.JSON.contentTypes[type].name
+                    text: AUTHOR.JSON_CONTENT.contentTypes[type].name
                 }));
             }
         }

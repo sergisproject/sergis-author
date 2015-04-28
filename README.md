@@ -28,7 +28,6 @@ Other:
 
 - Tutorial and help to show basic usage
 - Click/dblclick on content/actions/whatever to edit them
-- YouTube: take entire URL rather than video ID
 - Replace "Prompt Index" with just "Prompt", which consists of a 1-based prompt number and its title.
 - Make `overlay()` (i.e. no parameters to overlay) revert to the last open overlay, instead of none (unless it was previously none).
   - Maybe add parameter to force none, or vice versa, i.e. if we just pass `true`, then go back to the previous prompt.
