@@ -242,7 +242,7 @@ AUTHOR.JSON = {
             type: "number",
             min: this.min || undefined,
             max: this.max || undefined,
-            step: this.step || undefined,
+            step: this.step || "any",
             value: this.number,
             required: "required"
         });
@@ -588,7 +588,7 @@ AUTHOR.JSON = {
             inner_td = c("td");
             input = c("input", {
                 type: "number",
-                step: 0.001,
+                step: "any",
                 value: that.json[i].latitude || 0,
                 required: "required"
             });
@@ -612,7 +612,7 @@ AUTHOR.JSON = {
             inner_td = c("td");
             input = c("input", {
                 type: "number",
-                step: 0.001,
+                step: "any",
                 value: that.json[i].longitude || 0,
                 required: "required"
             });
@@ -830,12 +830,13 @@ AUTHOR.JSON = {
             
             td = c("td");
             if (this.possibilities[prop] == "number") {
-                // It must be a positive number
+                // It must be a positive integer
                 input = c("input", {
                     id: id,
                     type: "number",
                     value: this.json[prop],
-                    min: 1
+                    min: 1,
+                    step: 1
                 });
                 addNumericChangeHandler(input, (function (that, prop) {
                     return function (event, value) {

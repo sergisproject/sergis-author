@@ -707,8 +707,9 @@ AUTHOR.TABLE = {
             input = c("input", {
                 className: "row_map_" + mapstuff[i][0],
                 id: id,
-                size: "4",
+                size: "6",
                 type: "number",
+                step: "any",
                 tabindex: ++tabindex,
                 value: prompt.map[mapstuff[i][0]]
             });
@@ -961,6 +962,7 @@ AUTHOR.TABLE = {
         }));
         input = c("input", {
             type: "number",
+            step: "1",
             value: action.pointValue,
             tabindex: ++tabindex
         });

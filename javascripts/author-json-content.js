@@ -75,6 +75,7 @@ AUTHOR.JSON_CONTENT = {
                 input = c("input", {
                     id: id,
                     type: "number",
+                    step: "any",
                     value: value.toString()
                 });
                 addNumericChangeHandler(input, function (event, value) {
