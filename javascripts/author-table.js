@@ -707,7 +707,7 @@ AUTHOR.TABLE = {
             input = c("input", {
                 className: "row_map_" + mapstuff[i][0],
                 id: id,
-                size: "6",
+                size: "9",
                 type: "number",
                 step: "any",
                 tabindex: ++tabindex,
