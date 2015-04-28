@@ -142,9 +142,9 @@ AUTHOR.TABLE = {
         /**
          * Handler for the "Edit Map Properties" button.
          */
-        editFrontendInfo: function (event, promptIndex) {
+        editMapProperties: function (event, promptIndex) {
             event.preventDefault();
-            AUTHOR.FRONTEND_INFO_EDITOR.editFrontendInfo(promptIndex);
+            AUTHOR.MAP_PROPERTIES_EDITOR.editMapProperties(promptIndex);
         },
         
         
@@ -734,7 +734,6 @@ AUTHOR.TABLE = {
                 tabindex: ++tabindex,
                 title: _("Resetting the map removes all user drawings and other drawn objects on the map.")
             }, tableEvents.updateMapReinitialization, promptIndex);
-            input.style.marginBottom = "20px";
             input.appendChild(c("option", {
                 value: "",
                 text: _("Don't reset map"),
@@ -752,17 +751,18 @@ AUTHOR.TABLE = {
                 title: _("Reset the map after showing this prompt, before showing the next one"),
                 selected: prompt.map.reinitialize == "after" ? "selected" : undefined
             }));
-            div = c("div");
+            div = c("div", {
+                className: "marginLikeTable"
+            });
             div.appendChild(input);
             td.appendChild(div);
         }
         
         // Make "Edit Map Properties" button
         td.appendChild(c("button", {
-            className: "row_map_editFrontendInfo",
             text: _("Edit Map Properties"),
             tabindex: ++tabindex
-        }, tableEvents.editFrontendInfo, promptIndex));
+        }, tableEvents.editMapProperties, promptIndex));
         tr.appendChild(td);
         
         ///////////////////////////////////////////////////////////////////////

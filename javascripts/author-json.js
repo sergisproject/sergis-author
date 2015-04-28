@@ -329,6 +329,7 @@ AUTHOR.JSON = {
     /* frontendNames */
     /* actionsByFrontend */
     /* frontendInfo */
+    /* frontendButtons */
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1606,5 +1607,50 @@ AUTHOR.JSON = {
                 }
             }
         }
+    };
+    
+    /**
+     * The frontend buttons for a SerGIS Prompt.
+     * Property names are the frontends. Values are another array of objects
+     * where each object has the following properties:
+     *   - "id" (the button's frontend-specific ID),
+     *   - "label" (a human-readable name for the button),
+     *   - "tooltip" (a tooltip for the button, same as in the client)
+     */
+    AUTHOR.JSON.frontendButtons = {
+        arcgis: [
+            {
+                id: "drawPoint",
+                label: _("Find Lat/Long"),
+                tooltip: _("Draw a point on the map and get its latitude and longitude coordinates")
+            },
+            /*
+            {
+                id: "drawLine",
+                label: _("Measure Distance"),
+                tooltip: _("Draw a line on the map and get its distance")
+            },
+            */
+            {
+                id: "drawPolyline",
+                label: _("Measure Distance"),
+                tooltip: _("Draw one or more lines on the map and get the total distance")
+            },
+            {
+                id: "drawPolygon",
+                label: _("Measure Area"),
+                tooltip: _("Draw a polygon on the map and get its total area")
+            },
+            {
+                id: "findPath",
+                label: _("Find Path"),
+                tooltip: _("Find the shortest path between 2 points using the currently selected layer.")
+            },
+            {
+                id: "resetMap",
+                label: _("Reset Map"),
+                tooltip: _("Remove all custom drawings from the map")
+            }
+        ]
     };
 })();

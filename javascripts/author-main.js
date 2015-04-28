@@ -397,6 +397,18 @@ function checkJSON() {
             }
         }
         
+        // Check "prompt.buttons"
+        if (!item.prompt.buttons) {
+            item.prompt.buttons = {};
+        }
+        for (j in AUTHOR.JSON.frontendInfo) {
+            if (AUTHOR.JSON.frontendInfo.hasOwnProperty(j)) {
+                if (!item.prompt.buttons[j]) {
+                    item.prompt.buttons[j] = {};
+                }
+            }
+        }
+        
         // Check "prompt.contents"
         if (!item.prompt.contents || !item.prompt.contents.length) {
             item.prompt.contents = [];

@@ -199,6 +199,29 @@ code.short {
 }
 
 /*
+ * COLUMN LAYOUT STUFF
+ *
+ * .columns is used to make a simple 2-column layout where the left column takes
+ * up as much of the width as possible.
+ * <div class="columns"><div class="left-column">stuff</div><div class="right-column">stuff</div></div>
+ */
+
+.columns {
+  display: table;
+  width: 100%;
+}
+
+.columns .column-left {
+  display: table-cell;
+  width: 100%;
+}
+
+.columns .column-right {
+  display: table-cell;
+  white-space: nowrap;
+}
+
+/*
  * INPUT CONTAINER STUFF
  *
  * .inputcontainer is used to make a text input take up the rest of the width:
@@ -401,17 +424,28 @@ p img {
   border: none;
 }
 
-pre, code, span.box {
+pre, code, span.box, div.box {
   color: #222;
   background-color: #fff;
 
-  font-size: 14px;
-
-  border-radius: 2px;
-  -moz-border-radius: 2px;
   -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
 
   box-shadow: 0 0 10px rgba(0,0,0,.1);
+}
+
+div.box {
+  margin: 10px;
+  padding: 10px;
+
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  border-radius: 6px;
+}
+
+pre, code, span.box {
+  font-size: 14px;
 }
 
 pre, span.box {
@@ -476,6 +510,10 @@ table {
   border: 1px solid #373737;
   margin-bottom: 20px;
   text-align: left;
+}
+
+.marginLikeTable {
+  margin-bottom: 20px;
 }
 
 th {
@@ -769,6 +807,11 @@ table button, table label, table input, table select, table .minirow, table .row
 }
 
 @media screen and (max-width: 580px) {
+  .columns, .columns .column-left, .columns .column-right {
+    display: block;
+    white-space: normal;
+  }
+
   table button, table label, table input, table select, table .minirow, table .row, table li {
     font-size: 100%;
   }
