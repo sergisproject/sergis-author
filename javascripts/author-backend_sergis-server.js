@@ -40,8 +40,8 @@ AUTHOR.BACKEND = {
     AUTHOR.BACKEND.init = function () {
         return new Promise(function (resolve, reject) {
             // Load socket.io
-            var origin = document.getElementById("author_backend_script").getAttribute("data-socket-io-origin") || window.location.origin;
-            var prefix = document.getElementById("author_backend_script").getAttribute("data-socket-io-prefix") || "";
+            var origin = byId("author_backend_script").getAttribute("data-socket-io-origin") || window.location.origin;
+            var prefix = byId("author_backend_script").getAttribute("data-socket-io-prefix") || "";
             console.log("Connecting to socket.io at: " + origin + prefix + "/socket.io");
             socket = io.connect(origin + "/author", {
                 path: prefix + "/socket.io"
@@ -51,7 +51,7 @@ AUTHOR.BACKEND = {
             });
             socket.on("connect", function () {
                 console.log("Connected to socket server");
-                var session = document.getElementById("author_backend_script").getAttribute("data-session");
+                var session = byId("author_backend_script").getAttribute("data-session");
                 // Emit the "init" event to make sure the socket connection is good
                 socket.emit("init", session, function (isResolved, value) {
                     if (isResolved) {

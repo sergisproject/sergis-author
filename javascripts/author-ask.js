@@ -25,15 +25,15 @@
             var previousOverlay = getOverlay();
             // Set the prompt text (last line of promptText)
             var texts = promptText.split("\n");
-            document.getElementById("overlay_prompt_text").textContent = texts.pop();
+            byId("overlay_prompt_text").textContent = texts.pop();
             // Set the rest of promptText
-            document.getElementById("overlay_prompt_error").innerHTML = "";
+            byId("overlay_prompt_error").innerHTML = "";
             texts.forEach(function (text, index) {
-                if (index > 0) document.getElementById("overlay_prompt_error").appendChild(c("br"));
-                document.getElementById("overlay_prompt_error").appendChild(document.createTextNode(text));
+                if (index > 0) byId("overlay_prompt_error").appendChild(create("br"));
+                byId("overlay_prompt_error").appendChild(document.createTextNode(text));
             });
             // Set the default value
-            document.getElementById("overlay_prompt_input").value = defaultValue || "";
+            byId("overlay_prompt_input").value = defaultValue || "";
             // Set up the handler for the user's choice
             askHandler = function (value) {
                 overlay(previousOverlay || undefined);
@@ -42,7 +42,7 @@
             // Show the overlay
             overlay("overlay_prompt");
             // Highlight the input box
-            document.getElementById("overlay_prompt_input").focus();
+            byId("overlay_prompt_input").focus();
         });
     };
     
@@ -58,10 +58,10 @@
             var previousOverlay = getOverlay();
             // Set the prompt text
             var texts = promptText.split("\n");
-            document.getElementById("overlay_alert_text").innerHTML = "";
+            byId("overlay_alert_text").innerHTML = "";
             texts.forEach(function (text, index) {
-                if (index > 0) document.getElementById("overlay_alert_text").appendChild(c("br"));
-                document.getElementById("overlay_alert_text").appendChild(document.createTextNode(text));
+                if (index > 0) byId("overlay_alert_text").appendChild(create("br"));
+                byId("overlay_alert_text").appendChild(document.createTextNode(text));
             });
             // Set up the handler for the user's choice
             askForOKHander = function () {
@@ -71,7 +71,7 @@
             // Show the overlay
             overlay("overlay_alert");
             // Focus the "OK" button
-            document.getElementById("overlay_alert_ok").focus();
+            byId("overlay_alert_ok").focus();
         });
     };
     
@@ -90,14 +90,14 @@
             var previousOverlay = getOverlay();
             // Set the prompt text
             var texts = promptText.split("\n");
-            document.getElementById("overlay_confirm_text").innerHTML = "";
+            byId("overlay_confirm_text").innerHTML = "";
             texts.forEach(function (text, index) {
-                if (index > 0) document.getElementById("overlay_confirm_text").appendChild(c("br"));
-                document.getElementById("overlay_confirm_text").appendChild(document.createTextNode(text));
+                if (index > 0) byId("overlay_confirm_text").appendChild(create("br"));
+                byId("overlay_confirm_text").appendChild(document.createTextNode(text));
             });
             // Set up the buttons
-            document.getElementById("overlay_confirm_yes").className = focusNoButton ? "sub-button" : "main-button";
-            document.getElementById("overlay_confirm_no").className = focusNoButton ? "main-button" : "sub-button";
+            byId("overlay_confirm_yes").className = focusNoButton ? "sub-button" : "main-button";
+            byId("overlay_confirm_no").className = focusNoButton ? "main-button" : "sub-button";
             // Set up the handler for the user's choice
             askForConfirmationHander = function (value) {
                 overlay(previousOverlay || undefined);
@@ -106,7 +106,7 @@
             // Show the overlay
             overlay("overlay_confirm");
             // Focus the "Yes" or "No" button
-            document.getElementById(focusNoButton ? "overlay_confirm_no" : "overlay_confirm_yes").focus();
+            byId(focusNoButton ? "overlay_confirm_no" : "overlay_confirm_yes").focus();
         });
     };
     
@@ -120,14 +120,14 @@
          */
         window.askForFile = function () {
             return new Promise(function (resolve, reject) {
-                var fileinput = c("input", {
+                var fileinput = create("input", {
                     type: "file"
                 }, function (event) {
                     if (event.target.files && event.target.files.length > 0) {
                         resolve(event.target.files[0]);
                     }
                 });
-                document.getElementById("fileinputs").appendChild(fileinput);
+                byId("fileinputs").appendChild(fileinput);
                 fileinput.click();
             });
         };
@@ -138,33 +138,33 @@
      */
     function initAsk() {
         // Set up form and button for prompt ("ask")
-        document.getElementById("overlay_prompt_form").addEventListener("submit", function (event) {
+        byId("overlay_prompt_form").addEventListener("submit", function (event) {
             event.preventDefault();
             if (typeof askHandler == "function") {
-                askHandler(document.getElementById("overlay_prompt_input").value);
+                askHandler(byId("overlay_prompt_input").value);
             }
             askHandler = null;
         }, false);
-        document.getElementById("overlay_prompt_cancel").addEventListener("click", function (event) {
+        byId("overlay_prompt_cancel").addEventListener("click", function (event) {
             event.preventDefault();
             if (typeof askHandler == "function") askHandler(null);
             askHandler = null;
         }, false);
         
         // Set up button for alert ("askForOK")
-        document.getElementById("overlay_alert_ok").addEventListener("click", function (event) {
+        byId("overlay_alert_ok").addEventListener("click", function (event) {
             event.preventDefault();
             if (typeof askForOKHander == "function") askForOKHander();
             askForOKHander = null;
         }, false);
         
         // Set up buttons for confirm ("askForConfirmation")
-        document.getElementById("overlay_confirm_yes").addEventListener("click", function (event) {
+        byId("overlay_confirm_yes").addEventListener("click", function (event) {
             event.preventDefault();
             if (typeof askForConfirmationHander == "function") askForConfirmationHander(true);
             askForConfirmationHander = null;
         }, false);
-        document.getElementById("overlay_confirm_no").addEventListener("click", function (event) {
+        byId("overlay_confirm_no").addEventListener("click", function (event) {
             event.preventDefault();
             if (typeof askForConfirmationHander == "function") askForConfirmationHander(false);
             askForConfirmationHander = null;

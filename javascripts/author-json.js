@@ -61,17 +61,17 @@ AUTHOR.JSON = {
     function makeStringField(label, description, value, onchange, required, pattern,
                              divClassName, labelClassName) {
         var id = "id_" + randID();
-        var bigdiv = c("div", {className: divClassName || undefined});
+        var bigdiv = create("div", {className: divClassName || undefined});
         
-        var div = c("div", {className: "inputcontainer"});
-        div.appendChild(c("label", {
+        var div = create("div", {className: "inputcontainer"});
+        div.appendChild(create("label", {
             "for": id,
             text: label + ": ",
             className: labelClassName || undefined
         }));
         
-        var span = c("span");
-        span.appendChild(c("input", {
+        var span = create("span");
+        span.appendChild(create("input", {
             id: id,
             value: value || "",
             required: required ? "required" : undefined,
@@ -82,7 +82,7 @@ AUTHOR.JSON = {
         bigdiv.appendChild(div);
         
         if (description) {
-            bigdiv.appendChild(c("div", {
+            bigdiv.appendChild(create("div", {
                 className: "action-description",
                 text: description
             }));
@@ -96,22 +96,22 @@ AUTHOR.JSON = {
      */
     function makeCheckBox(label, description, checked, onchange,
                           divClassName, labelClassName) {
-        var div = c("div", {className: divClassName || undefined}),
+        var div = create("div", {className: divClassName || undefined}),
             id = "id_" + randID();
 
-        div.appendChild(c("input", {
+        div.appendChild(create("input", {
             id: id,
             type: "checkbox",
             checked: checked ? "checked" : undefined
         }, onchange));
-        div.appendChild(c("label", {
+        div.appendChild(create("label", {
             "for": id,
             text: " " + label,
             className: labelClassName || undefined
         }));
         
         if (description) {
-            div.appendChild(c("div", {
+            div.appendChild(create("div", {
                 className: "action-description",
                 text: description
             }));
@@ -136,19 +136,19 @@ AUTHOR.JSON = {
      */
     function makeDropDown(label, description, items, index, onchange,
                           divClassName, labelClassName) {
-        var div = c("div", {className: divClassName || undefined}),
+        var div = create("div", {className: divClassName || undefined}),
             id = "id_" + randID();
         
-        div.appendChild(c("label", {
+        div.appendChild(create("label", {
             "for": id,
             text: label + ": ",
             className: labelClassName || undefined
         }));
-        var select = c("select", {
+        var select = create("select", {
             id: id
         }, onchange);
         for (var i = 0; i < items.length; i++) {
-            select.appendChild(c("option", {
+            select.appendChild(create("option", {
                 value: i,
                 text: items[i].label,
                 selected: index === i ? "selected" : undefined
@@ -157,7 +157,7 @@ AUTHOR.JSON = {
         div.appendChild(select);
         
         if (description) {
-            div.appendChild(c("div", {
+            div.appendChild(create("div", {
                 className: "action-description",
                 text: description
             }));
@@ -228,16 +228,16 @@ AUTHOR.JSON = {
         onchange();
         
         var that = this,
-            div = c("div", {className: "action-item"}),
+            div = create("div", {className: "action-item"}),
             input,
             id = "id_" + randID();
         
-        div.appendChild(c("label", {
+        div.appendChild(create("label", {
             "for": id,
             text: this.label + ": ",
             className: "action-label"
         }));
-        input = c("input", {
+        div.appendChild(create("input", {
             id: id,
             type: "number",
             min: this.min || undefined,
@@ -245,15 +245,13 @@ AUTHOR.JSON = {
             step: this.step || "any",
             value: this.number,
             required: "required"
-        });
-        addNumericChangeHandler(input, function (event, value) {
+        }, makeNumberHandler([this.min, this.max], function (event, value) {
             that.number = value || Math.max(this.min || -Infinity, 0);
             onchange();
-        }, this.min || undefined, this.max || undefined);
-        div.appendChild(input);
+        })));
         
         if (this.description) {
-            div.appendChild(c("div", {
+            div.appendChild(create("div", {
                 className: "action-description",
                 text: this.description
             }));
@@ -326,18 +324,18 @@ AUTHOR.JSON = {
         onchange();
         
         var that = this,
-            div = c("div", {className: "action-item"}),
+            div = create("div", {className: "action-item"}),
             id, inner_div, input;
         
-        inner_div = c("div");
-        inner_div.appendChild(c("label", {
+        inner_div = create("div");
+        inner_div.appendChild(create("label", {
             text: this.label,
             className: "action-label"
         }));
         div.appendChild(inner_div);
         
         if (this.description) {
-            div.appendChild(c("div", {
+            div.appendChild(create("div", {
                 className: "action-description",
                 text: this.description
             }));
@@ -403,12 +401,12 @@ AUTHOR.JSON = {
         
         // Opacity
         id = "id_" + randID();
-        inner_div = c("div", {className: "action-subitem"});
-        inner_div.appendChild(c("label", {
+        inner_div = create("div", {className: "action-subitem"});
+        inner_div.appendChild(create("label", {
             "for": id,
             text: _("Opacity") + ": "
         }));
-        input = c("input", {
+        inner_div.appendChild(create("input", {
             id: id,
             type: "number",
             min: 0,
@@ -416,12 +414,10 @@ AUTHOR.JSON = {
             step: 0.01,
             value: this.json.opacity,
             required: "required"
-        });
-        addNumericChangeHandler(input, function (event, value) {
+        }, makeNumberHandler([0, 1], function (event, value) {
             that.json.opacity = value === null ? 1 : value;
             onchange();
-        }, 0, 1);
-        inner_div.appendChild(input);
+        })));
         div.appendChild(inner_div);
         
         // Has Legend
@@ -460,9 +456,9 @@ AUTHOR.JSON = {
         onchange();
         
         var that = this,
-            bigdiv = c("div", {className: "action-item"}),
-            div = c("div"),
-            editor_div = c("div");
+            bigdiv = create("div", {className: "action-item"}),
+            div = create("div"),
+            editor_div = create("div");
         
         if (!that.json._sergis_author_data) that.json._sergis_author_data = {};
         
@@ -522,7 +518,7 @@ AUTHOR.JSON = {
 
         // Add the description, if needed
         if (that.description) {
-            bigdiv.appendChild(c("div", {
+            bigdiv.appendChild(create("div", {
                 className: "action-description",
                 text: that.description
             }));
@@ -554,83 +550,79 @@ AUTHOR.JSON = {
         onchange();
         
         var that = this,
-            div = c("div", {className: "action-item"}),
-            table = c("table"), tr = c("tr"), td;
+            div = create("div", {className: "action-item"}),
+            table = create("table"), tr = create("tr"), td;
         
-        div.appendChild(c("label", {
+        div.appendChild(create("label", {
             text: this.label + ": ",
             className: "action-label"
         }));
         
         if (this.description) {
-            div.appendChild(c("div", {
+            div.appendChild(create("div", {
                 className: "action-description",
                 text: this.description
             }));
         }
         
         function makeInnerTable(i) {
-            var inner_table = c("table", {
+            var inner_table = create("table", {
                 className: "noborder"
             });
             inner_table.style.margin = "0";
             var inner_tr, inner_td, input, id;
             
             // Latitude
-            inner_tr = c("tr");
-            inner_td = c("td");
+            inner_tr = create("tr");
+            inner_td = create("td");
             id = "id_" + randID();
-            inner_td.appendChild(c("label", {
+            inner_td.appendChild(create("label", {
                 "for": id,
                 text: _("Latitude:") + " "
             }));
             inner_tr.appendChild(inner_td);
-            inner_td = c("td");
-            input = c("input", {
+            inner_td = create("td");
+            inner_td.appendChild(create("input", {
                 type: "number",
                 step: "any",
                 value: that.json[i].latitude || 0,
                 required: "required"
-            });
-            addNumericChangeHandler(input, function (event, value) {
+            }, makeNumberHandler(function (event, value) {
                 that.json[i].latitude = value || 0;
                 onchange();
-            });
-            inner_td.appendChild(input);
+            })));
             inner_tr.appendChild(inner_td);
             inner_table.appendChild(inner_tr);
             
             // Longitude
-            inner_tr = c("tr");
-            inner_td = c("td");
+            inner_tr = create("tr");
+            inner_td = create("td");
             id = "id_" + randID();
-            inner_td.appendChild(c("label", {
+            inner_td.appendChild(create("label", {
                 "for": id,
                 text: _("Longitude:") + " "
             }));
             inner_tr.appendChild(inner_td);
-            inner_td = c("td");
-            input = c("input", {
+            inner_td = create("td");
+            inner_td.appendChild(create("input", {
                 type: "number",
                 step: "any",
                 value: that.json[i].longitude || 0,
                 required: "required"
-            });
-            addNumericChangeHandler(input, function (event, value) {
+            }, makeNumberHandler(function (event, value) {
                 that.json[i].longitude = value || 0;
                 onchange();
-            });
-            inner_td.appendChild(input);
+            })));
             inner_tr.appendChild(inner_td);
             inner_table.appendChild(inner_tr);
             
             // "Remove" button
-            inner_tr = c("tr");
-            inner_td = c("td", {
+            inner_tr = create("tr");
+            inner_td = create("td", {
                 colspan: "2"
             });
             inner_td.style.textAlign = "center";
-            inner_td.appendChild(c("button", {
+            inner_td.appendChild(create("button", {
                 text: "Remove Point"
             }, function (event) {
                 that.json[i] = undefined;
@@ -649,22 +641,22 @@ AUTHOR.JSON = {
         for (var i = 0; i < this.json.length; i++) {
             //if (!this.json[i]) this.json[i] = {latitude: 0, longitude: 0};
             if (this.json[i]) {
-                td = c("td");
+                td = create("td");
                 td.appendChild(makeInnerTable(i));
                 tr.appendChild(td);
             }
         }
         
         // Add "Add Point" button
-        var button = c("button", {
+        var button = create("button", {
             text: "Add Point"
         }, function (event) {
-            var new_td = c("td");
+            var new_td = create("td");
             new_td.appendChild(makeInnerTable(that.json.push({latitude: 0, longitude: 0}) - 1));
             onchange();
             tr.insertBefore(new_td, td);
         });
-        td = c("td");
+        td = create("td");
         td.style.verticalAlign = "middle";
         td.appendChild(button);
         tr.appendChild(td);
@@ -790,18 +782,16 @@ AUTHOR.JSON = {
         onchange();
         
         var that = this,
-            div = c("div", {className: "action-item"}),
-            table = c("table", {className: "noborder"}),
-            tr, td, input, select,
-            id, i, j;
+            div = create("div", {className: "action-item"}),
+            table = create("table", {className: "noborder"});
         
-        div.appendChild(c("label", {
+        div.appendChild(create("label", {
             text: this.label + ": ",
             className: "action-label"
         }));
         
         if (this.description) {
-            div.appendChild(c("div", {
+            div.appendChild(create("div", {
                 className: "action-description",
                 text: this.description
             }));
@@ -809,9 +799,9 @@ AUTHOR.JSON = {
         
         var pre = "";
         var rows = [];
-        var columns, prop;
-        for (i = 0; i < this.properties.length; i++) {
-            prop = this.properties[i][0];
+        var columns;
+        this.properties.forEach(function (property) {
+            var prop = property[0];
             
             if (pre != prop.substring(0, 3)) {
                 // Make a new row
@@ -820,76 +810,72 @@ AUTHOR.JSON = {
                 pre = prop.substring(0, 3);
             }
             
-            id = "id_" + randID();
-            td = c("td");
-            td.appendChild(c("label", {
+            var id = "id_" + randID();
+            var td = create("td");
+            td.appendChild(create("label", {
                 "for": id,
-                text: this.properties[i][1] + ": "
+                text: property[1] + ": "
             }));
             columns.push(td);
             
-            td = c("td");
-            if (this.possibilities[prop] == "number") {
+            td = create("td");
+            if (that.possibilities[prop] == "number") {
                 // It must be a positive integer
-                input = c("input", {
+                td.appendChild(create("input", {
                     id: id,
                     type: "number",
-                    value: this.json[prop],
+                    value: that.json[prop],
                     min: 1,
                     step: 1
-                });
-                addNumericChangeHandler(input, (function (that, prop) {
-                    return function (event, value) {
-                        that.json[prop] = value || 1;
-                        onchange();
-                    };
-                })(this, prop), 1);
-                td.appendChild(input);
-            } else if (this.possibilities[prop] == "color") {
+                }, makeNumberHandler([1], function (event, value) {
+                    that.json[prop] = value || 1;
+                    onchange();
+                })));
+            } else if (that.possibilities[prop] == "color") {
                 // It must be a color
-                input = c("input", {
+                var colorInput = create("input", {
                     id: id,
                     type: "color",
-                    //value: rgbToHex(this.json[prop]),
+                    //value: rgbToHex(that.json[prop]),
                     // (above doesn't do it for chrome)
                     size: "7",
                     maxlength: "7"
-                }, function (event, that, prop) {
+                }, function (event) {
                     that.json[prop] = hexToRgb(this.value).concat(that.json[prop][3]);
-                }, this, prop);
-                td.appendChild(input);
-                input.value = rgbToHex(this.json[prop]);
+                });
+                td.appendChild(colorInput);
+                colorInput.value = rgbToHex(that.json[prop]);
             } else {
                 // It must be a select option
-                select = c("select", {
+                var select = create("select", {
                     id: id
-                }, function (event, that, prop) {
+                }, function (event) {
                     that.json[prop] = this.value;
                 });
-                for (j = 0; j < this.possibilities[prop].length; j++) {
-                    select.appendChild(c("option", {
-                        value: this.possibilities[prop][j][0],
-                        text: this.possibilities[prop][j][1],
-                        selected: this.json[prop] == this.possibilities[prop][j][0] ? "selected" : undefined
+                for (var i = 0; i < that.possibilities[prop].length; i++) {
+                    select.appendChild(create("option", {
+                        value: that.possibilities[prop][i][0],
+                        text: that.possibilities[prop][i][1],
+                        selected: that.json[prop] == that.possibilities[prop][i][0] ? "selected" : undefined
                     }));
                 }
                 td.appendChild(select);
             }
             columns.push(td);
             // Spacing
-            columns.push(c("td"));
-        }
+            columns.push(create("td"));
+        });
         // Finish up the last row
         rows.push(columns);
         
         // Add table contents
-        for (i = 0; i < rows.length; i++) {
-            tr = c("tr");
-            for (j = 0; j < rows[i].length; j++) {
-                tr.appendChild(rows[i][j]);
+        rows.forEach(function (row) {
+            var tr = create("tr");
+            for (var i = 0; i < row.length; i++) {
+                tr.appendChild(row[i]);
             }
             table.appendChild(tr);
-        }
+        });
         div.appendChild(table);
         
         return div;
@@ -935,14 +921,14 @@ AUTHOR.JSON = {
             },
             
             toHTML: function (data) {
-                var span = c("span");
-                span.appendChild(c("b", {
+                var span = create("span");
+                span.appendChild(create("b", {
                     text: this.name + ": "
                 }));
                 for (var i = 0; i < data.length; i++) {
                     if (data[i]) {
-                        span.appendChild(c("br"));
-                        span.appendChild(c("span", {
+                        span.appendChild(create("br"));
+                        span.appendChild(create("span", {
                             html: AUTHOR.JSON_CONTENT.contentTypes[data[i].type || AUTHOR.JSON_CONTENT.DEFAULT_CONTENT_TYPE].toHTML(data[i])
                         }));
                     }
@@ -961,7 +947,7 @@ AUTHOR.JSON = {
             },
             
             toHTML: function (data) {
-                return c("span", {
+                return create("span", {
                     text: this.name
                 }).innerHTML;
             }
@@ -980,11 +966,11 @@ AUTHOR.JSON = {
             },
             
             toHTML: function (data) {
-                var span = c("span");
-                span.appendChild(c("b", {
+                var span = create("span");
+                span.appendChild(create("b", {
                     text: this.name + ": "
                 }));
-                span.appendChild(c("span", {
+                span.appendChild(create("span", {
                     text: data[0]
                 }));
                 return span.innerHTML;
@@ -1019,8 +1005,8 @@ AUTHOR.JSON = {
                 },
                 
                 toHTML: function (data) {
-                    var span = c("span");
-                    span.appendChild(c("b", {
+                    var span = create("span");
+                    span.appendChild(create("b", {
                         text: "ArcGIS: " + this.name
                     }));
                     return span.innerHTML;
@@ -1053,13 +1039,13 @@ AUTHOR.JSON = {
                 },
                 
                 toHTML: function (data) {
-                    var span = c("span");
-                    span.appendChild(c("b", {
+                    var span = create("span");
+                    span.appendChild(create("b", {
                         text: "ArcGIS: " + this.name + ": "
                     }));
                     for (var i = 0; i < data.length; i++) {
-                        span.appendChild(c("br"));
-                        span.appendChild(c("span", {
+                        span.appendChild(create("br"));
+                        span.appendChild(create("span", {
                             text: data[i].name +
                                   (data[i].group ? " (" + data[i].group + ")" : "") +
                                   ": " + data[i].urls.join(", ")
@@ -1094,13 +1080,13 @@ AUTHOR.JSON = {
                 },
                 
                 toHTML: function (data) {
-                    var span = c("span");
-                    span.appendChild(c("b", {
+                    var span = create("span");
+                    span.appendChild(create("b", {
                         text: "ArcGIS: " + this.name + ": "
                     }));
                     for (var i = 0; i < data.length; i++) {
-                        span.appendChild(c("br"));
-                        span.appendChild(c("span", {
+                        span.appendChild(create("br"));
+                        span.appendChild(create("span", {
                             text: data[i]
                         }));
                     }
@@ -1160,14 +1146,14 @@ AUTHOR.JSON = {
                 },
                 
                 toHTML: function (data) {
-                    var span = c("span");
-                    span.appendChild(c("b", {
+                    var span = create("span");
+                    span.appendChild(create("b", {
                         text: "ArcGIS: " + this.name + ": "
                     }));
-                    span.appendChild(c("span", {
+                    span.appendChild(create("span", {
                         text: (this.drawTypes[data[1]] || data[1]) + " "
                     }));
-                    span.appendChild(c("i", {
+                    span.appendChild(create("i", {
                         text: "(" + data[0] + ")"
                     }));
                     return span.innerHTML;
@@ -1217,14 +1203,14 @@ AUTHOR.JSON = {
                 },
                 
                 toHTML: function (data) {
-                    var span = c("span");
-                    span.appendChild(c("b", {
+                    var span = create("span");
+                    span.appendChild(create("b", {
                         text: "ArcGIS: " + this.name + ": "
                     }));
-                    span.appendChild(c("span", {
+                    span.appendChild(create("span", {
                         text: data[0] + " " + (this.distanceUnits[data[1]] || data[1]) + " "
                     }));
-                    span.appendChild(c("i", {
+                    span.appendChild(create("i", {
                         text: "(" + data[2] + ")"
                     }));
                     return span.innerHTML;
@@ -1260,7 +1246,7 @@ AUTHOR.JSON = {
                 },
                 
                 toHTML: function (data) {
-                    var span = c("span", {
+                    var span = create("span", {
                         text: data
                     });
                     return span.innerHTML;
@@ -1283,7 +1269,7 @@ AUTHOR.JSON = {
                 },
                 
                 toHTML: function (data) {
-                    var span = c("span", {
+                    var span = create("span", {
                         text: data.map(function (item) {
                             return item && item.name;
                         }).join(", ")

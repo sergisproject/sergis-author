@@ -124,22 +124,22 @@ AUTHOR.GAMES = {
     function createGame() {
         overlay("overlay_loading");
         // Hide any old error messages
-        document.getElementById("overlay_games_create_invalid").style.display = "none";
-        document.getElementById("overlay_games_create_taken").style.display = "none";
+        byId("overlay_games_create_invalid").style.display = "none";
+        byId("overlay_games_create_taken").style.display = "none";
         // Check the game name
-        var gameName = document.getElementById("overlay_games_create_name").value;
+        var gameName = byId("overlay_games_create_name").value;
         AUTHOR.BACKEND.checkGameName(gameName).then(function (status) {
             if (status == -1) {
                 // Game name is invalid
-                document.getElementById("overlay_games_create_invalid").style.display = "block";
+                byId("overlay_games_create_invalid").style.display = "block";
                 overlay("overlay_games");
             } else if (status === 0) {
                 // Game name is taken
-                document.getElementById("overlay_games_create_taken").style.display = "block";
+                byId("overlay_games_create_taken").style.display = "block";
                 overlay("overlay_games");
             } else {
                 // All good!
-                document.getElementById("project_title").textContent = gameName;
+                byId("project_title").textContent = gameName;
                 game.name = gameName;
                 game.jsondata = {};
                 // Make our JSON defaults and generate the default table
@@ -147,7 +147,7 @@ AUTHOR.GAMES = {
                 // Hide all overlays
                 overlay();
                 // Show the instructions
-                document.getElementById("instructions").style.display = "block";
+                byId("instructions").style.display = "block";
             }
         }).catch(makeCatch(_("Error checking game name")));
     }
@@ -159,7 +159,7 @@ AUTHOR.GAMES = {
      */
     function loadGame(gameName) {
         AUTHOR.BACKEND.loadGame(gameName).then(function (jsondata) {
-            document.getElementById("project_title").textContent = gameName;
+            byId("project_title").textContent = gameName;
             game.name = gameName;
             game.jsondata = jsondata;
             // Check the new JSON, generate the table, and set other inputs
@@ -167,7 +167,7 @@ AUTHOR.GAMES = {
             // Hide any overlay
             overlay();
             // The user is experienced; hide the instructions
-            document.getElementById("instructions").style.display = "none";
+            byId("instructions").style.display = "none";
         }).catch(makeCatch(_("Error loading game {0}", gameName)));
     }
     
@@ -196,7 +196,7 @@ AUTHOR.GAMES = {
                     if (gameName) {
                         // Yay, we have a game name!
                         // Update our current game data
-                        document.getElementById("project_title").textContent = gameName;
+                        byId("project_title").textContent = gameName;
                         game.name = gameName;
                         game.jsondata = jsondata;
                         // Check the new JSON, generate the table, and set other inputs
@@ -204,7 +204,7 @@ AUTHOR.GAMES = {
                         // Hide all overlays
                         overlay();
                         // The user is a natural; hide the instructions
-                        document.getElementById("instructions").style.display = "none";
+                        byId("instructions").style.display = "none";
                     } else {
                         // No game :(
                         // Just go back to Create Game overlay
@@ -265,7 +265,7 @@ AUTHOR.GAMES = {
      */
     function updateGameList() {
         return AUTHOR.BACKEND.getGameList().then(function (gameList) {
-            var container = document.getElementById("overlay_games_open_gamescontainer");
+            var container = byId("overlay_games_open_gamescontainer");
             while (container.lastChild) {
                 container.removeChild(container.lastChild);
             }
@@ -273,11 +273,11 @@ AUTHOR.GAMES = {
             Object.keys(gameList).sort(function (a, b) {
                 return (new Date(gameList[b])).getTime() - (new Date(gameList[a])).getTime();
             }).forEach(function (gameName) {
-                var tr = c("tr");
+                var tr = create("tr");
                 var td, a;
                 
                 // Make button to load game (with game name)
-                a = c("a", {
+                a = create("a", {
                     href: "#",
                     text: gameName
                 }, function (event) {
@@ -287,37 +287,37 @@ AUTHOR.GAMES = {
                     // Load the game
                     loadGame(gameName);
                 });
-                td = c("td");
+                td = create("td");
                 td.appendChild(a);
                 tr.appendChild(td);
                 
                 // Make "Last Modified" cell
-                td = c("td", {
+                td = create("td", {
                     text: representDate(new Date(gameList[gameName]))
                 });
                 tr.appendChild(td);
                 
                 // Make "Rename" button
-                a = c("a", {
+                a = create("a", {
                     href: "#",
                     text: _("Rename")
                 }, function (event) {
                     event.preventDefault();
                     renameGame(gameName);
                 });
-                td = c("td");
+                td = create("td");
                 td.appendChild(a);
                 tr.appendChild(td);
                 
                 // Make "Delete" button
-                a = c("a", {
+                a = create("a", {
                     href: "#",
                     text: _("Delete")
                 }, function (event) {
                     event.preventDefault();
                     deleteGame(gameName);
                 });
-                td = c("td");
+                td = create("td");
                 td.appendChild(a);
                 tr.appendChild(td);
                 
@@ -384,13 +384,13 @@ AUTHOR.GAMES = {
      */
     function switchTab(tabName) {
         // Hide any old error messages
-        document.getElementById("overlay_games_create_invalid").style.display = "none";
-        document.getElementById("overlay_games_create_taken").style.display = "none";
+        byId("overlay_games_create_invalid").style.display = "none";
+        byId("overlay_games_create_taken").style.display = "none";
         // "Deselect" all the tabs except ours and hide all content except
         // the one for the new tab
         TAB_NAMES.forEach(function (curTabName) {
             // Check tab
-            var elem = document.getElementById("overlay_games_tab_" + curTabName);
+            var elem = byId("overlay_games_tab_" + curTabName);
             if (curTabName == tabName) {
                 // Add "selected"
                 elem.className += " selected";
@@ -400,7 +400,7 @@ AUTHOR.GAMES = {
             }
             
             // Check content divs
-            elem = document.getElementById("overlay_games_" + curTabName);
+            elem = byId("overlay_games_" + curTabName);
             elem.style.display = curTabName == tabName ? "block" : "none";
         });
     }
@@ -411,44 +411,44 @@ AUTHOR.GAMES = {
     function initGames() {
         // Set up tabs for create/open overlay
         TAB_NAMES.forEach(function (tabName) {
-            document.getElementById("overlay_games_tab_" + tabName).addEventListener("click", function (event) {
+            byId("overlay_games_tab_" + tabName).addEventListener("click", function (event) {
                 event.preventDefault();
                 switchTab(tabName);
             }, false);
         });
         
         // Handler for "Create Game" form
-        document.getElementById("overlay_games_create_form").addEventListener("submit", function (event) {
+        byId("overlay_games_create_form").addEventListener("submit", function (event) {
             event.preventDefault();
             createGame();
         }, false);
         
         // Handler for "Import Game" (if supported)
         if (typeof window.askForFile == "function") {
-            document.getElementById("overlay_games_import_open").addEventListener("click", function (event) {
+            byId("overlay_games_import_open").addEventListener("click", function (event) {
                 event.preventDefault();
                 importGame();
             }, false);
         } else {
             // Permanently disable "Import" tab
             TAB_NAMES.splice(TAB_NAMES.indexOf("import"), 1);
-            document.getElementById("overlay_games_tab_import").style.display = "none";
+            byId("overlay_games_tab_import").style.display = "none";
         }
         
         // Handler for "Cancel" button
-        document.getElementById("overlay_games_cancel").addEventListener("click", function (event) {
+        byId("overlay_games_cancel").addEventListener("click", function (event) {
             event.preventDefault();
             overlay();
         }, false);
         
         // Handler for "Create/Open" toolbar button
-        document.getElementById("toolbar_open").addEventListener("click", function (event) {
+        byId("toolbar_open").addEventListener("click", function (event) {
             event.preventDefault();
             overlay("overlay_loading");
             updateGameList().then(function () {
                 // Make sure the Cancel button is visible
                 // (it's hidden by default so that when we first start the user has to create or open something)
-                document.getElementById("overlay_games_buttons").style.display = "block";
+                byId("overlay_games_buttons").style.display = "block";
                 // Show the Create/Open overlay
                 overlay("overlay_games");
             }).catch(makeCatch(_("Error loading game list")));

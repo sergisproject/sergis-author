@@ -62,12 +62,10 @@ AUTHOR.MAP_PROPERTIES_EDITOR = {
      * @param {string} frontendInfoName - The name of this specific property.
      */
     function makeProperty(fields, container, frontendName, frontendInfoName) {
-        var isArray = (typeof Array.isArray == "function") ? Array.isArray
-                      : function (arr) { return typeof arr.length == "number"; };
         var frontendBase = game.jsondata.promptList[editor_state.promptIndex].prompt.map.frontendInfo[frontendName];
         
         fields = fields.getFields(frontendBase[frontendInfoName]);
-        if (!isArray(fields)) {
+        if (!Array.isArray(fields)) {
             // Let's assume that it's not an array
             var field = fields;
             container.appendChild(field.getElement(function () {
@@ -78,25 +76,22 @@ AUTHOR.MAP_PROPERTIES_EDITOR = {
             if (!frontendBase[frontendInfoName]) frontendBase[frontendInfoName] = [];
             if (frontendBase[frontendInfoName].length === 0) frontendBase[frontendInfoName].push(null);
             
-            for (var i = 0; i < fields.length; i++) {
-                if (fields[i] == "repeat") continue;
-                (function (i) {
-                    container.appendChild(fields[i].getElement(function () {
-                        frontendBase[frontendInfoName][i] = fields[i].getJSONValue();
-                    }));
-                })(i);
-            }
+            fields.forEach(function (field, index) {
+                if (field == "repeat") return;
+                container.appendChild(field.getElement(function () {
+                    frontendBase[frontendInfoName][index] = field.getJSONValue();
+                }));
+            });
 
             // If we ended in a repeatable field, take care of that
             if (fields.length && fields[fields.length - 1] == "repeat") {
-                var p = c("p");
-                p.appendChild(c("button", {
+                // Create a <p> with a <button> inside
+                container.appendChild(create("p").create("button", {
                     text: "Add More..."
                 }, function (event) {
                     frontendBase[frontendInfoName].push(null);
                     updateMapPropertiesEditor();
                 }));
-                container.appendChild(p);
             }
         }
     }
@@ -112,50 +107,64 @@ AUTHOR.MAP_PROPERTIES_EDITOR = {
      */
     function makeButtonProperty(buttonInfo, tbody, frontendName) {
         var id = "id_" + randID();
-        var tr = c("tr"),
-            td;
+        var tr = create("tr");
         
-        td = c("td");
-        td.appendChild(c("label", {
+        // Make label column
+        tr.appendChild(create("td").create("label", {
             "for": id,
             text: buttonInfo.label,
             title: buttonInfo.tooltip || undefined
         }));
-        tr.appendChild(td);
         
         var buttonsObj = game.jsondata.promptList[editor_state.promptIndex].prompt.buttons[frontendName];
         if (!buttonsObj[buttonInfo.id]) {
             buttonsObj[buttonInfo.id] = {};
         }
         
-        var select = c("select", {
+        // Make select dropdown
+        var select = create("select", {
             id: id,
             title: buttonInfo.tooltip || undefined
         }, function (event) {
-            buttonsObj[buttonInfo.id] = {
-                disabled: this.value == "disabled",
-                hidden: this.value == "hidden"
-            };
+            var isUndefined = !this.value;
+            if (!this.value) {
+                // They both need to be undefined
+                buttonsObj[buttonInfo.id].disabled = undefined;
+                buttonsObj[buttonInfo.id].hidden = undefined;
+            } else {
+                // Set "disabled" and "hidden"
+                buttonsObj[buttonInfo.id].disabled = this.value == "disabled";
+                buttonsObj[buttonInfo.id].hidden = this.value == "hidden";
+            }
         });
-        select.appendChild(c("option", {
+        
+        // Create the options for the select
+        var curDisabled = buttonsObj[buttonInfo.id].disabled,
+            curHidden   = buttonsObj[buttonInfo.id].hidden,
+            curUndefined = curDisabled === undefined && curHidden === undefined;
+        select.appendChild(create("option", {
             value: "",
-            text: "Enabled",
-            selected: (!buttonsObj[buttonInfo.id].disabled && !buttonsObj[buttonInfo.id].hidden) ? "selected" : undefined
+            text: "Same as previous prompt",
+            selected: curUndefined ? "selected" : undefined
         }));
-        select.appendChild(c("option", {
+        select.appendChild(create("option", {
+            value: "enabled",
+            text: "Enabled",
+            selected: (!curUndefined && !curDisabled && !curHidden) ? "selected" : undefined
+        }));
+        select.appendChild(create("option", {
             value: "disabled",
             text: "Disabled",
-            selected: buttonsObj[buttonInfo.id].disabled ? "selected" : undefined
+            selected: curDisabled ? "selected" : undefined
         }));
-        select.appendChild(c("option", {
+        select.appendChild(create("option", {
             value: "hidden",
             text: "Disabled and Hidden",
-            selected: buttonsObj[buttonInfo.id].hidden ? "selected" : undefined
+            selected: curHidden ? "selected" : undefined
         }));
         
-        td = c("td");
-        td.appendChild(select);
-        tr.appendChild(td);
+        // Add select in another table column
+        tr.appendChild(create("td", [select]));
         tbody.appendChild(tr);
     }
     
@@ -164,7 +173,7 @@ AUTHOR.MAP_PROPERTIES_EDITOR = {
      */
     function updateMapPropertiesEditor() {
         // Remove the old fields
-        var container = document.getElementById("overlay_editMapProperties_contentContainer");
+        var container = byId("overlay_editMapProperties_contentContainer");
         container.innerHTML = "";
         
         var localFrontendName, frontendInfoName, i, bigdiv, div, littlediv, table, tbody;
@@ -176,17 +185,17 @@ AUTHOR.MAP_PROPERTIES_EDITOR = {
                 localFrontendName = AUTHOR.JSON.frontendNames[frontendName] || frontendName;
                 
                 // Make a title for the frontend
-                container.appendChild(c("h3", {
+                container.appendChild(create("h3", {
                     text: localFrontendName
                 }));
                 
                 // Make a container for this frontend's stuff
-                bigdiv = c("div", {
+                bigdiv = create("div", {
                     className: "columns"
                 });
                 
                 // Make the frontend info fields
-                div = c("div", {
+                div = create("div", {
                     className: "column-left"
                 });
                 for (frontendInfoName in AUTHOR.JSON.frontendInfo[frontendName]) {
@@ -200,38 +209,36 @@ AUTHOR.MAP_PROPERTIES_EDITOR = {
                 // Make the button visibility fields (if applicable)
                 if (AUTHOR.JSON.frontendButtons.hasOwnProperty(frontendName) &&
                     AUTHOR.JSON.frontendButtons[frontendName].length) {
-                    littlediv = c("div", {
-                        className: "box"
-                    });
-                    
-                    littlediv.appendChild(c("h4", {
-                        text: _("Toolbar Buttons")
-                    }));
-                    
-                    tbody = c("tbody");
+                    tbody = create("tbody");
                     for (i = 0; i < AUTHOR.JSON.frontendButtons[frontendName].length; i++) {
                         makeButtonProperty(AUTHOR.JSON.frontendButtons[frontendName][i], tbody,
                                            frontendName);
                     }
-                    table = c("table", {
-                        className: "noborder"
-                    });
-                    table.appendChild(tbody);
-                    littlediv.appendChild(table);
                     
-                    div = c("div", {
+                    // div.column-right > div.box > (h4,table.noborder)
+                    bigdiv.appendChild(create("div", {
                         className: "column-right"
-                    });
-                    div.appendChild(littlediv);
-                    
-                    bigdiv.appendChild(div);
+                    }).create("div", {
+                        className: "box"
+                    }, [// Children...
+
+                        // Title
+                        create("h4", {
+                            text: _("Toolbar Buttons")
+                        }),
+
+                        // Table
+                        create("table", {
+                            className: "noborder"
+                        }, [tbody])
+                    ]));
                 }
                 
                 // Append the stuff for this frontend to the overall container
                 container.appendChild(bigdiv);
                 
                 // Make a divider
-                container.appendChild(c("hr"));
+                container.appendChild(create("hr"));
             }
         }
     }
@@ -241,13 +248,13 @@ AUTHOR.MAP_PROPERTIES_EDITOR = {
      */
     function initMapPropertiesEditor() {
         // Set up Reset button
-        document.getElementById("overlay_editMapProperties_reset").addEventListener("click", function (event) {
+        byId("overlay_editMapProperties_reset").addEventListener("click", function (event) {
             event.preventDefault();
             resetEditor();
         }, false);
         
         // Set up Close button
-        document.getElementById("overlay_editMapProperties_close").addEventListener("click", function (event) {
+        byId("overlay_editMapProperties_close").addEventListener("click", function (event) {
             event.preventDefault();
             closeEditor();
         }, false);

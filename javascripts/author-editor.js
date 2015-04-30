@@ -41,15 +41,14 @@ AUTHOR.EDITOR = {
      *        the "overlay_editor_title" at the front, but doesn't have to.)
      */
     function editorTitle(title) {
-        var elems = document.getElementsByClassName("overlay_editor_title"), id;
-        for (var i = 0; i < elems.length; i++) {
-            id = elems[i].getAttribute("id");
+        forClass("overlay_editor_title", function (elem) {
+            var id = elem.getAttribute("id");
             if (id == title || id.substring(id.lastIndexOf("_") + 1) == title) {
-                elems[i].style.display = "block";
+                elem.style.display = "block";
             } else {
-                elems[i].style.display = "none";
+                elem.style.display = "none";
             }
-        }
+        });
     }
 
     /**
@@ -127,39 +126,40 @@ AUTHOR.EDITOR = {
      * editor_state.content_json.type.
      */
     function updateContentEditor() {
-        var select = document.getElementById("overlay_editor_contentType");
+        var select = byId("overlay_editor_contentType");
         
         // Make sure the proper option in `select` is selected
         if (AUTHOR.JSON_CONTENT.contentTypes.hasOwnProperty(editor_state.content_json.type)) {
-            document.getElementById("overlay_editor_contentType").value = editor_state.content_json.type;
+            select.value = editor_state.content_json.type;
         } else {
-            document.getElementById("overlay_editor_contentType").selectedIndex = 0;
+            select.selectedIndex = 0;
             editor_state.content_json.type = select.value;
         }
         
         // Remove the old fields
-        var container = document.getElementById("overlay_editor_contentContainer");
+        var container = byId("overlay_editor_contentContainer");
         container.innerHTML = "";
         
         // Make the fields for this content type (based on AUTHOR.JSON_CONTENT.contentTypes)
         var fields = AUTHOR.JSON_CONTENT.contentTypes[select.value].fields;
-        var property, name, type, value, data;
-        var p, id, inner_container;
         if (!editor_state.content_json._sergis_author_data) editor_state.content_json._sergis_author_data = {};
-        for (var i = 0; i < fields.length; i++) {
+        fields.forEach(function (field) {
             // Shortcuts for the 4 elements in the array
-            property = fields[i][0];
-            name = fields[i][1];
-            type = fields[i][2];
-            value = typeof editor_state.content_json[property] != "undefined" ? editor_state.content_json[property] : fields[i][3];
-            if (!editor_state.content_json._sergis_author_data[property]) editor_state.content_json._sergis_author_data[property] = {};
-            data = editor_state.content_json._sergis_author_data[property];
+            var property = field[0];
+            var name = field[1];
+            var type = field[2];
+            var value = typeof editor_state.content_json[property] != "undefined" ? editor_state.content_json[property] : field[3];
+            
+            if (!editor_state.content_json._sergis_author_data[property]) {
+                editor_state.content_json._sergis_author_data[property] = {};
+            }
+            var data = editor_state.content_json._sergis_author_data[property];
             
             // Create the field editor based on its type
             container.appendChild(AUTHOR.JSON_CONTENT.fieldTypes[type].makeEditor(property, name, value, data, function (property, value) {
                 editor_state.content_json[property] = value;
             }));
-        }
+        });
     }
 
     /**
@@ -167,12 +167,13 @@ AUTHOR.EDITOR = {
      */
     function initEditor() {
         // Set up Content Type switcher
-        var select = document.getElementById("overlay_editor_contentType");
+        var select = byId("overlay_editor_contentType");
+        
         // Make sure default content type is first
         var defaultContentType;
         if (AUTHOR.JSON_CONTENT.DEFAULT_CONTENT_TYPE && AUTHOR.JSON_CONTENT.contentTypes.hasOwnProperty(AUTHOR.JSON_CONTENT.DEFAULT_CONTENT_TYPE)) {
             defaultContentType = AUTHOR.JSON_CONTENT.DEFAULT_CONTENT_TYPE;
-            select.appendChild(c("option", {
+            select.appendChild(create("option", {
                 value: defaultContentType,
                 text: AUTHOR.JSON_CONTENT.contentTypes[defaultContentType].name
             }));
@@ -180,7 +181,7 @@ AUTHOR.EDITOR = {
         // Add the rest of the content types
         for (var type in AUTHOR.JSON_CONTENT.contentTypes) {
             if (AUTHOR.JSON_CONTENT.contentTypes.hasOwnProperty(type) && type != defaultContentType) {
-                select.appendChild(c("option", {
+                select.appendChild(create("option", {
                     value: type,
                     text: AUTHOR.JSON_CONTENT.contentTypes[type].name
                 }));
@@ -197,13 +198,13 @@ AUTHOR.EDITOR = {
         updateContentEditor();
         
         // Set up Cancel button
-        document.getElementById("overlay_editor_cancel").addEventListener("click", function (event) {
+        byId("overlay_editor_cancel").addEventListener("click", function (event) {
             event.preventDefault();
             closeEditor();
         }, false);
         
         // Set up Save button
-        document.getElementById("overlay_editor_save").addEventListener("click", function (event) {
+        byId("overlay_editor_save").addEventListener("click", function (event) {
             event.preventDefault();
             saveEditor();
         }, false);

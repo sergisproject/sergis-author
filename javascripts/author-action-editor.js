@@ -42,15 +42,14 @@ AUTHOR.ACTION_EDITOR = {
      *        the "overlay_actionEditor_title" at the front, but not required.)
      */
     function editorTitle(title) {
-        var elems = document.getElementsByClassName("overlay_actionEditor_title"), id;
-        for (var i = 0; i < elems.length; i++) {
-            id = elems[i].getAttribute("id");
+        forClass("overlay_actionEditor_title", function (elem) {
+            var id = elem.getAttribute("id");
             if (id == title || id.substring(id.lastIndexOf("_") + 1) == title) {
-                elems[i].style.display = "block";
+                elem.style.display = "block";
             } else {
-                elems[i].style.display = "none";
+                elem.style.display = "none";
             }
-        }
+        });
     }
     
     /**
@@ -84,7 +83,7 @@ AUTHOR.ACTION_EDITOR = {
      */
     function saveEditor() {
         // Check validation
-        var form = document.getElementById("overlay_actionEditor_contentContainer");
+        var form = byId("overlay_actionEditor_contentContainer");
         if (form && typeof form.reportValidity == "function") {
             if (!form.reportValidity()) {
                 return;
@@ -112,7 +111,7 @@ AUTHOR.ACTION_EDITOR = {
      * editor_state.action_json.name.
      */
     function updateActionEditor() {
-        var select = document.getElementById("overlay_actionEditor_name");
+        var select = byId("overlay_actionEditor_name");
         var data;
         
         // Make sure the proper option in `select` is selected
@@ -141,30 +140,28 @@ AUTHOR.ACTION_EDITOR = {
         }
         
         // Set the description
-        document.getElementById("overlay_actionEditor_description").innerHTML = "";
+        byId("overlay_actionEditor_description").innerHTML = "";
         if (actionsDataList[data.name].description) {
-            document.getElementById("overlay_actionEditor_description").appendChild(document.createTextNode(actionsDataList[data.name].description));
+            byId("overlay_actionEditor_description").appendChild(document.createTextNode(actionsDataList[data.name].description));
         }
         
         // Remove the old fields
-        var container = document.getElementById("overlay_actionEditor_contentContainer");
+        var container = byId("overlay_actionEditor_contentContainer");
         container.innerHTML = "";
         
         // Make the fields for this action name (and possibly frontend)
         var fields = actionsDataList[data.name].getFields(editor_state.action_json.data);
-        for (var i = 0; i < fields.length; i++) {
-            if (fields[i] == "repeat") continue;
-            (function (i) {
-                container.appendChild(fields[i].getElement(function () {
-                    editor_state.action_json.data[i] = fields[i].getJSONValue();
-                }));
-            })(i);
-        }
+        fields.forEach(function (field, index) {
+            if (field == "repeat") return;
+            container.appendChild(field.getElement(function () {
+                editor_state.action_json.data[index] = field.getJSONValue();
+            }));
+        });
         
         // If we ended in a repeatable field, take care of that
         if (fields.length && fields[fields.length - 1] == "repeat") {
-            var p = c("p");
-            p.appendChild(c("button", {
+            var p = create("p");
+            p.appendChild(create("button", {
                 text: "Add More..."
             }, function (event) {
                 editor_state.action_json.data.push(null);
@@ -179,11 +176,11 @@ AUTHOR.ACTION_EDITOR = {
      */
     function initActionEditor() {
         // Set up the Action Name switcher
-        var select = document.getElementById("overlay_actionEditor_name");
+        var select = byId("overlay_actionEditor_name");
         
         for (var actionName in AUTHOR.JSON.actions) {
             if (AUTHOR.JSON.actions.hasOwnProperty(actionName)) {
-                select.appendChild(c("option", {
+                select.appendChild(create("option", {
                     value: JSON.stringify({name: actionName, frontend: null}),
                     text: AUTHOR.JSON.actions[actionName].name
                 }));
@@ -194,7 +191,7 @@ AUTHOR.ACTION_EDITOR = {
             if (AUTHOR.JSON.actionsByFrontend.hasOwnProperty(frontendName)) {
                 for (actionName in AUTHOR.JSON.actionsByFrontend[frontendName]) {
                     if (AUTHOR.JSON.actionsByFrontend[frontendName].hasOwnProperty(actionName)) {
-                        select.appendChild(c("option", {
+                        select.appendChild(create("option", {
                             value: JSON.stringify({name: actionName, frontend: frontendName}),
                             text: (AUTHOR.JSON.frontendNames[frontendName] || frontendName) +
                                   ": " + AUTHOR.JSON.actionsByFrontend[frontendName][actionName].name
@@ -217,18 +214,18 @@ AUTHOR.ACTION_EDITOR = {
         updateActionEditor();
         
         // Set up form to not submit
-        document.getElementById("overlay_actionEditor_contentContainer").addEventListener("submit", function (event) {
+        byId("overlay_actionEditor_contentContainer").addEventListener("submit", function (event) {
             event.preventDefault();
         }, false);
         
         // Set up Cancel button
-        document.getElementById("overlay_actionEditor_cancel").addEventListener("click", function (event) {
+        byId("overlay_actionEditor_cancel").addEventListener("click", function (event) {
             event.preventDefault();
             closeEditor();
         }, false);
         
         // Set up Save button
-        document.getElementById("overlay_actionEditor_save").addEventListener("click", function (event) {
+        byId("overlay_actionEditor_save").addEventListener("click", function (event) {
             event.preventDefault();
             saveEditor();
         }, false);

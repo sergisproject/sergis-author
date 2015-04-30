@@ -136,7 +136,7 @@ code, span.box {
 }
 
 code.wide, span.box.wide {
-  max-width: 500px;
+  max-width: 535px;
 }
 
 span.box img {
@@ -214,11 +214,13 @@ code.short {
 .columns .column-left {
   display: table-cell;
   width: 100%;
+  vertical-align: top;
 }
 
 .columns .column-right {
   display: table-cell;
   white-space: nowrap;
+  vertical-align: top;
 }
 
 /*
@@ -371,7 +373,7 @@ h6 {
 }
 
 p {
-  font-size: 18px;
+  font-size: 17px;
   margin: 10px 0 15px 0;
 }
 
@@ -510,6 +512,7 @@ table {
   border: 1px solid #373737;
   margin-bottom: 20px;
   text-align: left;
+  font-size: 16px;
 }
 
 .marginLikeTable {
@@ -803,21 +806,23 @@ Small Device Styles
 *******************************************************************************/
 
 table button, table label, table input, table select, table .minirow, table .row, table li, .smaller {
-  font-size: 80%;
+  font-size: 90%;
 }
 
-@media screen and (max-width: 580px) {
+@media screen and (max-width: 900px) {
   .columns, .columns .column-left, .columns .column-right {
     display: block;
     white-space: normal;
   }
+}
 
+@media screen and (max-width: 580px) {
   table button, table label, table input, table select, table .minirow, table .row, table li {
     font-size: 100%;
   }
 
   body {
-    font-size:14px;
+    font-size: 14px;
   }
 
   .toolbar {
@@ -826,7 +831,7 @@ table button, table label, table input, table select, table .minirow, table .row
   }
 
   .linkbar {
-    display: none;
+    display: none !important;
   }
 
   .inner {

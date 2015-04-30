@@ -40,16 +40,16 @@ AUTHOR.JSON_CONTENT = {
                 // Propogate initial value
                 onchange(property, value);
                 
-                var p = c("p"),
+                var p = create("p"),
                     id = "id_" + randID();
-                p.appendChild(c("input", {
+                p.appendChild(create("input", {
                     id: id,
                     type: "checkbox",
                     checked: value ? "checked" : undefined
                 }, function (event) {
                     onchange(property, this.checked);
                 }));
-                p.appendChild(c("label", {
+                p.appendChild(create("label", {
                     "for": id,
                     text: " " + name
                 }));
@@ -65,23 +65,21 @@ AUTHOR.JSON_CONTENT = {
                 // Propogate initial value
                 onchange(property, value);
                 
-                var p = c("p"),
+                var p = create("p"),
                     input,
                     id = "id_" + randID();
-                p.appendChild(c("label", {
+                p.appendChild(create("label", {
                     "for": id,
                     text: name + " "
                 }));
-                input = c("input", {
+                p.appendChild(create("input", {
                     id: id,
                     type: "number",
                     step: "any",
                     value: value.toString()
-                });
-                addNumericChangeHandler(input, function (event, value) {
+                }, makeNumberHandler(function (event, value) {
                     onchange(property, value || 0);
-                });
-                p.appendChild(input);
+                })));
                 return p;
             }
         },
@@ -94,16 +92,16 @@ AUTHOR.JSON_CONTENT = {
                 // Propogate initial value
                 onchange(property, value);
                 
-                var p = c("p", {
+                var p = create("p", {
                     className: "inputcontainer"
                 });
                 var id = "id_" + randID();
-                p.appendChild(c("label", {
+                p.appendChild(create("label", {
                     "for": id,
                     text: name + " "
                 }));
-                var inner_container = c("span");
-                inner_container.appendChild(c("input", {
+                var inner_container = create("span");
+                inner_container.appendChild(create("input", {
                     id: id,
                     value: value
                 }, function (event) {
@@ -124,17 +122,17 @@ AUTHOR.JSON_CONTENT = {
                 // Propogate initial value
                 onchange(property, value);
                 
-                var p = c("p", {
+                var p = create("p", {
                     className: "inputcontainer"
                 });
                 var id = "id_" + randID();
-                p.appendChild(c("label", {
+                p.appendChild(create("label", {
                     "for": id,
                     text: name + " ",
                     title: descrip
                 }));
-                var inner_container = c("span");
-                inner_container.appendChild(c("input", {
+                var inner_container = create("span");
+                inner_container.appendChild(create("input", {
                     id: id,
                     value: value,
                     title: descrip
@@ -171,13 +169,13 @@ AUTHOR.JSON_CONTENT = {
                 // Propogate initial value
                 onchange(property, value);
                 
-                var p = c("p"),
+                var p = create("p"),
                     id = "id_" + randID();
-                p.appendChild(c("label", {
+                p.appendChild(create("label", {
                     "for": id,
                     text: name + " "
                 }));
-                p.appendChild(c("textarea", {
+                p.appendChild(create("textarea", {
                     id: id,
                     rows: 3,
                     text: value
@@ -196,16 +194,16 @@ AUTHOR.JSON_CONTENT = {
                 // Propogate initial value
                 onchange(property, value);
                 
-                var p = c("p", {
+                var p = create("p", {
                     className: "inputcontainer"
                 });
                 var id = "id_" + randID();
-                p.appendChild(c("label", {
+                p.appendChild(create("label", {
                     "for": id,
                     text: name + " "
                 }));
                 
-                var input = c("input", {
+                var input = create("input", {
                     id: id,
                     value: data.filename || value || "",
                     placeholder: "http://"
@@ -214,17 +212,17 @@ AUTHOR.JSON_CONTENT = {
                 });
                 if (data.filename) input.disabled = true;
                 
-                var inner_container = c("span");
+                var inner_container = create("span");
                 inner_container.appendChild(input);
                 p.appendChild(inner_container);
                 
                 // Make button container
-                inner_container = c("span");
+                inner_container = create("span");
                 inner_container.style.width = "1px";
                 inner_container.style.whiteSpace = "nowrap";
 
                 // Make clear button
-                var clearButton = c("button", {
+                var clearButton = create("button", {
                     text: _("Clear")
                 }, function (event) {
                     event.preventDefault();
@@ -240,7 +238,7 @@ AUTHOR.JSON_CONTENT = {
                 
                 if (window.askForFile) {
                     // Make browse button
-                    var browseButton = c("button", {
+                    var browseButton = create("button", {
                         text: _("Browse for file...")
                     }, function (event) {
                         event.preventDefault();
@@ -311,8 +309,8 @@ AUTHOR.JSON_CONTENT = {
                 ["style", _("CSS style:"), "string"]
             ],
             toHTML: function (content) {
-                var span = c("span");
-                span.appendChild(c("span", {
+                var span = create("span");
+                span.appendChild(create("span", {
                     text: content.value || "",
                     style: content.style || undefined
                 }));
@@ -327,8 +325,8 @@ AUTHOR.JSON_CONTENT = {
                 ["style", _("CSS style:"), "string"]
             ],
             toHTML: function (content) {
-                var span = c("span");
-                span.appendChild(c("span", {
+                var span = create("span");
+                span.appendChild(create("span", {
                     html: content.value || "",
                     style: content.style || undefined
                 }));
@@ -344,8 +342,8 @@ AUTHOR.JSON_CONTENT = {
                 ["style", _("CSS style:"), "string"]
             ],
             toHTML: function (content) {
-                var span = c("span");
-                span.appendChild(c("img", {
+                var span = create("span");
+                span.appendChild(create("img", {
                     src: content.value || "",
                     style: content.style || undefined
                 }));
@@ -364,10 +362,10 @@ AUTHOR.JSON_CONTENT = {
                 // TODO: NOT SUPPORTED: playerVars
             ],
             toHTML: function (content) {
-                var span = c("span", {
+                var span = create("span", {
                     text: _("YouTube Video") + ": "
                 });
-                span.appendChild(c("a", {
+                span.appendChild(create("a", {
                     href: "http://www.youtube.com/watch?v=" + encodeURIComponent(content.value),
                     text: content.value,
                     target: "_blank"
