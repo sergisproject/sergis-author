@@ -469,6 +469,9 @@ function updateAdvancedProperties() {
         !!json.layout.showPromptNumber;
     byId("overlay_advancedProperties_layout_hidePromptTitle").checked =
         !!json.layout.hidePromptTitle;
+    byId("overlay_advancedProperties_layout_hideScoringBreakdown").checked =
+        !!json.layout.hideScoringBreakdown;
+    
     byId("overlay_advancedProperties_layout_defaultSidebarWidthRatio").value =
         "" + json.layout.defaultSidebarWidthRatio;
     byId("overlay_advancedProperties_layout_defaultPopupMaxWidthRatio").value =
@@ -491,7 +494,7 @@ function updateAdvancedProperties() {
      */
     function initAdvancedProperties() {
         // The checkboxes for some layout properties
-        ["disableSidebarResizing", "disableTranslucentSidebar", "showPromptNumber", "hidePromptTitle"].forEach(function (layoutProp) {
+        ["disableSidebarResizing", "disableTranslucentSidebar", "showPromptNumber", "hidePromptTitle", "hideScoringBreakdown"].forEach(function (layoutProp) {
             byId("overlay_advancedProperties_layout_" + layoutProp).addEventListener("change", function (event) {
                 game.jsondata.layout[layoutProp] = this.checked;
                 // Save the game and update the Export button
