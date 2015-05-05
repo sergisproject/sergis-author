@@ -9,7 +9,7 @@
 // Globals: ask, askForOK, askForConfirmation, askForFile (if supported)
 
 (function () {
-    var askHandler, askForOKHandler, askForConfirmationHander;
+    var askHandler, askForOKHandler, askForConfirmationHandler;
     
     /**
      * Prompt the user for something.
@@ -64,7 +64,7 @@
                 byId("overlay_alert_text").appendChild(document.createTextNode(text));
             });
             // Set up the handler for the user's choice
-            askForOKHander = function () {
+            askForOKHandler = function () {
                 overlay(previousOverlay || undefined);
                 resolve();
             };
@@ -99,7 +99,7 @@
             byId("overlay_confirm_yes").className = focusNoButton ? "sub-button" : "main-button";
             byId("overlay_confirm_no").className = focusNoButton ? "main-button" : "sub-button";
             // Set up the handler for the user's choice
-            askForConfirmationHander = function (value) {
+            askForConfirmationHandler = function (value) {
                 overlay(previousOverlay || undefined);
                 resolve(value);
             };
@@ -154,20 +154,20 @@
         // Set up button for alert ("askForOK")
         byId("overlay_alert_ok").addEventListener("click", function (event) {
             event.preventDefault();
-            if (typeof askForOKHander == "function") askForOKHander();
-            askForOKHander = null;
+            if (typeof askForOKHandler == "function") askForOKHandler();
+            askForOKHandler = null;
         }, false);
         
         // Set up buttons for confirm ("askForConfirmation")
         byId("overlay_confirm_yes").addEventListener("click", function (event) {
             event.preventDefault();
-            if (typeof askForConfirmationHander == "function") askForConfirmationHander(true);
-            askForConfirmationHander = null;
+            if (typeof askForConfirmationHandler == "function") askForConfirmationHandler(true);
+            askForConfirmationHandler = null;
         }, false);
         byId("overlay_confirm_no").addEventListener("click", function (event) {
             event.preventDefault();
-            if (typeof askForConfirmationHander == "function") askForConfirmationHander(false);
-            askForConfirmationHander = null;
+            if (typeof askForConfirmationHandler == "function") askForConfirmationHandler(false);
+            askForConfirmationHandler = null;
         }, false);
     }
     
