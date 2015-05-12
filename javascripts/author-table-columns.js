@@ -44,15 +44,24 @@ AUTHOR.TABLE_COLUMNS = {
             event.stopPropagation();
             var promptList = game.jsondata.promptList;
             if (promptIndex !== 0) {
-                // Swap with the previous one
-                var olditem = promptList[promptIndex - 1];
-                promptList[promptIndex - 1] = promptList[promptIndex];
-                promptList[promptIndex] = olditem;
-                // Update any "goto" actions
-                swapGotos(promptIndex, promptIndex - 1);
+                // All the prompt indexes that will be affected
+                var promptIndexes = [promptIndex, promptIndex - 1];
+                // Update the promptIndexes array with any other prompts affected by the ones we already have
+                findRelatedPromptIndexes(promptIndexes);
+                
+                // Lock the prompts we need so that we can safely edit them
+                // Also handles unlocking and saving afterwards
+                AUTHOR.GAMES.withLockedPrompts(promptIndexes, function () {
+                    // Prompts locked successfully; swap the prompt with the previous one
+                    var olditem = promptList[promptIndex - 1];
+                    promptList[promptIndex - 1] = promptList[promptIndex];
+                    promptList[promptIndex] = olditem;
+                    // Update any "goto" actions
+                    swapGotos(promptIndex, promptIndex - 1);
+                    // Save and regenerate
+                    return generateAndSave(true, promptIndex - 1);
+                }).catch(makeCatch(_("Error moving prompt up")));
             }
-            // Save and regenerate
-            generate(true, promptIndex - 1);
         },
         
         /**
@@ -63,15 +72,24 @@ AUTHOR.TABLE_COLUMNS = {
             event.stopPropagation();
             var promptList = game.jsondata.promptList;
             if (promptIndex != promptList.length - 1) {
-                // Swap with the next one
-                var olditem = promptList[promptIndex + 1];
-                promptList[promptIndex + 1] = promptList[promptIndex];
-                promptList[promptIndex] = olditem;
-                // Update any "goto" actions
-                swapGotos(promptIndex, promptIndex + 1);
+                // All the prompt indexes that will be affected
+                var promptIndexes = [promptIndex, promptIndex + 1];
+                // Update the promptIndexes array with any other prompts affected by the ones we already have
+                findRelatedPromptIndexes(promptIndexes);
+                
+                // Lock the prompts we need so that we can safely edit them
+                // Also handles unlocking and saving afterwards
+                AUTHOR.GAMES.withLockedPrompts(promptIndexes, function () {
+                    // Prompts locked successfully; swap with the next one
+                    var olditem = promptList[promptIndex + 1];
+                    promptList[promptIndex + 1] = promptList[promptIndex];
+                    promptList[promptIndex] = olditem;
+                    // Update any "goto" actions
+                    swapGotos(promptIndex, promptIndex + 1);
+                    // Save and regenerate
+                    return generateAndSave(true, promptIndex + 1);
+                }).catch(makeCatch(_("Error moving prompt down")));
             }
-            // Save and regenerate
-            generate(true, promptIndex + 1);
         },
         
         /**
@@ -81,19 +99,34 @@ AUTHOR.TABLE_COLUMNS = {
             event.preventDefault();
             event.stopPropagation();
             var promptList = game.jsondata.promptList;
-            promptList.splice(promptIndex, 1);
-            // Update any "goto" actions (and see if there were any pointing to the prompt we just deleted).
-            var occurrences = decrementGotos(promptIndex);
-            // Save and regenerate
-            generate(true, Math.min(promptIndex, game.jsondata.promptList.length - 1));
-            // Tell the user if this screws up their goto actions
-            if (occurrences > 0) {
-                // NOTE: askForOK returns a Promise, but we'll ignore it
-                askForOK(
-                    _("NOTE: There were " + occurrences + " \"goto\" actions that pointed to the prompt that was just deleted.") + "\n" +
-                    _("Also, all other \"goto\" actions have been updated to point to the new prompt indexes that resulted from deleting this prompt.")
-                );
+            
+            // All the prompts that will be affected by removing this one
+            var promptIndexes = [];
+            for (var i = promptIndex; i < promptList.length; i++) {
+                promptIndex.push(i);
             }
+            // Update the promptIndexes array with any other prompts affected by the ones we already have
+            findRelatedPromptIndexes(promptIndexes);
+            
+            var occurrences;
+            // Lock the prompts we need so that we can safely edit them
+            // Also handles unlocking and saving afterwards
+            AUTHOR.GAMES.withLockedPrompts(promptIndexes, function () {
+                // Prompts locked successfully; now we can do the things
+                promptList.splice(promptIndex, 1);
+                // Update any "goto" actions (and see if there were any pointing to the prompt we just deleted)
+                occurrences = decrementGotos(promptIndex);
+                // Save and regenerate
+                return generateAndSave(true, Math.min(promptIndex, game.jsondata.promptList.length - 1));
+            }).then(function () {
+                // Tell the user if this screws up their goto actions
+                if (occurrences) {
+                    return askForOK(
+                        _("NOTE: There were " + occurrences + " \"goto\" actions that pointed to the prompt that was just deleted.") + "\n" +
+                        _("Also, all other \"goto\" actions have been updated to point to the new prompt indexes that resulted from deleting this prompt.")
+                    );
+                }
+            }).catch(makeCatch(_("Error deleting prompt")));
         },
         
         /**
@@ -102,16 +135,17 @@ AUTHOR.TABLE_COLUMNS = {
         updateTitle: function (event, promptIndex) {
             game.jsondata.promptList[promptIndex].prompt.title = this.value;
             // Save the game
-            generate();
+            generateAndSave(undefined, undefined, "promptList." + promptIndex + ".prompt.title");
         },
         
         
         /**
          * Handler for the map "Same as previous prompt" checkbox.
          */
-        updateMapSameCheckbox: function (event, promptItem, tableID, prevMapstuffValues) {
+        updateMapSameCheckbox: function (event, promptIndex, tableID, prevMapstuffValues) {
+            var promptItem = game.jsondata.promptList[promptIndex];
             var sameAsPreviousPrompt = this.checked;
-            byId(tableID).style.display = sameAsPreviousPrompt ? "none" : "block";
+            byId(tableID).style.display = sameAsPreviousPrompt ? "none" : "table";
             mapstuff.forEach(function (mapitem, index) {
                 var property = mapitem[0],
                     label = mapitem[1],
@@ -126,7 +160,7 @@ AUTHOR.TABLE_COLUMNS = {
                 }
             });
             // Same the game
-            generate();
+            generateAndSave(undefined, undefined, "promptList." + promptIndex + ".prompt.map");
         },
         
         /**
@@ -143,16 +177,16 @@ AUTHOR.TABLE_COLUMNS = {
             }
             promptList[promptIndex].prompt.map[property] = value;
             // Save the game
-            generate();
+            generateAndSave(undefined, undefined, "promptList." + promptIndex + ".prompt.map");
         },
         
         /**
          * Handler for the map reinitialization dropdown.
          */
         updateMapReinitialization: function (event, promptIndex) {
-            game.jsondata.promptList[promptIndex].map.reinitialize = this.value;
+            game.jsondata.promptList[promptIndex].prompt.map.reinitialize = this.value;
             // Save the game
-            generate();
+            generateAndSave(undefined, undefined, "promptList." + promptIndex + ".prompt.map");
         },
         
         /**
@@ -181,12 +215,17 @@ AUTHOR.TABLE_COLUMNS = {
             event.preventDefault();
             var promptList = game.jsondata.promptList;
             if (contentIndex !== 0) {
-                var olditem = promptList[promptIndex].prompt.contents[contentIndex - 1];
-                promptList[promptIndex].prompt.contents[contentIndex - 1] = promptList[promptIndex].prompt.contents[contentIndex];
-                promptList[promptIndex].prompt.contents[contentIndex] = olditem;
+                // Lock this prompt so we can safely edit it
+                // Also handles unlocking and saving afterwards
+                AUTHOR.GAMES.withLockedPrompts([promptIndex], function () {
+                    // Prompt locked successfully
+                    var olditem = promptList[promptIndex].prompt.contents[contentIndex - 1];
+                    promptList[promptIndex].prompt.contents[contentIndex - 1] = promptList[promptIndex].prompt.contents[contentIndex];
+                    promptList[promptIndex].prompt.contents[contentIndex] = olditem;
+                    // Save and regenerate
+                    return generateAndSave(true, undefined, "promptList." + promptIndex + ".prompt.contents");
+                }).catch(makeCatch(_("Error moving content up")));
             }
-            // Save and regenerate
-            generate(true);
         },
         
         /**
@@ -196,12 +235,17 @@ AUTHOR.TABLE_COLUMNS = {
             event.preventDefault();
             var promptList = game.jsondata.promptList;
             if (contentIndex != promptList[promptIndex].prompt.contents.length - 1) {
-                var olditem = promptList[promptIndex].prompt.contents[contentIndex + 1];
-                promptList[promptIndex].prompt.contents[contentIndex + 1] = promptList[promptIndex].prompt.contents[contentIndex];
-                promptList[promptIndex].prompt.contents[contentIndex] = olditem;
+                // Lock this prompt so we can safely edit it
+                // Also handles unlocking and saving afterwards
+                AUTHOR.GAMES.withLockedPrompts([promptIndex], function () {
+                    // Prompt locked successfully
+                    var olditem = promptList[promptIndex].prompt.contents[contentIndex + 1];
+                    promptList[promptIndex].prompt.contents[contentIndex + 1] = promptList[promptIndex].prompt.contents[contentIndex];
+                    promptList[promptIndex].prompt.contents[contentIndex] = olditem;
+                    // Save and regenerate
+                    return generateAndSave(true, undefined, "promptList." + promptIndex + ".prompt.contents");
+                }).catch(makeCatch(_("Error moving content down")));
             }
-            // Save and regenerate
-            generate(true);
         },
         
         /**
@@ -217,9 +261,14 @@ AUTHOR.TABLE_COLUMNS = {
          */
         deleteContent: function (event, promptIndex, contentIndex) {
             event.preventDefault();
-            game.jsondata.promptList[promptIndex].prompt.contents.splice(contentIndex, 1);
-            // Save and regenerate
-            generate(true);
+            // Lock this prompt so we can safely edit it
+            // Also handles unlocking and saving afterwards
+            AUTHOR.GAMES.withLockedPrompts([promptIndex], function () {
+                // Prompt locked successfully
+                game.jsondata.promptList[promptIndex].prompt.contents.splice(contentIndex, 1);
+                // Save and regenerate
+                return generateAndSave(true, undefined, "promptList." + promptIndex + ".prompt.contents");
+            }).catch(makeCatch(_("Error deleting content")));
         },
         
         
@@ -239,7 +288,7 @@ AUTHOR.TABLE_COLUMNS = {
         updateRandomizeChoices: function (event, promptIndex) {
             game.jsondata.promptList[promptIndex].prompt.randomizeChoices = this.checked;
             // Save the game
-            generate();
+            generateAndSave(undefined, undefined, "promptList." + promptIndex + ".prompt.randomizeChoices");
         },
         
         /**
@@ -249,17 +298,25 @@ AUTHOR.TABLE_COLUMNS = {
             event.preventDefault();
             var promptList = game.jsondata.promptList;
             if (choiceIndex !== 0) {
-                // Update "choices"
-                var olditem = promptList[promptIndex].prompt.choices[choiceIndex - 1];
-                promptList[promptIndex].prompt.choices[choiceIndex - 1] = promptList[promptIndex].prompt.choices[choiceIndex];
-                promptList[promptIndex].prompt.choices[choiceIndex] = olditem;
-                // Update "actionList"
-                olditem = promptList[promptIndex].actionList[choiceIndex - 1];
-                promptList[promptIndex].actionList[choiceIndex - 1] = promptList[promptIndex].actionList[choiceIndex];
-                promptList[promptIndex].actionList[choiceIndex] = olditem;
+                // Lock this prompt so we can safely edit it
+                // Also handles unlocking and saving afterwards
+                AUTHOR.GAMES.withLockedPrompts([promptIndex], function () {
+                    // Prompt locked successfully
+                    
+                    // Update "choices"
+                    var olditem = promptList[promptIndex].prompt.choices[choiceIndex - 1];
+                    promptList[promptIndex].prompt.choices[choiceIndex - 1] = promptList[promptIndex].prompt.choices[choiceIndex];
+                    promptList[promptIndex].prompt.choices[choiceIndex] = olditem;
+                    
+                    // Update "actionList"
+                    olditem = promptList[promptIndex].actionList[choiceIndex - 1];
+                    promptList[promptIndex].actionList[choiceIndex - 1] = promptList[promptIndex].actionList[choiceIndex];
+                    promptList[promptIndex].actionList[choiceIndex] = olditem;
+                    
+                    // Save and regenerate
+                    return generateAndSave(true, undefined, "promptList." + promptIndex);
+                }).catch(makeCatch(_("Error moving choice up")));
             }
-            // Save and regenerate
-            generate(true);
         },
         
         /**
@@ -269,17 +326,25 @@ AUTHOR.TABLE_COLUMNS = {
             event.preventDefault();
             var promptList = game.jsondata.promptList;
             if (choiceIndex != promptList[promptIndex].prompt.choices.length - 1) {
-                // Update "choices"
-                var olditem = promptList[promptIndex].prompt.choices[choiceIndex + 1];
-                promptList[promptIndex].prompt.choices[choiceIndex + 1] = promptList[promptIndex].prompt.choices[choiceIndex];
-                promptList[promptIndex].prompt.choices[choiceIndex] = olditem;
-                // Update "actionList"
-                olditem = promptList[promptIndex].actionList[choiceIndex + 1];
-                promptList[promptIndex].actionList[choiceIndex + 1] = promptList[promptIndex].actionList[choiceIndex];
-                promptList[promptIndex].actionList[choiceIndex] = olditem;
+                // Lock this prompt so we can safely edit it
+                // Also handles unlocking and saving afterwards
+                AUTHOR.GAMES.withLockedPrompts([promptIndex], function () {
+                    // Prompt locked successfully
+                    
+                    // Update "choices"
+                    var olditem = promptList[promptIndex].prompt.choices[choiceIndex + 1];
+                    promptList[promptIndex].prompt.choices[choiceIndex + 1] = promptList[promptIndex].prompt.choices[choiceIndex];
+                    promptList[promptIndex].prompt.choices[choiceIndex] = olditem;
+                    
+                    // Update "actionList"
+                    olditem = promptList[promptIndex].actionList[choiceIndex + 1];
+                    promptList[promptIndex].actionList[choiceIndex + 1] = promptList[promptIndex].actionList[choiceIndex];
+                    promptList[promptIndex].actionList[choiceIndex] = olditem;
+                    
+                    // Save and regenerate
+                    return generateAndSave(true, undefined, "promptList." + promptIndex);
+                }).catch(makeCatch(_("Error moving choice down")));
             }
-            // Save and regenerate
-            generate(true);
         },
         
         /**
@@ -296,10 +361,15 @@ AUTHOR.TABLE_COLUMNS = {
         deleteChoice: function (event, promptIndex, choiceIndex) {
             event.preventDefault();
             var promptList = game.jsondata.promptList;
-            promptList[promptIndex].prompt.choices.splice(choiceIndex, 1);
-            promptList[promptIndex].actionList.splice(choiceIndex, 1);
-            // Save and regenerate
-            generate(true);
+            // Lock this prompt so we can safely edit it
+            // Also handles unlocking and saving afterwards
+            AUTHOR.GAMES.withLockedPrompts([promptIndex], function () {
+                // Prompt locked successfully
+                promptList[promptIndex].prompt.choices.splice(choiceIndex, 1);
+                promptList[promptIndex].actionList.splice(choiceIndex, 1);
+                // Save and regenerate
+                return generateAndSave(true, undefined, "promptList." + promptIndex);
+            }).catch(makeCatch(_("Error deleting choice")));
         },
         
         /**
@@ -309,7 +379,7 @@ AUTHOR.TABLE_COLUMNS = {
             var promptList = game.jsondata.promptList;
             promptList[promptIndex].actionList[choiceIndex].pointValue = value || 0;
             // Save the game
-            generate();
+            generateAndSave(undefined, undefined, "promptList." + promptIndex + ".actionList." + choiceIndex + ".pointValue");
         },
         
         
@@ -331,12 +401,17 @@ AUTHOR.TABLE_COLUMNS = {
             event.preventDefault();
             var promptList = game.jsondata.promptList;
             if (actionIndex !== 0) {
-                var olditem = promptList[promptIndex].actionList[choiceIndex].actions[actionIndex - 1];
-                promptList[promptIndex].actionList[choiceIndex].actions[actionIndex - 1] = promptList[promptIndex].actionList[choiceIndex].actions[actionIndex];
-                promptList[promptIndex].actionList[choiceIndex].actions[actionIndex] = olditem;
+                // Lock this prompt so we can safely edit it
+                // Also handles unlocking and saving afterwards
+                AUTHOR.GAMES.withLockedPrompts([promptIndex], function () {
+                    // Prompt locked successfully
+                    var olditem = promptList[promptIndex].actionList[choiceIndex].actions[actionIndex - 1];
+                    promptList[promptIndex].actionList[choiceIndex].actions[actionIndex - 1] = promptList[promptIndex].actionList[choiceIndex].actions[actionIndex];
+                    promptList[promptIndex].actionList[choiceIndex].actions[actionIndex] = olditem;
+                    // Save and regenerate
+                    return generateAndSave(true, undefined, "promptList." + promptIndex + ".actionList." + choiceIndex + ".actions");
+                }).catch(makeCatch(_("Error moving action up")));
             }
-            // Save and regenerate
-            generate(true);
         },
         
         /**
@@ -346,12 +421,17 @@ AUTHOR.TABLE_COLUMNS = {
             event.preventDefault();
             var promptList = game.jsondata.promptList;
             if (choiceIndex != promptList[promptIndex].actionList[choiceIndex].actions.length - 1) {
-                var olditem = promptList[promptIndex].actionList[choiceIndex].actions[actionIndex + 1];
-                promptList[promptIndex].actionList[choiceIndex].actions[actionIndex + 1] = promptList[promptIndex].actionList[choiceIndex].actions[actionIndex];
-                promptList[promptIndex].actionList[choiceIndex].actions[actionIndex] = olditem;
+                // Lock this prompt so we can safely edit it
+                // Also handles unlocking and saving afterwards
+                AUTHOR.GAMES.withLockedPrompts([promptIndex], function () {
+                    // Prompt locked successfully
+                    var olditem = promptList[promptIndex].actionList[choiceIndex].actions[actionIndex + 1];
+                    promptList[promptIndex].actionList[choiceIndex].actions[actionIndex + 1] = promptList[promptIndex].actionList[choiceIndex].actions[actionIndex];
+                    promptList[promptIndex].actionList[choiceIndex].actions[actionIndex] = olditem;
+                    // Save and regenerate
+                    return generateAndSave(true, undefined, "promptList." + promptIndex + ".actionList." + choiceIndex + ".actions");
+                }).catch(makeCatch(_("Error moving action down")));
             }
-            // Save and regenerate
-            generate(true);
         },
         
         /**
@@ -367,9 +447,14 @@ AUTHOR.TABLE_COLUMNS = {
          */
         deleteAction: function (event, promptIndex, choiceIndex, actionIndex) {
             event.preventDefault();
-            game.jsondata.promptList[promptIndex].actionList[choiceIndex].actions.splice(actionIndex, 1);
-            // Save and regenerate
-            generate(true);
+            // Lock this prompt so we can safely edit it
+            // Also handles unlocking and saving afterwards
+            AUTHOR.GAMES.withLockedPrompts([promptIndex], function () {
+                // Prompt locked successfully
+                game.jsondata.promptList[promptIndex].actionList[choiceIndex].actions.splice(actionIndex, 1);
+                // Save and regenerate
+                return generateAndSave(true, undefined, "promptList." + promptIndex + ".actionList." + choiceIndex + ".actions");
+            }).catch(makeCatch(_("Error deleting action")));
         },
     };
     
@@ -605,7 +690,7 @@ AUTHOR.TABLE_COLUMNS = {
                     type: "checkbox",
                     title: _("Keeps the map the same as it was for the previous prompt that the user was on"),
                     checked: sameAsPreviousPrompt ? "checked" : undefined
-                }, TABLE_EVENTS.updateMapSameCheckbox, promptItem, tableID, prevMapstuffValues),
+                }, TABLE_EVENTS.updateMapSameCheckbox, promptIndex, tableID, prevMapstuffValues),
 
                 // Label
                 create("label", {

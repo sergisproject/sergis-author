@@ -66,16 +66,26 @@ AUTHOR.ACTION_EDITOR = {
      *        (affects the title of the editor).
      */
     AUTHOR.ACTION_EDITOR.editAction = function (promptIndex, choiceIndex, actionIndex, isAdding) {
-        editorTitle(isAdding ? "addaction" : "editaction");
-        
-        editor_state.action_json = game.jsondata.promptList[promptIndex].actionList[choiceIndex].actions[actionIndex] || {};
-        if (!editor_state.action_json.data) editor_state.action_json.data = [];
-        
-        editor_state.promptIndex = promptIndex;
-        editor_state.choiceIndex = choiceIndex;
-        editor_state.actionIndex = actionIndex;
-        updateActionEditor();
-        overlay("overlay_actionEditor");
+        overlay("overlay_loading");
+        // Try to lock the prompt
+        AUTHOR.GAMES.lockPrompts(promptIndex).then(function (isSuccessful) {
+            if (isSuccessful) {
+                // All good!
+                editorTitle(isAdding ? "addaction" : "editaction");
+
+                editor_state.action_json = game.jsondata.promptList[promptIndex].actionList[choiceIndex].actions[actionIndex] || {};
+                if (!editor_state.action_json.data) editor_state.action_json.data = [];
+
+                editor_state.promptIndex = promptIndex;
+                editor_state.choiceIndex = choiceIndex;
+                editor_state.actionIndex = actionIndex;
+                updateActionEditor();
+                overlay("overlay_actionEditor");
+            } else {
+                // No good :(
+                overlay();
+            }
+        }).catch(makeCatch(_("Error locking prompt")));
     };
 
     /**
@@ -89,20 +99,32 @@ AUTHOR.ACTION_EDITOR = {
                 return;
             }
         }
+        
+        // Okay, all valid!
+        overlay("overlay_loading");
         // Store it
         game.jsondata.promptList[editor_state.promptIndex].actionList[editor_state.choiceIndex].actions[editor_state.actionIndex] = editor_state.action_json;
-        // Close the editor
-        closeEditor();
+        var jsonpath = "promptList." + editor_state.promptIndex + ".actionList." + editor_state.choiceIndex + ".actions." + editor_state.actionIndex;
+        // Save and regenerate
+        generateAndSave(true, undefined, jsonpath).then(function () {
+            // Try to unlock the prompt
+            return AUTHOR.GAMES.unlockPrompts(editor_state.promptIndex);
+        }).then(function () {
+            // All done; close the editor
+            overlay();
+        }).catch(makeCatch(_("Error unlocking prompt")));
     }
 
     /**
      * Close the editor (doesn't also save).
      */
     function closeEditor() {
-        // Close the editor
-        overlay();
-        // Regenerate the table and update the save button
-        generate(true);
+        overlay("overlay_loading");
+        // Try to unlock the prompt
+        AUTHOR.GAMES.unlockPrompts(editor_state.promptIndex).then(function () {
+            // Close the editor
+            overlay();
+        }).catch(makeCatch(_("Error unlocking prompt")));
     }
     
     /**

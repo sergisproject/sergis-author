@@ -255,6 +255,10 @@ code.short {
   width: 100%
 }
 
+.inputcontainersub {
+  display: table-row;
+}
+
 /*
  * "MINIMAL" ROWS IN PROMPT TABLE
  */
@@ -314,7 +318,7 @@ div.tabs a:not(.selected):hover {
 
 .tabcontent {
   padding: 12px 16px;
-  border: 1px solid;
+  /* border: 1px solid; */
   border-top: none;
 }
 

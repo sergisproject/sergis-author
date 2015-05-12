@@ -24,19 +24,41 @@ AUTHOR.MAP_PROPERTIES_EDITOR = {
     };
     
     AUTHOR.MAP_PROPERTIES_EDITOR.editMapProperties = function (promptIndex) {
+        overlay("overlay_loading");
+        // Try to lock the prompt
+        AUTHOR.GAMES.lockPrompts(promptIndex).then(function (isSuccessful) {
+            if (isSuccessful) {
+                // All good!
+                openEditor(promptIndex);
+            } else {
+                // Not good :(
+                overlay();
+            }
+        }).catch(makeCatch(_("Error locking prompt")));
+    };
+    
+    /**
+     * Load and open the editor.
+     */
+    function openEditor(promptIndex) {
         editor_state.promptIndex = promptIndex;
         updateMapPropertiesEditor();
         overlay("overlay_editMapProperties");
-    };
+    }
     
     /**
      * Close the editor.
      */
     function closeEditor() {
-        // Close the editor
-        overlay();
+        overlay("overlay_loading");
         // Save and regenerate
-        generate(true);
+        generateAndSave(true, "promptList." + editor_state.promptIndex + ".prompt").then(function () {
+            // Try to unlock the prompt
+            return AUTHOR.GAMES.unlockPrompts(editor_state.promptIndex);
+        }).then(function () {
+            // All done; close the editor
+            overlay();
+        }).catch(makeCatch(_("Error unlocking prompt")));
     }
     
     /**
@@ -48,7 +70,7 @@ AUTHOR.MAP_PROPERTIES_EDITOR = {
         game.jsondata.promptList[editor_state.promptIndex].prompt.buttons = {};
         checkJSON();
         // Re-open the editor
-        AUTHOR.MAP_PROPERTIES_EDITOR.editMapProperties(editor_state.promptIndex);
+        openEditor(editor_state.promptIndex);
     }
     
     /**

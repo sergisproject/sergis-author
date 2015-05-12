@@ -12,6 +12,11 @@ Alternatively, you can clone this repository and open `index.html`.
 
 ## TODO
 
+
+- If we're in an editor but we don't actually change anything (i.e. onchange() is never called), then we don't need to save
+- GET RID OF HUGE DATA URIs IN JSON DATA (do this server-side if need be)
+
+
 Action Editor:
 
 - Ability to delete action parts that we added using "Add More..."
@@ -31,18 +36,21 @@ Other:
 - Replace "Prompt Index" with just "Prompt", which consists of a 1-based prompt number and its title.
 - Make `overlay()` (i.e. no parameters to overlay) revert to the last open overlay, instead of none (unless it was previously none).
   - Maybe add parameter to force none, or vice versa, i.e. if we just pass `true`, then go back to the previous prompt.
-- With socket to server, when someone sends in a saveGame, see if that game is open anywhere else and send them an update (if multiple people are working on the game at once).
 
 New Stuff:
 
 - Remove "goto" from the actions that you can do, and add a new dropdown under each choice called "Next Prompt" (which includes an option "end game", that could just add a "endGame" action instead of a "goto" action).
 - Add support for conditional `goto`s
   - Have a function in the author to convert a string like `(varName >= 10 && var2 is empty) or var3 equals 0 || (varName is 12 and var5 is less than 18)` into a tree of SerGIS JSON Condition objects
+  - When checking stuff with goto actions (i.e. findRelatedPromptIndexes), any prompts with conditionals that reference any of these prompt indexes must also be "marked"
 - Add ability to show/hide the map on a per-prompt basis (will also require something new in the JSON Game Data format, and sergis-client)
 - Add ability to buffer geodata in layers
 - Ability to "sketch" a feature on a map (i.e. if we want to draw something; instead of entering points, allow drawing it on a map)
 - Support new frontendInfo stuff ("basemap" array, "layers" stuff, etc.) and new removeLayers action
 - For layers, auto-detect what type of layer (Dynamic, Feature, etc.) depending on the URL
+- Add an ability to "clone" a layer that is added to the map (what we mean by this is that if you want to add the same combination of maps/layers to several prompts, it would be useful if they could be copied from one prompt to another, without typing in the same information repeatedly in different prompts)
+- Also, same thing for drawn objects (i.e. polygons)
+  - Maybe add a dropdown for this action, "Copy Previous: [________]"
 
 New "Graph View":
 

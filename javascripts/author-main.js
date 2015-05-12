@@ -6,9 +6,10 @@
     in the LICENSE.txt file.
 */
 
-// Globals: exportEnabled, game, makeCatch, removeFromString,
+// Globals: exportEnabled, game, makeCatch, removeFromString, parsePath,
 // overlay, getOverlay, openPage, selectAll,
-// checkJSON, swapGotos, decrementGotos, generate, updateAdvancedProperties
+// checkJSON, swapGotos, decrementGotos, findRelatedPromptIndexes,
+// generate, generateAndSave, updateAdvancedProperties
 
 /**
  * Whether the "Export" button should be enabled (if base64 and data URIs are
@@ -21,6 +22,7 @@ var exportEnabled = (typeof btoa == "function" && navigator.userAgent.indexOf("T
 // The current game
 var game = {
     name: null,
+    owner: null,
     jsondata: {
         /*
         // Metadata:
@@ -36,7 +38,9 @@ var game = {
         showActionsInUserOrder: false,
         promptList: [{}]
         */
-    }
+    },
+    lockedPrompts: {},
+    ourLockedPrompts: {}
 };
 
 /**
@@ -361,14 +365,9 @@ function checkJSON() {
  * @param {number} goto2 - The second promptIndex; swapped with `goto1`.
  */
 function swapGotos(goto1, goto2) {
-    var i, j, k, actionList, actions, action;
-    var promptList = game.jsondata.promptList;
-    for (i = 0; i < promptList.length; i++) {
-        actionList = promptList[i].actionList;
-        for (j = 0; j < actionList.length; j++) {
-            actions = actionList[j].actions;
-            for (k = 0; k < actions.length; k++) {
-                action = actions[k];
+    game.jsondata.promptList.forEach(function (promptItem) {
+        promptItem.actionList.forEach(function (actionItem) {
+            actionItem.actions.forEach(function (action) {
                 if (action.name == "goto" && action.data && action.data.length) {
                     if (action.data[0] == goto1) {
                         action.data[0] = goto2;
@@ -376,9 +375,9 @@ function swapGotos(goto1, goto2) {
                         action.data[0] = goto1;
                     }
                 }
-            }
-        }
-    }
+            });
+        });
+    });
 }
 
 /**
@@ -387,19 +386,14 @@ function swapGotos(goto1, goto2) {
  * @param {number} leastIndex - Any promptIndexes that are less than OR EQUAL
  *        TO this value will NOT be decremented.
  *
- * @returns {number} The number of occurrences of leastIndex (which, FYI, were
- *          NOT decremented).
+ * @return {number} The number of occurrences of leastIndex (which, FYI, were
+ *         NOT decremented).
  */
 function decrementGotos(leastIndex) {
-    var i, j, k, actionList, actions, action;
-    var promptList = game.jsondata.promptList;
     var occurrences = 0;
-    for (i = 0; i < promptList.length; i++) {
-        actionList = promptList[i].actionList;
-        for (j = 0; j < actionList.length; j++) {
-            actions = actionList[j].actions;
-            for (k = 0; k < actions.length; k++) {
-                action = actions[k];
+    game.jsondata.promptList.forEach(function (promptItem) {
+        promptItem.actionList.forEach(function (actionItem) {
+            actionItem.actions.forEach(function (action) {
                 if (action.name == "goto" && action.data && action.data.length) {
                     if (action.data[0] == leastIndex) {
                         occurrences += 1;
@@ -407,15 +401,57 @@ function decrementGotos(leastIndex) {
                         action.data[0] -= 1;
                     }
                 }
-            }
-        }
-    }
+            });
+        });
+    });
     return occurrences;
 }
 
 /**
- * Check the JSON data, then update the export button and (possibly) update the
- * table.
+ * Enhance an array of prompt indexes by adding to it any prompt indexes that
+ * are affected by any of the provided prompt indexes in the array.
+ *
+ * @param {Array.<number>} promptIndexes - The prompt indexes to find related
+ *        ones for (this array is mutated by adding any other prompt indexes
+ *        affected by the ones already in the array, then sorting the array).
+ * @param {boolean} [repeatRecursively=false] - If the array is changed,
+ *        continue performing the process until the array is not changed. (This
+ *        means that if Prompt A is in the original list and it references
+ *        Prompt B, then Prompt B is added to the list and any of its
+ *        references; then, this is repeated until nothing new is added to the
+ *        list.)
+ */
+function findRelatedPromptIndexes(promptIndexes, repeatRecursively) {
+    var addedRelatedPromptIndexes = false;
+    do {
+        // Look through a copy of the original array
+        promptIndexes.slice(0).forEach(function (promptIndex) {
+            // Look through each choice for this prompt
+            game.jsondata.promptList[promptIndex].actionList.forEach(function (actionItem) {
+                // Look through each action for this choice
+                actionItem.actions.forEach(function (action) {
+                    // If this is a goto action, check its data
+                    if (action.name == "goto" && action.data && action.data.length) {
+                        // Found a goto action from a prompt in our list!
+                        if (promptIndexes.indexOf(action.data[0]) == -1) {
+                            // Add it to our list
+                            promptIndexes.push(promptIndex);
+                            if (repeatRecursively) {
+                                // Mark that we changed the list so that we do all this again
+                                addedRelatedPromptIndexes = true;
+                            }
+                        }
+                    }
+                });
+            });
+        });
+    } while (addedRelatedPromptIndexes);
+    // All done; sort the list
+    promptIndexes.sort();
+}
+
+/**
+ * Check the JSON data, update the export button and possibly update the table.
  *
  * @param {boolean} [updateTable] - Whether to update the table.
  * @param {number} [newCurrentPromptIndex] - A new current prompt index.
@@ -432,22 +468,39 @@ function generate(updateTable, newCurrentPromptIndex) {
     }
     
     // Update "Preview Game" link
-    // (if we have a clientPreviewURL but not a previewGame function on the backend)
-    if (AUTHOR.CONFIG.clientPreviewURL && typeof AUTHOR.BACKEND.previewGame != "function") {
+    // (if we have a clientPreviewURL but not a previewCurrentGame function on the backend)
+    if (AUTHOR.CONFIG.clientPreviewURL && typeof AUTHOR.BACKEND.previewCurrentGame != "function") {
         byId("toolbar_preview").style.display = "block";
         byId("toolbar_preview").setAttribute("href",
             AUTHOR.CONFIG.clientPreviewURL + "#jsongamedata::" + encodeURIComponent(AUTHOR.GAMES.getJSON()));
     }
     
-    // Save with the backend
-    AUTHOR.GAMES.saveGame().then(function () {
-        console.log("Saved game: " + game.name);
-    }).catch(makeCatch(_("Error saving game")));
-    
     // And, update the table (if needed)
     if (updateTable) {
         AUTHOR.TABLE.generateTable(newCurrentPromptIndex);
     }
+}
+
+/**
+ * Check and save the JSON data, update the export button and (possibly) update
+ * the table.
+ *
+ * @param {boolean} [updateTable] - Whether to update the table.
+ * @param {number} [newCurrentPromptIndex] - A new current prompt index.
+ * @param {string} [path] - An optional JSON path for the JSON data.
+ *        (See http://sergisproject.github.io/docs/author.html)
+ *
+ * @return {Promise} Resolved when the game is saved.
+ */
+function generateAndSave(updateTable, newCurrentPromptIndex, path) {
+    generate(updateTable, newCurrentPromptIndex);
+    
+    // Save with the backend
+    // (Even though we're returning it, we're catching errors
+    //  since most calls to this function ignore the return value)
+    return AUTHOR.GAMES.saveGame(path).then(function () {
+        // All good!
+    }).catch(makeCatch(_("Error saving game")));
 }
 
 /**
@@ -497,8 +550,8 @@ function updateAdvancedProperties() {
         ["disableSidebarResizing", "disableTranslucentSidebar", "showPromptNumber", "hidePromptTitle", "hideScoringBreakdown"].forEach(function (layoutProp) {
             byId("overlay_advancedProperties_layout_" + layoutProp).addEventListener("change", function (event) {
                 game.jsondata.layout[layoutProp] = this.checked;
-                // Save the game and update the Export button
-                generate();
+                // Save the game
+                generateAndSave(undefined, undefined, "layout");
             }, false);
         });
         
@@ -511,44 +564,44 @@ function updateAdvancedProperties() {
                 } else {
                     game.jsondata.layout[layoutProp] = value;
                 }
-                // Save the game and update the Export button
-                generate();
+                // Save the game
+                generateAndSave(undefined, undefined, "layout");
             }), false);
         });
         
         // "Always Reinitialize Map" checkbox
         byId("overlay_advancedProperties_alwaysReinitializeMap").addEventListener("change", function (event) {
             game.jsondata.alwaysReinitializeMap = this.checked;
-            // Save the game, update the table, and update the Export button
-            generate(true);
+            // Save the game and update the table
+            generateAndSave(true, undefined, "alwaysReinitializeMap");
         }, false);
         
         // "Jumping Back Allowed" checkbox
         byId("overlay_advancedProperties_general_jumpingBackAllowed").addEventListener("change", function (event) {
             game.jsondata.jumpingBackAllowed = this.checked;
-            // Save the game and update the Export button
-            generate();
+            // Save the game
+            generateAndSave(undefined, undefined, "jumpingBackAllowed");
         }, false);
         
         // "On Jump Back" select
         byId("overlay_advancedProperties_general_onJumpBack").addEventListener("change", function (event) {
             game.jsondata.onJumpBack = this.value;
-            // Save the game and update the Export button
-            generate();
+            // Save the game
+            generateAndSave(undefined, undefined, "onJumpBack");
         }, false);
         
         // "Jumping Forward Allowed" checkbox
         byId("overlay_advancedProperties_general_jumpingForwardAllowed").addEventListener("change", function (event) {
             game.jsondata.jumpingForwardAllowed = this.checked;
-            // Save the game and update the Export button
-            generate();
+            // Save the game
+            generateAndSave(undefined, undefined, "jumpingForwardAllowed");
         }, false);
         
         // "Show Actions In User Order" checkbox
         byId("overlay_advancedProperties_general_showActionsInUserOrder").addEventListener("change", function (event) {
             game.jsondata.showActionsInUserOrder = this.checked;
-            // Save the game and update the Export button
-            generate();
+            // Save the game
+            generateAndSave(undefined, undefined, "showActionsInUserOrder");
         }, false);
     }
     
@@ -593,16 +646,16 @@ function updateAdvancedProperties() {
         }
         
         // "Preview" button
-        if (AUTHOR.CONFIG.clientPreviewURL || typeof AUTHOR.BACKEND.previewGame == "function") {
+        if (AUTHOR.CONFIG.clientPreviewURL || typeof AUTHOR.BACKEND.previewCurrentGame == "function") {
             // Show the button
             byId("toolbar_preview").style.display = "block";
-            // If the backend has `previewGame`, set that up
-            if (typeof AUTHOR.BACKEND.previewGame == "function") {
+            // If the backend has `previewCurrentGame`, set that up
+            if (typeof AUTHOR.BACKEND.previewCurrentGame == "function") {
                 byId("toolbar_preview").addEventListener("click", function (event) {
                     event.preventDefault();
                     overlay("overlay_loading");
                     var doPreview = function () {
-                        AUTHOR.BACKEND.previewGame(game.name).then(function (pageData) {
+                        AUTHOR.BACKEND.previewCurrentGame().then(function (pageData) {
                             overlay();
                             openPage(pageData, "_blank");
                         }).catch(makeCatch(_("Error getting preview page")));
@@ -623,12 +676,12 @@ function updateAdvancedProperties() {
         }
         
         // "Publish" button
-        if (typeof AUTHOR.BACKEND.publishGame == "function") {
+        if (typeof AUTHOR.BACKEND.publishCurrentGame == "function") {
             byId("toolbar_publish").style.display = "block";
             byId("toolbar_publish").addEventListener("click", function (event) {
                 event.preventDefault();
                 overlay("overlay_loading");
-                AUTHOR.BACKEND.publishGame(game.name).then(function (pageData) {
+                AUTHOR.BACKEND.publishCurrentGame().then(function (pageData) {
                     overlay("overlay_publish");
                     openPage(pageData, "overlay_publish_iframe");
                 }).catch(makeCatch(_("Error getting publish page")));
@@ -683,7 +736,7 @@ function updateAdvancedProperties() {
             event.preventDefault();
             var newPromptIndex = game.jsondata.promptList.push({}) - 1;
             // Save and regenerate
-            generate(true, newPromptIndex);
+            generateAndSave(true, newPromptIndex, "promptList." + newPromptIndex);
         }, false);
     }
 

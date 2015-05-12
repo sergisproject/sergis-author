@@ -117,15 +117,33 @@
       
       <div id="overlay_games_open" class="tabcontent" style="display: none;">
         <p>Your Games:</p>
-        <table>
+        <p id="overlay_games_open_nogames" style="display: none;">No Games<br>Create one under the "Create Game" tab or import one under the "Import Game from File" tab.</p>
+        <table id="overlay_games_open_gamescontainercontainer">
           <thead>
             <tr>
               <th>Game Name</th>
               <th>Last Modified</th>
+              <th id="overlay_games_open_games_sharedWith" style="display: none;">Shared With</th>
+              <th id="overlay_games_open_games_currentlyEditing" style="display: none;">Users Editing</th>
             </tr>
           </thead>
           <tbody id="overlay_games_open_gamescontainer"></tbody>
         </table>
+        
+        <div id="overlay_games_open_shared">
+          <p>Shared With You:</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Game Name</th>
+                <th>Owner</th>
+                <th>Last Modified</th>
+                <th id="overlay_games_open_shared_currentlyEditing" style="display: none;">Users Editing</th>
+              </tr>
+            </thead>
+            <tbody id="overlay_games_open_shared_gamescontainer"></tbody>
+          </table>
+        </div>
       </div>
       
       <div id="overlay_games_import" class="tabcontent" style="display: none;">
@@ -134,6 +152,38 @@
       </div>
 
       <p id="overlay_games_buttons" class="overlay_buttons" style="display: none;"><button id="overlay_games_cancel">Cancel</button></p>
+    </div>
+
+    <!-- Share Game overlay -->
+    <div id="overlay_sharing" class="overlay_inner" style="display: none;">
+      <h2>Share Game</h2>
+      
+      <p id="overlay_sharing_nobody">Not shared with anyone</p>
+      <div id="overlay_sharing_somebody">
+        <p>Currently shared with:</p>
+        <table>
+          <tbody id="overlay_sharing_sharedWithContainer"></tbody>
+        </table>
+      </div>
+      
+      <table class="noborder">
+        <tbody>
+          <tr>
+            <td>Share with another user: </td>
+            <td>
+              <div id="overlay_sharing_orgusers_container">
+                <select id="overlay_sharing_orgusers" style="width: 100%;">
+                  <option id="overlay_sharing_orgusers_other" value="">(Enter username)</option>
+                </select>
+              </div>
+              <div><input id="overlay_sharing_username" style="width: 100%;" placeholder="username"></div>
+            </td>
+            <td><button id="overlay_sharing_share">Share</button></td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <p class="overlay_buttons"><button id="overlay_sharing_close">Close</button></p>
     </div>
 
     <!-- View JSON overlay -->
@@ -312,10 +362,6 @@ AUTHOR.CONFIG = {
     links: [
         {
             name: "SerGIS Author",
-            href: "http://sergisproject.github.io/sergis-author/"
-        },
-        {
-            name: "Author",
             href: "http://sergisproject.github.io/sergis-author/"
         }
     ]

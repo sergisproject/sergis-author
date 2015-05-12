@@ -116,15 +116,17 @@ AUTHOR.TABLE = {
         // Check scrolling
         checkScroll();
         
-        // Scroll the current prompt into view
+        // Scroll the current prompt into view, if applicable
         if (finalElem) {
-            var bodyRect = document.body.getBoundingClientRect(),
-                elemRect = finalElem.getBoundingClientRect(),
-                offset   = elemRect.top - bodyRect.top;
             if (firstTimeScrolling) {
                 firstTimeScrolling = false;
             } else {
-                window.scrollTo(0, offset - 60);
+                setTimeout(function () {
+                    var bodyRect = document.body.getBoundingClientRect(),
+                        elemRect = finalElem.getBoundingClientRect(),
+                        offset   = elemRect.top - bodyRect.top;
+                    window.scrollTo(0, offset - 60);
+                }, 2);
             }
         }
     }
