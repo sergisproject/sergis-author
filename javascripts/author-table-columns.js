@@ -103,7 +103,7 @@ AUTHOR.TABLE_COLUMNS = {
             // All the prompts that will be affected by removing this one
             var promptIndexes = [];
             for (var i = promptIndex; i < promptList.length; i++) {
-                promptIndex.push(i);
+                promptIndexes.push(i);
             }
             // Update the promptIndexes array with any other prompts affected by the ones we already have
             findRelatedPromptIndexes(promptIndexes);

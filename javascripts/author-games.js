@@ -218,7 +218,7 @@ AUTHOR.GAMES = {
             console.log("Prompts unlocked.");
             // Mark the prompts as unlocked in our own record-keeping
             promptIndexes.forEach(function (promptIndex) {
-                game.ourLockedPrompts[promptIndex] = false;
+                delete game.ourLockedPrompts[promptIndex];
             });
         });
     };
@@ -229,14 +229,29 @@ AUTHOR.GAMES = {
      * @param {Array.<number>} promptIndexes - The prompt indexes to lock.
      * @param {Function} callback - The function to call after the prompts have
      *        been locked. May optionally return a Promise if operating async.
-     * @param {boolean} [noLoadingOverlay=false] - Whether to not show the
-     *        loading overlay.
      *
      * @return {Promise}
      */
-    AUTHOR.GAMES.withLockedPrompts = function (promptIndexes, callback, noLoadingOverlay) {
-        var previousOverlay = getOverlay();
-        if (!noLoadingOverlay) overlay("overlay_loading");
+    AUTHOR.GAMES.withLockedPrompts = function (promptIndexes, callback) {
+        var previousOverlay = getOverlay(),
+            changedOverlay = false,
+            isDone = false;
+        // Change the overlay only after a bit of time, if we're still not done
+        // (since this might only take a few ms)
+        setTimeout(function () {
+            if (!isDone) {
+                changedOverlay = true;
+                overlay("overlay_loading");
+            }
+        }, 125);
+        // Function to put the overlay back when we're done
+        function done() {
+            isDone = true;
+            if (changedOverlay) {
+                overlay(previousOverlay || undefined);
+            }
+        }
+        
         // Lock the prompt indexes that we'll be modifying
         return AUTHOR.GAMES.lockPrompts(promptIndexes).then(function (success) {
             // If we're successful, do the thing that we have to do
@@ -255,7 +270,7 @@ AUTHOR.GAMES = {
                     return AUTHOR.GAMES.unlockPrompts(promptIndexes);
                 }).then(function () {
                     // All done! Take away the loading overlay
-                    if (!noLoadingOverlay) overlay(previousOverlay || undefined);
+                    done();
                     // And, if the original callback rejected, propogate that
                     if (rejected_error !== null) {
                         return Promise.reject(rejected_error);
@@ -263,7 +278,7 @@ AUTHOR.GAMES = {
                 });
             } else {
                 // We weren't successful; take away the loading overlay
-                if (!noLoadingOverlay) overlay(previousOverlay || undefined);
+                done();
             }
         });
     };
