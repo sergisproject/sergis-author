@@ -229,12 +229,14 @@ AUTHOR.GAMES = {
      * @param {Array.<number>} promptIndexes - The prompt indexes to lock.
      * @param {Function} callback - The function to call after the prompts have
      *        been locked. May optionally return a Promise if operating async.
+     * @param {boolean} [noLoadingOverlay=false] - Whether to not show the
+     *        loading overlay.
      *
      * @return {Promise}
      */
-    function withLockedPrompts(promptIndexes, callback) {
+    AUTHOR.GAMES.withLockedPrompts = function (promptIndexes, callback, noLoadingOverlay) {
         var previousOverlay = getOverlay();
-        overlay("overlay_loading");
+        if (!noLoadingOverlay) overlay("overlay_loading");
         // Lock the prompt indexes that we'll be modifying
         return AUTHOR.GAMES.lockPrompts(promptIndexes).then(function (success) {
             // If we're successful, do the thing that we have to do
@@ -250,10 +252,10 @@ AUTHOR.GAMES = {
                     rejected_error = err;
                 }).then(function () {
                     // Next, unlock the prompts that we had locked
-                    return AUTHOR.GAMES.unlockPrompts(promptIndex, promptIndex - 1);
+                    return AUTHOR.GAMES.unlockPrompts(promptIndexes);
                 }).then(function () {
                     // All done! Take away the loading overlay
-                    overlay(previousOverlay || undefined);
+                    if (!noLoadingOverlay) overlay(previousOverlay || undefined);
                     // And, if the original callback rejected, propogate that
                     if (rejected_error !== null) {
                         return Promise.reject(rejected_error);
@@ -261,10 +263,10 @@ AUTHOR.GAMES = {
                 });
             } else {
                 // We weren't successful; take away the loading overlay
-                overlay(previousOverlay || undefined);
+                if (!noLoadingOverlay) overlay(previousOverlay || undefined);
             }
         });
-    }
+    };
     
     /**
      * Reload the game with the backend, and re-lock any prompts that we had
