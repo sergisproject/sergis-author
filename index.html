@@ -372,6 +372,7 @@ AUTHOR.CONFIG = {
 <!-- The following mess is in case we are running from sergis-server.
 {{#if author_js_src}}{{{endComment}}}
 <script type="text/javascript" src="{{socket_io_script_src}}"></script>
+<script type="text/javascript" src="{{author_js_lib_src}}"></script>
 <script id="author_backend_script" type="text/javascript" src="{{author_js_src}}" data-socket-io-origin="{{socket_io_origin}}" data-socket-io-prefix="{{socket_io_prefix}}" data-session="{{session}}"></script>
 {{{startComment}}}{{else}} -->
 

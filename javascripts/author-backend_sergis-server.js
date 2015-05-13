@@ -68,6 +68,39 @@ AUTHOR.BACKEND = {
         };
     });
     
+    // Handle uploadFile specially
+    AUTHOR.BACKEND.uploadFile = function (imagefile) {
+        return new Promise(function (resolve, reject) {
+            if (!socket) {
+                reject(new Error(_("No connection to server.")));
+            } else {
+                var stream = ss.createStream();
+                ss(socket).emit("uploadFile", stream, [
+                    imagefile.name,
+                    imagefile.type,
+                    imagefile.size
+                ], function (isResolved, value) {
+                    if (isResolved) {
+                        resolve(value);
+                    } else {
+                        reject(new Error(value || _("Server Error")));
+                    }
+                });
+                var blobStream = ss.createBlobReadStream(imagefile);
+                /*
+                // Upload progress:
+                var uploadedSize = 0;
+                blobStream.on("data", function (chunk) {
+                    uploadedSize += chunk.length;
+                    console.log(Math.floor(size / imagefile.size * 100) + "%");
+                });
+                */
+                blobStream.pipe(stream);
+            }
+        });
+    };
+    
+    // Handle init specially
     AUTHOR.BACKEND.init = function (_onPromptLock, _onGameUpdate) {
         onPromptLock = _onPromptLock;
         onGameUpdate = _onGameUpdate;

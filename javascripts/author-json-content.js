@@ -9,12 +9,6 @@
 // This file contains all the details about the content types for the SerGIS
 // JSON Game Data format.
 
-// Globals: AUTHOR_JSON_MAX_FILE_SIZE, AUTHOR_JSON_MAX_FILE_SIZE_HUMAN_READABLE
-
-// Max file size, in bytes
-var AUTHOR_JSON_MAX_FILE_SIZE = 1024 * 1024; // 1 MB
-var AUTHOR_JSON_MAX_FILE_SIZE_HUMAN_READABLE = "1 MB";
-
 AUTHOR.JSON_CONTENT = {
     DEFAULT_CONTENT_TYPE: "text",
     
@@ -194,6 +188,25 @@ AUTHOR.JSON_CONTENT = {
                 // Propogate initial value
                 onchange(property, value);
                 
+                function set(fileName, fileData) {
+                    // Store file name
+                    input.value = data.filename = fileName;
+                    // Set looks
+                    input.disabled = true;
+                    clearButton.style.display = "inline";
+                    // Store file value, if provided
+                    if (fileData !== null) onchange(property, fileData);
+                }
+                
+                function reset(fileURL) {
+                    // Clear stored file value
+                    data.filename = undefined;
+                    onchange(property, input.value = (fileURL || ""));
+                    // Reset looks
+                    clearButton.style.display = "none";
+                    input.disabled = false;
+                }
+                
                 var p = create("p", {
                     className: "inputcontainer"
                 });
@@ -205,12 +218,10 @@ AUTHOR.JSON_CONTENT = {
                 
                 var input = create("input", {
                     id: id,
-                    value: data.filename || value || "",
                     placeholder: "http://"
                 }, function (event) {
                     onchange(property, this.value);
                 });
-                if (data.filename) input.disabled = true;
                 
                 var inner_container = create("span");
                 inner_container.appendChild(input);
@@ -226,58 +237,36 @@ AUTHOR.JSON_CONTENT = {
                     text: _("Clear")
                 }, function (event) {
                     event.preventDefault();
-                    // Clear stored file value
-                    data.filename = undefined;
-                    onchange(property, input.value = "");
-                    // Reset looks
-                    this.style.display = "none";
-                    input.disabled = false;
+                    reset();
                 });
-                if (!data.filename) clearButton.style.display = "none";
                 inner_container.appendChild(clearButton);
                 
-                if (window.askForFile) {
+                // Set initial styling/looks
+                if (data.filename) {
+                    set(data.filename, null);
+                } else {
+                    reset(value);
+                }
+                
+                if (window.askForFileThroughBackend) {
                     // Make browse button
                     var browseButton = create("button", {
                         text: _("Browse for file...")
                     }, function (event) {
                         event.preventDefault();
-                        var file;
-                        askForFile().then(function (_file) {
-                            file = _file;
-                            if (file.size > AUTHOR_JSON_MAX_FILE_SIZE) {
-                                // AHH! Huge file!
-                                return askForConfirmation(
-                                    _("The file that you have chosen is larger than {0}, which is the recommended maximum file size. It is recommended that you upload the file elsewhere and just link to it here.", AUTHOR_JSON_MAX_FILE_SIZE_HUMAN_READABLE) +
-                                    "\n\n" +
-                                    _("Would you like to add the file anyway? (This may cause unexpected issues.)"),
-                                true);
+                        
+                        askForFileThroughBackend().then(function (fileInfo) {
+                            if (fileInfo.fileURL) {
+                                // It's a URL
+                                reset(fileInfo.fileURL);
+                            } else {
+                                // It's more complex file data
+                                set(fileInfo.fileName, fileInfo.fileData);
                             }
-                            // The file wasn't too big
-                            return true;
-                        }).then(function (shouldContinue) {
-                            if (!shouldContinue) return;
-                            var reader = new FileReader();
-                            reader.onload = function () {
-                                if (reader.result) {
-                                    // Store file name
-                                    input.value = data.filename = file.name;
-                                    // Set looks
-                                    input.disabled = true;
-                                    clearButton.style.display = "inline";
-                                    // Store file value
-                                    onchange(property, reader.result);
-                                } else {
-                                    alert(_("Error reading file! File is empty or unreadable."));
-                                }
-                            };
-                            reader.onerror = function () {
-                                console.error(reader.error);
-                                alert(_("Error reading file: ") + reader.error.name + "\n" + reader.error.message);
-                            };
-                            reader.readAsDataURL(file);
-                        });
+                        }).catch(makeCatch(_("Error selecting or uploading file")));
                     });
+                    
+                    // Browse button styling
                     browseButton.style.marginLeft = "5px";
                     inner_container.appendChild(browseButton);
                     p.appendChild(inner_container);

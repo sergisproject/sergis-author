@@ -6,7 +6,16 @@
     in the LICENSE.txt file.
 */
 
-// Globals: ask, askForOK, askForConfirmation, askForFile (if supported)
+// Globals: ask, askForOK, askForConfirmation, askForFile (if supported),
+// askForFileThroughBackend (if supported; available after window load),
+// AUTHOR_MAX_FILE_SIZE, AUTHOR_MAX_FILE_SIZE_HUMAN_READABLE, AUTHOR_MIN_UPLOAD_SIZE
+
+// Max file size, in bytes
+var AUTHOR_MAX_FILE_SIZE = 1024 * 1024; // 1 MB
+var AUTHOR_MAX_FILE_SIZE_HUMAN_READABLE = "1 MB";
+
+// Minimum file size to not store in JSON if possible
+var AUTHOR_MIN_UPLOAD_SIZE = 512; // 0.5 KB
 
 (function () {
     var askHandler, askForOKHandler, askForConfirmationHandler;
@@ -110,33 +119,126 @@
         });
     };
     
-    // "askForFile" function (if FileReader is supported)
-    if (typeof FileReader != "undefined") {
-        /**
-         * Prompt the user to select a file.
-         *
-         * @return {Promise.<File>} The file selected by the user. If the user
-         *         does not select a file, the promise is never resolved.
-         */
-        window.askForFile = function () {
-            return new Promise(function (resolve, reject) {
-                var fileinput = create("input", {
-                    type: "file"
-                }, function (event) {
-                    if (event.target.files && event.target.files.length > 0) {
-                        resolve(event.target.files[0]);
-                    }
-                });
-                byId("fileinputs").appendChild(fileinput);
-                fileinput.click();
+    /**
+     * Prompt the user to select a file.
+     *
+     * @return {Promise.<File>} The file selected by the user. If the user
+     *         does not select a file, the promise is never resolved.
+     */
+    function promptForFile() {
+        return new Promise(function (resolve, reject) {
+            var fileinput = create("input", {
+                type: "file"
+            }, function (event) {
+                if (event.target.files && event.target.files.length > 0) {
+                    resolve(event.target.files[0]);
+                }
             });
-        };
+            byId("fileinputs").appendChild(fileinput);
+            fileinput.click();
+        });
+    }
+    
+    /**
+     * Prompt the user to select a file, then uploading it through the backend
+     * or getting JSON data.
+     *
+     * @return {Promise.<Object>} The file selected by the user. If the user
+     *         does not select a file, the promise is never resolved. The object
+     *         contains either the properties `fileName` and `fileData` or the
+     *         property `fileURL`.
+     */
+    function promptForFileThroughBackend() {
+        var file,
+            overlayChanged = false,
+            previousOverlay,
+            wasRejected = false,
+            rejectedError;
+        return promptForFile().then(function (_file) {
+            file = _file;
+            // We only have to worry about the file size if we're storing it in the JSON
+            if (typeof AUTHOR.BACKEND.uploadFile != "function" && file.size > AUTHOR_MAX_FILE_SIZE) {
+                // AHH! Huge file!
+                return askForConfirmation(
+                    _("The file that you have chosen is larger than {0}, which is the recommended maximum file size. It is recommended that you upload the file elsewhere and just link to it here.", AUTHOR_MAX_FILE_SIZE_HUMAN_READABLE) +
+                    "\n\n" +
+                    _("Would you like to add the file anyway? (This may cause unexpected issues.)"),
+                true);
+            }
+            // The file wasn't too big
+            return true;
+        }).then(function (shouldContinue) {
+            if (!shouldContinue) return;
+
+            previousOverlay = getOverlay();
+            overlayChanged = true;
+            overlay("overlay_loading");
+
+            // If the backend can upload files, do that
+            // (if the file is larger enough)
+            if (typeof AUTHOR.BACKEND.uploadFile == "function" && file.size > AUTHOR_MIN_UPLOAD_SIZE) {
+                // Upload through the backend
+                return AUTHOR.BACKEND.uploadFile(file).then(function (fileURL) {
+                    // Check if the file URL is relative
+                    if (fileURL.substring(0, 1) == "/") {
+                        fileURL = window.location.origin + fileURL;
+                    }
+                    return {
+                        fileURL: fileURL
+                    };
+                });
+            } else {
+                return new Promise(function (resolve, reject) {
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        if (reader.result) {
+                            // We're done!
+                            resolve({
+                                fileName: file.name,
+                                fileData: reader.result
+                            });
+                        } else {
+                            reject(new Error(_("Error reading file! File is empty or unreadable.")));
+                        }
+                    };
+                    reader.onerror = function () {
+                        reject(reader.error);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        }).catch(function (err) {
+            wasRejected = true;
+            rejectedError = err;
+        }).then(function (fileData) {
+            // Reset the overlay
+            if (overlayChanged) {
+                overlay(previousOverlay || undefined);
+            }
+            // Send the result on back
+            if (wasRejected) {
+                return Promise.reject(rejectedError);
+            } else {
+                return fileData;
+            }
+        });
     }
     
     /**
      * Initialize ask functions.
      */
     function initAsk() {
+        // "askForFile" function (if FileReader is supported)
+        if (typeof FileReader != "undefined") {
+            window.askForFile = promptForFile;
+        }
+        
+        // "askForFileThroughBackend" function (if either the backend or the browser supports it)
+        if (typeof AUTHOR.BACKEND.uploadFile == "function" || typeof FileReader != "undefined") {
+            window.askForFileThroughBackend = promptForFileThroughBackend;
+        }
+        
+        
         // Set up form and button for prompt ("ask")
         byId("overlay_prompt_form").addEventListener("submit", function (event) {
             event.preventDefault();
