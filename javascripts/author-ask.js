@@ -179,10 +179,6 @@ var AUTHOR_MIN_UPLOAD_SIZE = 512; // 0.5 KB
             if (typeof AUTHOR.BACKEND.uploadFile == "function" && file.size > AUTHOR_MIN_UPLOAD_SIZE) {
                 // Upload through the backend
                 return AUTHOR.BACKEND.uploadFile(file).then(function (fileURL) {
-                    // Check if the file URL is relative
-                    if (fileURL.substring(0, 1) == "/") {
-                        fileURL = window.location.origin + fileURL;
-                    }
                     return {
                         fileURL: fileURL
                     };

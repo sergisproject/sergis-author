@@ -19,6 +19,7 @@
  */
 var exportEnabled = (typeof btoa == "function" && navigator.userAgent.indexOf("Trident/") == -1);
 
+
 // The current game
 var game = {
     name: null,
@@ -539,9 +540,149 @@ function updateAdvancedProperties() {
         !!json.jumpingForwardAllowed;
     byId("overlay_advancedProperties_general_showActionsInUserOrder").checked =
         !!json.showActionsInUserOrder;
+    
+    // Data URI conversion
+    var canDoDataURIs = typeof Uint8Array != "undefined" && typeof Blob != "undefined" &&
+        typeof AUTHOR.BACKEND.uploadFile == "function";
+    byId("overlay_advancedProperties_convertDataURIs").style.display = canDoDataURIs ? "block" : "none";
 }
 
-(function () {    
+(function () {
+    /**
+     * Convert any data URIs in the JSON to files on the server, then generate
+     * and save.
+     *
+     * @return {Promise}
+     */
+    function convertFromDataURIs() {
+        // Make sure we can
+        var canDoDataURIs = typeof Uint8Array != "undefined" && typeof Blob != "undefined" &&
+            typeof AUTHOR.BACKEND.uploadFile == "function";
+        if (!canDoDataURIs) return;
+
+        var previousOverlay = getOverlay();
+        overlay("overlay_loading");
+        
+        // We need to lock actually ALL THE PROMPTS
+        var promptIndexes = [];
+        for (var i = 0; i < game.jsondata.promptList.length; i++) {
+            promptIndexes.push(i);
+        }
+        
+        var promises = [];
+        return AUTHOR.GAMES.withLockedPrompts(promptIndexes, function () {
+            console.log("Starting search for data URIs...");
+            // Find all the properties with data URIs and upload them
+            game.jsondata.promptList.forEach(function (promptItem, promptIndex) {
+                // Check prompt contents
+                promptItem.prompt.contents.forEach(function (contentItem, contentIndex) {
+                    convertContentFromDataURI(promises, contentItem, promptIndex, "content" + contentIndex);
+                });
+
+                // Check prompt choices
+                promptItem.prompt.choices.forEach(function (choiceItem, choiceIndex) {
+                    convertContentFromDataURI(promises, choiceItem, promptIndex, "choice" + choiceIndex);
+                });
+
+                // Check prompt actions
+                promptItem.actionList.forEach(function (actionItem, actionItemIndex) {
+                    // Check all the actions in this action set
+                    actionItem.actions.filter(function (action, actionIndex) {
+                        return action && action.name == "explain" && action.data && action.data.length;
+                    }).forEach(function (action, actionIndex) {
+                        action.data.forEach(function (contentItem, contentItemIndex) {
+                            convertContentFromDataURI(promises, contentItem, promptIndex, "action" + actionItemIndex + "." + actionIndex + "." + contentItemIndex);
+                        });
+                    });
+                });
+            });
+
+            return Promise.all(promises).catch(makeCatch(_("Error converting data URIs")));
+        }).then(function () {
+            console.log("Done converting data URIs.");
+            return generateAndSave(true);
+        }).then(function () {
+            // Restore overlay
+            overlay(previousOverlay || undefined);
+            // Tell the user what we did
+            return askForOK(_("Converted {0} data URIs to files on the server.", promises.length));
+        });
+    }
+    
+    /**
+     * Convert any data URIs in an individual content item.
+     *
+     * @param {Array} promises - An array to put the new Promises into that
+     *        will be resolved after conversions are done.
+     * @param {Object} contentItem - The SerGIS JSON Content Object to look in.
+     * @param {number} promptIndex - The prompt index (for logging).
+     * @param {string} subItemLabel - A sub-label below the prompt index (for
+     *        logging).
+     */
+    function convertContentFromDataURI(promises, contentItem, promptIndex, subItemLabel) {
+        var contentType = AUTHOR.JSON_CONTENT.contentTypes.hasOwnProperty(contentItem.type) ? contentItem.type :
+            AUTHOR.JSON_CONTENT.DEFAULT_CONTENT_TYPE;
+        
+        // Get all the fields for this content type
+        AUTHOR.JSON_CONTENT.contentTypes[contentType].fields.forEach(function (field) {
+            var name = field[0], label = field[1], fieldType = field[2];
+            if (fieldType == "string_file") {
+                // Found a file!
+                // Does it contain a data URI?
+                if (contentItem[name] && typeof contentItem[name] == "string" &&
+                    contentItem[name].substring(0, 5) == "data:") {
+                    // Yes, it does!
+                    console.log("Found data URI at prompt " + promptIndex + " (" + subItemLabel + ").");
+                    // Wipe the filename, if present
+                    if (contentItem._sergis_author_data && contentItem._sergis_author_data.filename) {
+                        delete contentItem._sergis_author_data.filename;
+                    }
+                    // Convert this shit
+                    promises.push(AUTHOR.BACKEND.uploadFile(convertDataURIToBlob(contentItem[name])).then(function (fileURL) {
+                        console.log("Successfully converted data URI for prompt " + promptIndex + " (" + subItemLabel + ").");
+                        // Store this new info in the content item
+                        contentItem[name] = fileURL;
+                    }));
+                }
+            }
+        });
+    }
+
+    /**
+     * Convert a data URI (either base64 encoded or URL encoded) to a Blob.
+     * base64 = data:mime/type;base64,bytes
+     * URL encoded = data:mime/type,bytes
+     *
+     * @param {string} dataURI - The complete data URI to convert.
+     *
+     * @return {Blob} A Blob representing this data URI.
+     */
+    function convertDataURIToBlob(dataURI) {
+        if (dataURI.substring(0, 5) == "data:") {
+            dataURI = dataURI.substring(5);
+        }
+        
+        var mimeString = dataURI.substring(0, dataURI.indexOf(","));
+        var byteString = dataURI.substring(dataURI.indexOf(",") + 1);
+        if (mimeString.slice(-7) == ";base64") {
+            mimeString = mimeString.slice(0, -7);
+            byteString = atob(byteString);
+        } else {
+            byteString = unescape(byteString);
+        }
+        
+        // Write the bytes to a typed array
+        var ia = new Uint8Array(byteString.length);
+        for (var i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+        
+        // Make a new Blob
+        return new Blob([ia], {
+            type: mimeString
+        });
+    }
+
     /**
      * Initialize the "Advanced Properties" overlay.
      */
@@ -602,6 +743,12 @@ function updateAdvancedProperties() {
             game.jsondata.showActionsInUserOrder = this.checked;
             // Save the game
             generateAndSave(undefined, undefined, "showActionsInUserOrder");
+        }, false);
+        
+        
+        // "Convert JSON data URIs to files on server" button
+        byId("overlay_advancedProperties_convertDataURIs_to").addEventListener("click", function (event) {
+            convertFromDataURIs().catch(makeCatch(_("Error converting data URIs to files")));
         }, false);
     }
     

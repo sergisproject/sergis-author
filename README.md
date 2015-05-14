@@ -14,7 +14,6 @@ Alternatively, you can clone this repository and open `index.html`.
 
 
 - If we're in an editor but we don't actually change anything (i.e. onchange() is never called), then we don't need to save
-- GET RID OF HUGE DATA URIs IN JSON DATA (do this server-side if need be)
 
 
 Action Editor:

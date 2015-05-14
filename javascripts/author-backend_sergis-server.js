@@ -71,17 +71,23 @@ AUTHOR.BACKEND = {
     // Handle uploadFile specially
     AUTHOR.BACKEND.uploadFile = function (imagefile) {
         return new Promise(function (resolve, reject) {
+            console.log("Uploading file: " + (imagefile.name || "file"));
             if (!socket) {
                 reject(new Error(_("No connection to server.")));
             } else {
                 var stream = ss.createStream();
                 ss(socket).emit("uploadFile", stream, [
-                    imagefile.name,
+                    imagefile.name || "file",
                     imagefile.type,
                     imagefile.size
                 ], function (isResolved, value) {
                     if (isResolved) {
-                        resolve(value);
+                        // Check if the file URL is relative
+                        var fileURL = "" + value;
+                        if (fileURL.substring(0, 1) == "/") {
+                            fileURL = window.location.origin + fileURL;
+                        }
+                        resolve(fileURL);
                     } else {
                         reject(new Error(value || _("Server Error")));
                     }

@@ -238,12 +238,14 @@ AUTHOR.GAMES = {
             isDone = false;
         // Change the overlay only after a bit of time, if we're still not done
         // (since this might only take a few ms)
-        setTimeout(function () {
-            if (!isDone) {
-                changedOverlay = true;
-                overlay("overlay_loading");
-            }
-        }, 125);
+        if (previousOverlay != "overlay_loading") {
+            setTimeout(function () {
+                if (!isDone) {
+                    changedOverlay = true;
+                    overlay("overlay_loading");
+                }
+            }, 125);
+        }
         // Function to put the overlay back when we're done
         function done() {
             isDone = true;
