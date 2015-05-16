@@ -842,6 +842,7 @@ AUTHOR.JSON = {
                     maxlength: "7"
                 }, function (event) {
                     that.json[prop] = hexToRgb(this.value).concat(that.json[prop][3]);
+                    onchange();
                 });
                 td.appendChild(colorInput);
                 colorInput.value = rgbToHex(that.json[prop]);
@@ -851,6 +852,7 @@ AUTHOR.JSON = {
                     id: id
                 }, function (event) {
                     that.json[prop] = this.value;
+                    onchange();
                 });
                 for (var i = 0; i < that.possibilities[prop].length; i++) {
                     select.appendChild(create("option", {
