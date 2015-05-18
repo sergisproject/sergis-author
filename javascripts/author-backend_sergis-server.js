@@ -111,6 +111,9 @@ AUTHOR.BACKEND = {
         onPromptLock = _onPromptLock;
         onGameUpdate = _onGameUpdate;
         return new Promise(function (resolve, reject) {
+            // Switch to "Connecting to Server" message
+            overlay("overlay_connecting");
+            
             // Load socket.io
             var origin = byId("author_backend_script").getAttribute("data-socket-io-origin") || window.location.origin;
             var prefix = byId("author_backend_script").getAttribute("data-socket-io-prefix") || "";
@@ -146,8 +149,9 @@ AUTHOR.BACKEND = {
                     return AUTHOR.GAMES.reloadGame();
                 }).then(function () {
                     // All ready!
-                    overlay(overlayBeforeDisconnect);
-                    overlayBeforeDisconnect = null;
+                    // We're not going to revert the overlay, since we're not re-locking the prompts
+                    //overlay(overlayBeforeDisconnect);
+                    //overlayBeforeDisconnect = null;
                 }).catch(makeCatch(_("Error initializing socket")));
             });
             
@@ -155,7 +159,7 @@ AUTHOR.BACKEND = {
             socket.on("disconnect", function () {
                 console.log("Disconnected from socket server.");
                 overlayBeforeDisconnect = getOverlay();
-                overlay("overlay_loading");
+                overlay("overlay_connecting");
                 if (!TRY_TO_RECONNECT) {
                     // We're not going to try to reconnect
                     askForOK(_("The connection to the socket server was lost.") + "\n" + _("Click OK to reload the page.")).then(function () {

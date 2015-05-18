@@ -724,7 +724,7 @@ AUTHOR.GAMES = {
             // Show/hide certain things based on whether anything is shared or being edited
             byId("overlay_games_open_games_sharedWith").style.display = hasOwnGamesShared ? "table-cell" : "none";
             byId("overlay_games_open_games_currentlyEditing").style.display = hasOwnGamesEditing ? "table-cell" : "none";
-            byId("overlay_games_open_shared_currentlyEditing").style.display = hasOwnGamesEditing ? "table-cell" : "none";
+            byId("overlay_games_open_shared_currentlyEditing").style.display = hasSharedGamesEditing ? "table-cell" : "none";
             
             // Sort the games by last modified date
             gameList.sort(function (a, b) {
