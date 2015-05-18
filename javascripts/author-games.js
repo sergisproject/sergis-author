@@ -286,8 +286,7 @@ AUTHOR.GAMES = {
     };
     
     /**
-     * Reload the game with the backend, and re-lock any prompts that we had
-     * locked.
+     * Reload the game with the backend.
      *
      * @return {Promise}
      */
@@ -299,12 +298,16 @@ AUTHOR.GAMES = {
         }
         
         // Store our current locked prompts list for later
-        var ourLockedPrompts = game.ourLockedPrompts;
+        var ourLockedPrompts = Object.keys(game.ourLockedPrompts);
         
         // Reload the current game
         return loadGame(game.name, game.owner).then(function () {
             // Re-lock our previous locked prompts
-            return AUTHOR.GAMES.lockPrompts(Object.keys(ourLockedPrompts));
+            //return AUTHOR.GAMES.lockPrompts(ourLockedPrompts);
+            
+            // Never mind, we're not going to try to re-lock prompts since that causes a mess.
+            // Just close any open overlays
+            overlay();
         });
     };
     
