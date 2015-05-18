@@ -12,10 +12,6 @@ Alternatively, you can clone this repository and open `index.html`.
 
 ## TODO
 
-
-- If we're in an editor but we don't actually change anything (i.e. onchange() is never called), then we don't need to save
-
-
 Action Editor:
 
 - Ability to delete action parts that we added using "Add More..."
@@ -34,7 +30,8 @@ Other:
 - Click/dblclick on content/actions/whatever to edit them
 - Replace "Prompt Index" with just "Prompt", which consists of a 1-based prompt number and its title.
 - Make `overlay()` (i.e. no parameters to overlay) revert to the last open overlay, instead of none (unless it was previously none).
-  - Maybe add parameter to force none, or vice versa, i.e. if we just pass `true`, then go back to the previous prompt.
+  - Maybe add parameter to force none, or vice versa, i.e. if we just pass `true`, then go back to the previous overlay.
+- If we're in an editor but we don't actually change anything (i.e. onchange() is never called), then we don't need to save
 
 New Stuff:
 
