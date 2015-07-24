@@ -48,7 +48,7 @@ New Stuff:
 - Also, same thing for drawn objects (i.e. polygons)
   - Maybe add a dropdown for this action, "Copy Previous: [________]"
 
-New "Graph View":
+New "Graph View" / "Flow View":
 
 - An alternative to the current "table view"
 - Prompts are shown as a directed "graph", where the nodes are the prompts (each is shown with its title and basic content, and the choices)
