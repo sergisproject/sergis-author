@@ -32,6 +32,7 @@ AUTHOR.BACKEND = {
     
     AUTHOR.BACKEND.getGameList = function () {
         return localforage.getItem("gameList").then(function (gameList) {
+            if (!gameList) gameList = {};
             return Object.keys(gameList).map(function (gameName) {
                 return {
                     name: gameName,
